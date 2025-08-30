@@ -154,7 +154,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
           </div>
         </div>
 
-        >        <div className="flex gap-2">
+        <div className="flex gap-2">
           <Button
             size="sm"
             onClick={handleAddExcuse}
