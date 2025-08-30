@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ClipboardList, Clock, Users, Zap } from 'lucide-react'
+import { ClipboardList, Clock, Users, Zap, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navigation = [
@@ -26,6 +26,11 @@ const navigation = [
     name: '暴走',
     href: '/rage',
     icon: Zap,
+  },
+  {
+    name: '我的',
+    href: '/profile',
+    icon: User,
   },
 ]
 

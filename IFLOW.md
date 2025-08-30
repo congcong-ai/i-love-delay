@@ -12,6 +12,7 @@
 - 📱 **移动优先**：完美适配手机使用场景
 - 🔄 **云端同步**：支持Supabase云端数据同步
 - 📱 **UniApp-X集成**：支持小程序和App多端部署
+- 🏛️ **广场分享**：在广场分享你的拖延故事和借口
 
 ## 🚀 快速开始
 
@@ -42,8 +43,8 @@ npm run lint
 
 ### 核心技术
 - **Next.js 15.5.2** - React框架，支持App Router
-- **TypeScript 5.x** - 类型安全
-- **Tailwind CSS 4.x** - 原子化CSS框架
+- **TypeScript 5.9.2** - 类型安全
+- **Tailwind CSS 4.1.12** - 原子化CSS框架
 - **React 19.1.0** - 最新React版本
 
 ### UI与组件
@@ -51,6 +52,7 @@ npm run lint
 - **Radix UI** - 无障碍组件基础
 - **Lucide React 0.542.0** - 图标库
 - **Tailwind Merge** - 样式合并工具
+- **tw-animate-css** - 动画样式库
 
 ### 状态管理
 - **Zustand 5.0.8** - 轻量级状态管理
@@ -60,7 +62,7 @@ npm run lint
 - **Dexie 4.2.0** - IndexedDB封装库
 - **IndexedDB** - 浏览器本地数据库
 - **localStorage** - 简单键值存储
-- **Supabase** - PostgreSQL云端数据库
+- **Supabase 2.56.1** - PostgreSQL云端数据库
 
 ### 工具库
 - **Class Variance Authority 0.7.1** - 样式变体管理
@@ -73,7 +75,8 @@ i-love-dalay-web/
 ├── app/                    # Next.js App Router
 │   ├── delayed/           # 拖延任务页面
 │   ├── rage/              # 暴走模式页面
-│   ├── square/            # 广场页面（新功能）
+│   ├── square/            # 广场页面（社交分享）
+│   ├── profile/           # 个人资料页面
 │   ├── globals.css        # 全局样式
 │   ├── layout.tsx         # 根布局
 │   └── page.tsx           # 任务首页
@@ -129,10 +132,54 @@ interface Settings {
   wechatUser?: WechatUser      // 微信用户信息
 }
 
-interface SyncStatus {
-  lastSyncTime: number         // 最后同步时间
-  isOnline: boolean           // 是否在线
-  pendingChanges: number      // 待同步变更数
+interface WechatUser {
+  openid: string
+  nickname: string
+  avatar: string
+}
+
+interface TaskStats {
+  totalTasks: number
+  completedTasks: number
+  delayedTasks: number
+  mostDelayedTask?: { name: string; count: number }
+  longestStreak: number
+  totalExcuses: number
+  averageExcuseLength: number
+}
+
+// 广场相关类型
+interface PublicTask {
+  id: string
+  taskId: string
+  userId: string
+  userName: string
+  userAvatar: string
+  taskName: string
+  excuse: string
+  delayCount: number
+  likesCount: number
+  isLiked: boolean
+  isFavorited: boolean
+  createdAt: Date
+  comments: Comment[]
+}
+
+interface Comment {
+  id: string
+  userId: string
+  userName: string
+  userAvatar: string
+  content: string
+  createdAt: Date
+}
+
+interface UserInteraction {
+  id: string
+  userId: string
+  publicTaskId: string
+  interactionType: 'like' | 'favorite'
+  createdAt: Date
 }
 ```
 
@@ -154,7 +201,8 @@ interface SyncStatus {
 1. **任务页（首页）**：创建新任务，显示所有 `todo` 状态任务
 2. **拖延页**：管理所有 `delayed` 状态任务，提供借口功能
 3. **暴走页**：突击完成拖延任务，支持批量选择
-4. **广场页**：新功能，可能用于社交分享
+4. **广场页**：社交分享功能，展示用户的拖延故事和创意借口
+5. **个人资料页**：用户设置和微信登录集成
 
 ## 🛠️ 开发命令
 
@@ -169,7 +217,7 @@ interface SyncStatus {
 
 ### 代码风格
 - 使用TypeScript严格模式
-- 遵循ESLint配置
+- 遵循ESLint配置（Next.js核心规则 + TypeScript规则）
 - 使用函数组件和Hooks
 - 组件命名采用PascalCase
 - 文件命名采用kebab-case
@@ -185,6 +233,12 @@ interface SyncStatus {
 - 响应式设计优先
 - 移动端优先设计
 - 使用CSS变量管理主题
+- 遵循Shadcn/ui设计规范
+
+### 项目配置
+- **组件配置**：使用components.json统一管理Shadcn/ui配置
+- **路径别名**：使用@/前缀指向src目录
+- **ESLint**：使用Flat Config格式，支持Next.js和TypeScript
 
 ## 🚀 部署配置
 
@@ -254,6 +308,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 - [部署文档](./docs/vercel-deployment.md) - Vercel部署指南
 - [Supabase配置](./docs/supabase-setup.md) - Supabase设置指南
 - [UniApp-X集成](./docs/uniapp-x-integration.md) - 多端部署指南
+- [环境配置](./docs/environment-setup.md) - 开发环境配置指南
 
 ## 🤝 贡献指南
 

@@ -30,11 +30,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="min-h-screen bg-gray-50">
-          {/* 同步状态指示器 */}
-          <div className="fixed top-0 right-0 z-50 p-2">
-            <SyncStatus />
-          </div>
-          
           {children}
           <BottomNav />
         </div>

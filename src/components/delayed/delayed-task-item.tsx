@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare, Calendar } from 'lucide-react'
+import { MessageSquare, Calendar, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { useExcuseStore } from '@/lib/stores/excuse-store'
+import { useAuthStore } from '@/lib/stores/auth-store'
 import { Task } from '@/lib/types'
 
 interface DelayedTaskItemProps {
@@ -18,8 +19,10 @@ interface DelayedTaskItemProps {
 export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
   const [excuse, setExcuse] = useState('')
   const [isAddingExcuse, setIsAddingExcuse] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
   const { updateTaskStatus } = useTaskStore()
   const { addExcuse, getExcusesByTask } = useExcuseStore()
+  const { user, isLoggedIn, login } = useAuthStore()
 
   const excuses = getExcusesByTask(task.id)
   const latestExcuse = excuses[0]
@@ -37,6 +40,59 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
   const handleMarkCompleted = async () => {
     await updateTaskStatus(task.id, 'completed')
     onUpdate?.()
+  }
+
+  const handleShareToSquare = async () => {
+    if (!isLoggedIn) {
+      try {
+        await login()
+        // 登录成功后继续分享流程
+        if (!useAuthStore.getState().isLoggedIn) {
+          return
+        }
+      } catch (error) {
+        console.error('登录失败:', error)
+        alert('登录失败，无法分享')
+        return
+      }
+    }
+
+    if (!latestExcuse) {
+      alert('请先添加一个借口再分享！')
+      return
+    }
+
+    setIsSharing(true)
+    try {
+      const response = await fetch('/api/square/share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          taskId: task.id,
+          taskName: task.name,
+          excuse: latestExcuse.content,
+          delayCount: task.delayCount,
+          userId: user?.openid,
+          userName: user?.nickname,
+          userAvatar: user?.avatar,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        alert('分享成功！你的拖延故事已发布到广场')
+      } else {
+        throw new Error(result.error || '分享失败')
+      }
+    } catch (error) {
+      console.error('分享失败:', error)
+      alert(error instanceof Error ? error.message : '分享失败，请稍后重试')
+    } finally {
+      setIsSharing(false)
+    }
   }
 
   const formatDate = (date: Date) => {
@@ -98,7 +154,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        >        <div className="flex gap-2">
           <Button
             size="sm"
             onClick={handleAddExcuse}
@@ -107,6 +163,16 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
           >
             <MessageSquare size={14} className="mr-1" />
             添加借口
+          </Button>
+          
+          <Button
+            size="sm"
+            onClick={handleShareToSquare}
+            disabled={isSharing || !latestExcuse}
+            className="flex-1 bg-blue-600 hover:bg-blue-700"
+          >
+            <Share2 size={14} className="mr-1" />
+            {isSharing ? '分享中...' : '分享到广场'}
           </Button>
           
           <Button

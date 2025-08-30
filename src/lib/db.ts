@@ -17,7 +17,9 @@ export class ILoveDelayDatabase extends Dexie {
   }
 
   async addTask(name: string): Promise<string> {
-    const id = crypto.randomUUID()
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     const now = new Date()
     
     await this.tasks.add({
@@ -59,7 +61,9 @@ export class ILoveDelayDatabase extends Dexie {
   }
 
   async addExcuse(taskId: string, content: string): Promise<string> {
-    const id = crypto.randomUUID()
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     
     await this.excuses.add({
       id,
