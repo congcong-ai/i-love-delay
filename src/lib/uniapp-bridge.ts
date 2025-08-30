@@ -7,31 +7,35 @@ export interface UniappUserInfo {
 
 export class UniappBridge {
   private isInUniapp = false
-  private listeners: Map<string, Function[]> = new Map()
+  private listeners: Map<string, ((data: unknown) => void)[]> = new Map()
 
   constructor() {
-    this.isInUniapp = !!(window as any).uni && !!(window as any).uni.postMessage
-    this.setupMessageListener()
+    if (typeof window !== 'undefined') {
+      this.isInUniapp = !!(window as { uni?: { postMessage: (data: unknown) => void } }).uni && !!(window as { uni?: { postMessage: (data: unknown) => void } }).uni?.postMessage
+      this.setupMessageListener()
+    }
   }
 
   private setupMessageListener() {
-    window.addEventListener('message', (event) => {
-      const { type, data } = event.data
-      
-      if (this.listeners.has(type)) {
-        this.listeners.get(type)!.forEach(callback => callback(data))
-      }
-    })
+    if (typeof window !== 'undefined') {
+      window.addEventListener('message', (event: MessageEvent<{ type: string; data: unknown }>) => {
+        const { type, data } = event.data
+        
+        if (this.listeners.has(type)) {
+          this.listeners.get(type)!.forEach(callback => callback(data))
+        }
+      })
+    }
   }
 
-  on(event: string, callback: Function) {
+  on(event: string, callback: (data: unknown) => void) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, [])
     }
     this.listeners.get(event)!.push(callback)
   }
 
-  off(event: string, callback: Function) {
+  off(event: string, callback: (data: unknown) => void) {
     if (this.listeners.has(event)) {
       const callbacks = this.listeners.get(event)!
       const index = callbacks.indexOf(callback)
@@ -41,9 +45,9 @@ export class UniappBridge {
     }
   }
 
-  emit(event: string, data?: any) {
+  emit(event: string, data?: unknown) {
     if (this.isInUniapp) {
-      ;(window as any).uni.postMessage({
+      ;(window as { uni?: { postMessage: (msg: { type: string; data?: unknown }) => void } }).uni?.postMessage({
         type: event,
         data
       })

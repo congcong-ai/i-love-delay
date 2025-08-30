@@ -232,7 +232,7 @@ export default function SquarePage() {
           ].map(({ key, label }) => (
             <button
               key={key}
-              onClick={() => setFilter(key as any)}
+              onClick={() => setFilter(key as "all" | "popular" | "recent")}
               className={cn(
                 'px-3 py-1.5 text-sm rounded-full transition-colors',
                 filter === key

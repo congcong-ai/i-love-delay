@@ -13,6 +13,8 @@ export function SyncStatus() {
   const [pendingChanges, setPendingChanges] = useState(0)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
 

@@ -61,11 +61,13 @@ export const useAuthStore = create<AuthState>()(
 )
 
 // 监听uniapp登录回调
-uniappBridge.on('WECHAT_LOGIN_SUCCESS', (userInfo: WechatUser) => {
+uniappBridge.on('WECHAT_LOGIN_SUCCESS', (data: unknown) => {
+  const userInfo = data as WechatUser
   useAuthStore.getState().setUser(userInfo)
 })
 
-uniappBridge.on('WECHAT_LOGIN_FAIL', (error: any) => {
-  console.error('微信登录失败:', error)
-  useAuthStore.setState({ isLoading: false })
+uniappBridge.on('WECHAT_LOGIN_FAIL', (data: unknown) => {
+  const error = data as { message?: string }
+  useAuthStore.setState({ isLoading: false, user: null, isLoggedIn: false })
+  console.error('登录失败:', error.message || '登录失败')
 })

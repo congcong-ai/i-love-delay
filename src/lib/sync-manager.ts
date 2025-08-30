@@ -12,7 +12,7 @@ interface PendingChange {
   id: string
   type: 'create' | 'update' | 'delete'
   table: string
-  data: any
+  data: unknown
   timestamp: number
 }
 
@@ -24,28 +24,34 @@ export class SyncManager {
   }
 
   constructor() {
-    this.setupNetworkListener()
-    this.setupPeriodicSync()
+    if (typeof window !== 'undefined') {
+      this.setupNetworkListener()
+      this.setupPeriodicSync()
+    }
   }
 
   private setupNetworkListener() {
-    window.addEventListener('online', () => {
-      this.syncStatus.isOnline = true
-      this.syncAll()
-    })
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => {
+        this.syncStatus.isOnline = true
+        this.syncAll()
+      })
 
-    window.addEventListener('offline', () => {
-      this.syncStatus.isOnline = false
-    })
+      window.addEventListener('offline', () => {
+        this.syncStatus.isOnline = false
+      })
+    }
   }
 
   private setupPeriodicSync() {
-    // 每5分钟自动同步一次
-    setInterval(() => {
-      if (this.syncStatus.isOnline) {
-        this.syncAll()
-      }
-    }, 5 * 60 * 1000)
+    if (typeof window !== 'undefined') {
+      // 每5分钟自动同步一次
+      setInterval(() => {
+        if (this.syncStatus.isOnline) {
+          this.syncAll()
+        }
+      }, 5 * 60 * 1000)
+    }
   }
 
   async syncAll() {
@@ -79,7 +85,7 @@ export class SyncManager {
       if (error) throw error
 
       // 合并数据（冲突解决：以最新更新时间为准）
-      const taskMap = new Map<string, any>()
+      const taskMap = new Map<string, Task & { source?: string }>()
       
       // 添加本地任务
       localTasks.forEach(task => {
@@ -96,7 +102,7 @@ export class SyncManager {
           taskMap.set(task.id, {
             ...task,
             source: 'cloud'
-          })
+          } as Task & { source?: string })
         }
       })
 
@@ -106,10 +112,10 @@ export class SyncManager {
         id: task.id,
         name: task.name,
         status: task.status,
-        delayCount: task.delay_count || task.delayCount,
-        createdAt: new Date(task.created_at || task.createdAt),
-        updatedAt: new Date(task.updated_at || task.updatedAt),
-        userId: task.user_id || task.userId
+        delayCount: (task as { delay_count?: number }).delay_count || task.delayCount,
+        createdAt: new Date((task as { created_at?: string }).created_at || task.createdAt),
+        updatedAt: new Date((task as { updated_at?: string }).updated_at || task.updatedAt),
+        userId: (task as { user_id?: string }).user_id || task.userId
       })))
 
       // 推送本地变更到云端
@@ -132,7 +138,7 @@ export class SyncManager {
       if (error) throw error
 
       // 同步借口（云端优先）
-      const excuseMap = new Map<string, any>()
+      const excuseMap = new Map<string, Excuse>()
       
       localExcuses.forEach(excuse => {
         excuseMap.set(excuse.id, excuse)
@@ -180,16 +186,16 @@ export class SyncManager {
       for (const change of pendingChanges) {
         switch (change.type) {
           case 'create':
-            await supabase.from(table).insert(change.data)
+            await supabase.from(table).insert(change.data as Record<string, unknown>)
             break
           case 'update':
-            await supabase.from(table).update(change.data).eq('id', change.id)
+            await supabase.from(table).update(change.data as Record<string, unknown>).eq('id', change.id)
             break
           case 'delete':
             await supabase.from(table).delete().eq('id', change.id)
             break
         }
-      }
+     }
 
       // 清除已同步的变更
       await this.clearPendingChanges(table)
@@ -201,17 +207,20 @@ export class SyncManager {
 
   private async getPendingChanges(table: string): Promise<PendingChange[]> {
     // 从本地存储获取待同步的变更
+    if (typeof window === 'undefined') return []
     const key = `pending_changes_${table}`
     const stored = localStorage.getItem(key)
-    return stored ? JSON.parse(stored) : []
+    return stored ? JSON.parse(stored) as PendingChange[] : []
   }
 
   private async clearPendingChanges(table: string) {
+    if (typeof window === 'undefined') return
     const key = `pending_changes_${table}`
     localStorage.removeItem(key)
   }
 
   async addPendingChange(table: string, change: PendingChange) {
+    if (typeof window === 'undefined') return
     const changes = await this.getPendingChanges(table)
     changes.push(change)
     localStorage.setItem(`pending_changes_${table}`, JSON.stringify(changes))
@@ -298,9 +307,11 @@ export class SyncManager {
 export const syncManager = new SyncManager()
 
 // 监听网络状态变化
-window.addEventListener('load', () => {
-  // 页面加载时同步一次
-  if (navigator.onLine) {
-    syncManager.syncAll()
-  }
-})
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    // 页面加载时同步一次
+    if (navigator.onLine) {
+      syncManager.syncAll()
+    }
+  })
+}
