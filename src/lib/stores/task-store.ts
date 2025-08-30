@@ -103,7 +103,7 @@ export const useTaskStore = create<TaskStore>()(
       }),
       {
         name: 'task-store',
-        partialize: (state) => ({ 
+        partialize: () => ({ 
           // Only persist UI state, not data
         })
       }

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Image from 'next/image'
 import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { PublicTask } from '@/lib/types'
@@ -111,10 +112,12 @@ function TaskCard({ task }: { task: PublicTask }) {
     <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
       {/* 用户信息 */}
       <div className="flex items-center mb-3">
-        <img
+        <Image
           src={task.userAvatar}
           alt={task.userName}
-          className="w-10 h-10 rounded-full mr-3"
+          width={40}
+          height={40}
+          className="rounded-full mr-3"
         />
         <div>
           <div className="font-medium text-sm">{task.userName}</div>
@@ -173,10 +176,12 @@ function TaskCard({ task }: { task: PublicTask }) {
         <div className="mt-4 pt-3 border-t space-y-3">
           {task.comments.map((comment) => (
             <div key={comment.id} className="flex space-x-3">
-              <img
+              <Image
                 src={comment.userAvatar}
                 alt={comment.userName}
-                className="w-8 h-8 rounded-full flex-shrink-0"
+                width={32}
+                height={32}
+                className="rounded-full flex-shrink-0"
               />
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
@@ -196,7 +201,7 @@ function TaskCard({ task }: { task: PublicTask }) {
 }
 
 export default function SquarePage() {
-  const [tasks, setTasks] = useState<PublicTask[]>(mockPublicTasks)
+  const [tasks] = useState<PublicTask[]>(mockPublicTasks)
   const [filter, setFilter] = useState<'all' | 'popular' | 'recent'>('all')
 
   const filteredTasks = tasks.filter(task => {
