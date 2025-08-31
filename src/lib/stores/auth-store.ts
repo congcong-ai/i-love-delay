@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
             get().setUser(mockUser)
           }
         } catch (error) {
-          console.error('登录失败:', error)
+          console.error('Login failed:', error)
         } finally {
           set({ isLoading: false })
         }
@@ -69,5 +69,5 @@ uniappBridge.on('WECHAT_LOGIN_SUCCESS', (data: unknown) => {
 uniappBridge.on('WECHAT_LOGIN_FAIL', (data: unknown) => {
   const error = data as { message?: string }
   useAuthStore.setState({ isLoading: false, user: null, isLoggedIn: false })
-  console.error('登录失败:', error.message || '登录失败')
+  console.error('Login failed:', error.message || 'Login failed')
 })

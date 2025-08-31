@@ -40,10 +40,15 @@
 - Output Directory: `.next`
 - Install Command: `npm install`
 
-**环境变量：**
+**必需环境变量：**
 在 "Environment Variables" 部分添加以下变量：
 
 ```bash
+# Supabase 配置（必需）
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
 # 基础配置
 NEXT_PUBLIC_APP_NAME="i love delay"
 NEXT_PUBLIC_APP_URL="https://your-domain.vercel.app"
@@ -68,6 +73,132 @@ SENTRY_AUTH_TOKEN="your-sentry-auth-token"
 
 ## 🔧 高级配置
 
+### Supabase 配置（必需）
+
+#### 1. 创建 Supabase 项目
+
+1. 访问 [supabase.com](https://supabase.com) 并注册账户
+2. 点击 "New Project" 创建新项目
+3. 填写项目信息：
+   - **Project name**: `i-love-delay`（或你喜欢的名称）
+   - **Database Password**: 设置一个强密码并保存好
+   - **Region**: 选择离你用户最近的地区（推荐 `East Asia (Singapore)`）
+
+#### 2. 获取 API 密钥
+
+项目创建完成后，进入项目 Dashboard：
+
+1. 点击左侧菜单的 **Settings** → **API**
+2. 复制以下信息：
+   - **Project URL**（格式：`https://[your-project].supabase.co`）
+   - **anon public**（用于客户端）
+   - **service_role**（用于服务端，务必保密）
+
+#### 3. 运行数据库迁移
+
+1. 进入 **SQL Editor**
+2. 复制 `supabase/migrations/20250830_create_square_tables.sql` 文件内容
+3. 粘贴到 SQL Editor 中，点击 **Run** 执行
+
+#### 4. 配置环境变量
+
+**最佳实践：独立项目 + 环境分离**
+
+### 🎯 推荐方案：独立Supabase项目
+
+**为什么选独立项目：**
+- ✅ **数据隔离** - 开发测试不影响生产数据
+- ✅ **成本分离** - 开发环境可用免费套餐
+- ✅ **权限管理** - 可以给开发团队不同权限
+- ✅ **风险隔离** - 开发操作不会破坏生产
+
+**为什么不推荐分支：**
+- ❌ Supabase没有数据库分支概念
+- ❌ 共享项目内无法真正隔离数据
+
+### 📋 具体配置步骤
+
+#### 1. 创建开发环境项目
+
+**创建两个独立项目：**
+
+| 环境 | 项目名称 | 用途 |
+|------|----------|------|
+| 开发 | `i-love-delay-dev` | 本地开发、测试 |
+| 生产 | `i-love-delay` | 正式用户访问 |
+
+**操作步骤：**
+1. 访问 [supabase.com](https://supabase.com)
+2. 创建 **i-love-delay-dev** 项目（开发用）
+3. 创建 **i-love-delay** 项目（生产用）
+4. 两个项目都运行相同的SQL迁移
+
+#### 2. 环境文件配置
+
+**文件结构（最佳实践）：**
+```
+.env.local          # 本地开发（git忽略）
+.env.production     # 生产环境（git忽略）
+.env.example        # 模板文件（git跟踪）
+```
+
+**开发环境配置 (.env.local):**
+```bash
+# 开发环境Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://i-love-delay-dev.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=dev-anon-key
+SUPABASE_SERVICE_ROLE_KEY=dev-service-key
+
+# 应用配置
+NEXT_PUBLIC_APP_NAME="i love delay (dev)"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+NODE_ENV="development"
+```
+
+**生产环境配置 (.env.production):**
+```bash
+# 生产环境Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://i-love-delay.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=prod-anon-key
+SUPABASE_SERVICE_ROLE_KEY=prod-service-key
+
+# 应用配置
+NEXT_PUBLIC_APP_NAME="i love delay"
+NEXT_PUBLIC_APP_URL="https://your-domain.vercel.app"
+NODE_ENV="production"
+```
+
+#### 3. 工作流程
+
+```bash
+# 本地开发
+npm run dev          # 自动使用 .env.local
+
+# 部署到预览环境
+git push origin feature-branch  # 使用开发环境
+
+# 部署到生产
+git push origin main           # 使用生产环境
+```
+
+#### 4. Vercel环境配置
+
+**在Vercel控制台设置：**
+
+**开发环境变量：**
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://i-love-delay-dev.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=dev-anon-key
+SUPABASE_SERVICE_ROLE_KEY=dev-service-key
+```
+
+**生产环境变量：**
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://i-love-delay.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=prod-anon-key
+SUPABASE_SERVICE_ROLE_KEY=prod-service-key
+```
+
 ### 自定义域名
 
 1. 在 Vercel 项目设置中，进入 "Domains" 标签页
@@ -76,20 +207,68 @@ SENTRY_AUTH_TOKEN="your-sentry-auth-token"
 
 ### 环境变量管理
 
-#### 开发环境
-复制 `.env.local.example` 为 `.env.local`：
+#### 开发环境设置
 
-```bash
-cp .env.local.example .env.local
-```
+1. **复制模板文件：**
+   ```bash
+   cp .env.example .env.local
+   ```
 
-然后填入你的实际配置值。
+2. **填入你的 Supabase 配置：**
+   ```bash
+   # 编辑 .env.local 文件
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ```
 
-#### 生产环境
+3. **启动开发服务器：**
+   ```bash
+   npm run dev
+   ```
+
+#### 生产环境设置（Vercel）
+
 在 Vercel 控制台：
 1. 进入项目设置
 2. 选择 "Environment Variables"
-3. 添加或修改变量
+3. 添加以下变量：
+
+**必需变量：**
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+**可选变量：**
+```bash
+# 微信登录（可选）
+NEXT_PUBLIC_WECHAT_APP_ID=your-wechat-app-id
+WECHAT_APP_SECRET=your-wechat-app-secret
+
+# 分析工具（可选）
+NEXT_PUBLIC_GA_ID=your-google-analytics-id
+NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your-vercel-analytics-id
+
+# 错误监控（可选）
+NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
+SENTRY_AUTH_TOKEN=your-sentry-auth-token
+```
+
+#### 环境变量最佳实践
+
+**文件用途说明：**
+- `.env.local` - 本地开发专用，包含敏感信息，**不提交到git**
+- `.env.production` - 生产环境配置，**不提交到git**
+- `.env.example` - 模板文件，展示所需变量，**提交到git**
+- `.env.development` - 开发团队共享配置（可选）
+
+**安全提示：**
+- 永远不要把 `.env.local` 和 `.env.production` 提交到版本控制
+- 使用强密码和密钥
+- 定期轮换敏感密钥
+- 在 Vercel 中设置的环境变量会自动加密存储
 
 ### 性能优化
 

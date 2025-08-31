@@ -56,7 +56,7 @@ export class SyncManager {
 
   async syncAll() {
     try {
-      console.log('开始同步数据...')
+      console.log('Starting data sync...')
       
       await Promise.all([
         this.syncTasks(),
@@ -65,69 +65,70 @@ export class SyncManager {
       ])
 
       this.syncStatus.lastSyncTime = Date.now()
-      console.log('数据同步完成')
+      console.log('Data sync completed')
     } catch (error) {
-      console.error('同步失败:', error)
+      console.error('Sync failed:', error)
     }
   }
 
   private async syncTasks() {
     try {
-      // 获取本地任务
+      // 检查是否是开发环境且使用占位符配置
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder') || 
+          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost:54321')) {
+        console.log('Skipping Supabase sync in development mode')
+        return
+      }
+
       const localTasks = await db.tasks.toArray()
       
-      // 获取云端任务
       const { data: cloudTasks, error } = await supabase
         .from('tasks')
         .select('*')
-        .gte('updated_at', new Date(this.syncStatus.lastSyncTime).toISOString())
+        .gte('created_at', new Date(this.syncStatus.lastSyncTime).toISOString())
 
       if (error) throw error
 
-      // 合并数据（冲突解决：以最新更新时间为准）
-      const taskMap = new Map<string, Task & { source?: string }>()
+      // 同步任务（云端优先）
+      const taskMap = new Map<string, Task>()
       
-      // 添加本地任务
       localTasks.forEach(task => {
+        taskMap.set(task.id, task)
+      })
+
+      cloudTasks?.forEach(task => {
         taskMap.set(task.id, {
-          ...task,
-          source: 'local'
+          id: task.id,
+          name: task.name,
+          status: task.status,
+          createdAt: new Date(task.created_at),
+          updatedAt: new Date(task.updated_at),
+          delayCount: task.delay_count || 0,
+          lastDelayedAt: task.last_delayed_at ? new Date(task.last_delayed_at) : undefined,
+          completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
+          userId: task.user_id
         })
       })
 
-      // 添加云端任务（如果更新则覆盖）
-      cloudTasks?.forEach(task => {
-        const localTask = taskMap.get(task.id)
-        if (!localTask || new Date(task.updated_at) > new Date(localTask.updatedAt)) {
-          taskMap.set(task.id, {
-            ...task,
-            source: 'cloud'
-          } as Task & { source?: string })
-        }
-      })
-
-      // 同步到本地数据库
-      const tasksToSync = Array.from(taskMap.values())
-      await db.tasks.bulkPut(tasksToSync.map(task => ({
-        id: task.id,
-        name: task.name,
-        status: task.status,
-        delayCount: (task as { delay_count?: number }).delay_count || task.delayCount,
-        createdAt: new Date((task as { created_at?: string }).created_at || task.createdAt),
-        updatedAt: new Date((task as { updated_at?: string }).updated_at || task.updatedAt),
-        userId: (task as { user_id?: string }).user_id || task.userId
-      })))
+      await db.tasks.bulkPut(Array.from(taskMap.values()))
 
       // 推送本地变更到云端
       await this.pushLocalChanges('tasks')
 
     } catch (error) {
-      console.error('同步任务失败:', error)
+      console.error('Sync tasks failed:', error)
     }
   }
 
   private async syncExcuses() {
     try {
+      // 检查是否是开发环境且使用占位符配置
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder') || 
+          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost:54321')) {
+        console.log('Skipping Supabase sync in development mode')
+        return
+      }
+
       const localExcuses = await db.excuses.toArray()
       
       const { data: cloudExcuses, error } = await supabase
@@ -157,12 +158,19 @@ export class SyncManager {
       await db.excuses.bulkPut(Array.from(excuseMap.values()))
 
     } catch (error) {
-      console.error('同步借口失败:', error)
+      console.error('Sync excuses failed:', error)
     }
   }
 
   private async syncUserData() {
     try {
+      // 检查是否是开发环境且使用占位符配置
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder') || 
+          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost:54321')) {
+        console.log('Skipping Supabase auth in development mode')
+        return
+      }
+
       // 获取用户信息
       const { data: userData, error } = await supabase.auth.getUser()
       
@@ -174,7 +182,7 @@ export class SyncManager {
       }
 
     } catch (error) {
-      console.error('同步用户数据失败:', error)
+      console.error('Sync user data failed:', error)
     }
   }
 
@@ -201,7 +209,7 @@ export class SyncManager {
       await this.clearPendingChanges(table)
 
     } catch (error) {
-      console.error(`推送${table}变更失败:`, error)
+      console.error(`Push ${table} changes failed:`, error)
     }
   }
 
@@ -228,7 +236,9 @@ export class SyncManager {
   }
 
   async createTask(task: Omit<Task, 'id'>) {
-    const id = crypto.randomUUID()
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     const newTask = { ...task, id }
     
     // 保存到本地

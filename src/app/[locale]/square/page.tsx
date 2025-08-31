@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { PublicTask } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { config } from '@/lib/config'
 
-// 模拟数据
+// 开发环境模拟数据
 const mockPublicTasks: PublicTask[] = [
   {
     id: '1',
@@ -47,42 +49,11 @@ const mockPublicTasks: PublicTask[] = [
     isFavorited: false,
     createdAt: new Date('2024-01-14'),
     comments: []
-  },
-  {
-    id: '3',
-    taskId: 'task3',
-    userId: 'user3',
-    userName: '拖延艺术家',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4',
-    taskName: '读书计划',
-    excuse: '这本书太厚了，我需要先做好心理准备。而且今天光线不太好，对眼睛不好。',
-    delayCount: 7,
-    likesCount: 15,
-    isLiked: false,
-    isFavorited: true,
-    createdAt: new Date('2024-01-13'),
-    comments: [
-      {
-        id: 'c2',
-        userId: 'user1',
-        userName: '拖延大师',
-        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-        content: '这个理由很充分，我收藏了！',
-        createdAt: new Date('2024-01-14')
-      },
-      {
-        id: 'c3',
-        userId: 'user4',
-        userName: '理由收集者',
-        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=5',
-        content: '光线不好这个理由太经典了！',
-        createdAt: new Date('2024-01-15')
-      }
-    ]
   }
 ]
 
 function TaskCard({ task }: { task: PublicTask }) {
+  const t = useTranslations('square')
   const [isLiked, setIsLiked] = useState(task.isLiked)
   const [isFavorited, setIsFavorited] = useState(task.isFavorited)
   const [likesCount, setLikesCount] = useState(task.likesCount)
@@ -102,10 +73,10 @@ function TaskCard({ task }: { task: PublicTask }) {
     const diff = now.getTime() - date.getTime()
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
     
-    if (days === 0) return '今天'
-    if (days === 1) return '昨天'
-    if (days < 7) return `${days}天前`
-    return date.toLocaleDateString('zh-CN')
+    if (days === 0) return t('today')
+    if (days === 1) return t('yesterday')
+    if (days < 7) return t('daysAgo', { days })
+    return date.toLocaleDateString('en-US')
   }
 
   return (
@@ -122,7 +93,7 @@ function TaskCard({ task }: { task: PublicTask }) {
         <div>
           <div className="font-medium text-sm">{task.userName}</div>
           <div className="text-xs text-gray-500">
-            拖延了{task.delayCount}次 · {formatTime(task.createdAt)}
+            {t('delayedCount', { count: task.delayCount })} · {formatTime(task.createdAt)}
           </div>
         </div>
       </div>
@@ -201,8 +172,37 @@ function TaskCard({ task }: { task: PublicTask }) {
 }
 
 export default function SquarePage() {
-  const [tasks] = useState<PublicTask[]>(mockPublicTasks)
+  const t = useTranslations('square')
+  const [tasks, setTasks] = useState<PublicTask[]>([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'popular' | 'recent'>('all')
+
+  useEffect(() => {
+    fetchPublicTasks()
+  }, [])
+
+  const fetchPublicTasks = async () => {
+    try {
+      const response = await fetch('/api/square/share')
+      if (response.ok) {
+        const data = await response.json()
+        setTasks(data)
+      } else {
+        // Use mock data in development
+        if (config.isDevelopment) {
+          setTasks(mockPublicTasks)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch square data:', error)
+      // Use mock data in development
+      if (config.isDevelopment) {
+        setTasks(mockPublicTasks)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredTasks = tasks.filter(task => {
     switch (filter) {
@@ -215,25 +215,63 @@ export default function SquarePage() {
     }
   })
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="bg-white border-b">
+          <div className="px-4 py-3">
+            <h1 className="text-lg font-semibold">{t('procrastinationSquare')}</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              {t('seeExcuses')}
+            </p>
+          </div>
+        </div>
+        <div className="px-4 py-8">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg shadow-sm border p-4 animate-pulse">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-20 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-32"></div>
+                  </div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* 头部 */}
+      {/* Header */}
       <div className="bg-white border-b">
         <div className="px-4 py-3">
-          <h1 className="text-lg font-semibold">拖延广场</h1>
+          <h1 className="text-lg font-semibold">{t('procrastinationSquare')}</h1>
           <p className="text-sm text-gray-600 mt-1">
-            看看大家都在用什么借口拖延
+            {t('seeExcuses')}
+            {config.isDevelopment && (
+              <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                {t('developmentMode')}
+              </span>
+            )}
           </p>
         </div>
       </div>
 
-      {/* 筛选器 */}
+      {/* Filter */}
       <div className="bg-white border-b px-4 py-2">
         <div className="flex space-x-1">
           {[
-            { key: 'all', label: '全部' },
-            { key: 'popular', label: '热门' },
-            { key: 'recent', label: '最新' }
+            { key: 'all', label: t('all') },
+            { key: 'popular', label: t('popular') },
+            { key: 'recent', label: t('recent') }
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -251,14 +289,18 @@ export default function SquarePage() {
         </div>
       </div>
 
-      {/* 内容区域 */}
+      {/* Content */}
       <div className="px-4 py-4">
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-2">🤔</div>
-            <p className="text-gray-500">还没有人分享拖延任务</p>
+            <p className="text-gray-500">
+              {config.isDevelopment ? t('developmentMode') : t('noSharesYet')}
+            </p>
             <p className="text-sm text-gray-400 mt-1">
-              快去拖延点什么，然后分享给大家吧！
+              {config.isDevelopment 
+                ? t('loadedMockData') 
+                : t('shareYourDelay')}
             </p>
           </div>
         ) : (
@@ -270,7 +312,6 @@ export default function SquarePage() {
         )}
       </div>
 
-      {/* 底部导航 */}
       <BottomNav />
     </div>
   )

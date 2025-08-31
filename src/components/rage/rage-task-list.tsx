@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { CheckCircle2, Zap, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -13,6 +14,7 @@ interface RageTaskListProps {
 }
 
 export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
+  const t = useTranslations('rage')
   const [completedTasks, setCompletedTasks] = useState<string[]>([])
 
   const handleComplete = async (taskId: string) => {
@@ -47,10 +49,10 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
               </h4>
               <div className="text-sm text-gray-500">
                 {task.status === 'delayed' && task.delayCount > 0 && (
-                  <span>已拖延 {task.delayCount} 次</span>
+                  <span>{t('delayedCountTimes', { count: task.delayCount })}</span>
                 )}
                 {task.status === 'todo' && (
-                  <span>创建于 {new Date(task.createdAt).toLocaleDateString('zh-CN')}</span>
+                  <span>{t('createdOn', { date: new Date(task.createdAt).toLocaleDateString('en-US') })}</span>
                 )}
               </div>
             </div>
@@ -61,7 +63,7 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
               variant={task.status === 'delayed' ? 'destructive' : 'secondary'}
               className={task.status === 'delayed' ? 'bg-orange-100 text-orange-800' : ''}
             >
-              {task.status === 'delayed' ? '拖延' : '待办'}
+              {task.status === 'delayed' ? t('delayed') : t('todo')}
             </Badge>
             
             {!completed ? (
@@ -71,12 +73,12 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
                 className="bg-green-600 hover:bg-green-700"
               >
                 <CheckCircle2 size={14} className="mr-1" />
-                完成
+                {t('finish')}
               </Button>
             ) : (
               <div className="flex items-center text-green-600">
                 <CheckCircle2 size={16} className="mr-1" />
-                <span className="text-sm font-medium">已完成</span>
+                <span className="text-sm font-medium">{t('completed')}</span>
               </div>
             )}
           </div>
@@ -94,9 +96,9 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
       {totalCount > 0 && (
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold">暴走进度</h3>
+            <h3 className="font-semibold">{t('rageProgress')}</h3>
             <span className="text-sm text-gray-600">
-              {completedCount} / {totalCount} 完成
+              {t('completedCount', { completed: completedCount, total: totalCount })}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -113,7 +115,7 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
         <div>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Clock size={16} />
-            待办任务 ({todoTasks.length})
+            {t('todoTasks')} ({todoTasks.length})
           </h3>
           <div className="space-y-3">
             {todoTasks.map(task => (
@@ -128,7 +130,7 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
         <div>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Zap size={16} />
-            拖延任务 ({delayedTasks.length})
+            {t('delayedTasks')} ({delayedTasks.length})
           </h3>
           <div className="space-y-3">
             {delayedTasks.map(task => (
@@ -142,8 +144,8 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
         <Card className="p-8 text-center">
           <div className="text-gray-500">
             <Zap size={48} className="mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-semibold mb-2">暴走模式已就绪</h3>
-            <p>但还没有选择任何任务</p>
+            <h3 className="text-lg font-semibold mb-2">{t('rageReady')}</h3>
+            <p>{t('noTasksSelected')}</p>
           </div>
         </Card>
       )}
@@ -152,12 +154,12 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
         <Card className="p-8 text-center bg-gradient-to-r from-green-50 to-blue-50">
           <div className="text-gray-700">
             <Zap size={48} className="mx-auto mb-4 text-green-600" />
-            <h3 className="text-xl font-semibold mb-2">暴走完成！</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('rageComplete')}</h3>
             <p className="text-lg">
-              恭喜你完成了 {completedCount} 个任务！
+              {t('congratulationsTasks', { count: completedCount })}
             </p>
             <p className="text-sm text-gray-600 mt-2">
-              今天的暴走模式表现完美，可以安心拖延明天的任务了～
+              {t('perfectPerformance')}
             </p>
           </div>
         </Card>

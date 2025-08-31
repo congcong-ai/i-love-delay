@@ -13,6 +13,8 @@ export class UniappBridge {
     if (typeof window !== 'undefined') {
       this.isInUniapp = !!(window as { uni?: { postMessage: (data: unknown) => void } }).uni && !!(window as { uni?: { postMessage: (data: unknown) => void } }).uni?.postMessage
       this.setupMessageListener()
+    } else {
+      this.isInUniapp = false
     }
   }
 

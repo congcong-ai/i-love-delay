@@ -46,10 +46,26 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
     if (!isLoggedIn) {
       try {
         await login()
-        // 登录成功后继续分享流程
-        if (!useAuthStore.getState().isLoggedIn) {
-          return
-        }
+        // 等待登录状态更新
+        const checkLogin = () => new Promise<void>((resolve, reject) => {
+          const maxAttempts = 20
+          let attempts = 0
+          
+          const check = () => {
+            attempts++
+            if (useAuthStore.getState().isLoggedIn) {
+              resolve()
+            } else if (attempts >= maxAttempts) {
+              reject(new Error('登录超时'))
+            } else {
+              setTimeout(check, 500)
+            }
+          }
+          
+          check()
+        })
+        
+        await checkLogin()
       } catch (error) {
         console.error('登录失败:', error)
         alert('登录失败，无法分享')
@@ -85,7 +101,8 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
       if (response.ok) {
         alert('分享成功！你的拖延故事已发布到广场')
       } else {
-        throw new Error(result.error || '分享失败')
+        console.error('分享失败详情:', result)
+        throw new Error(result.error || result.message || '分享失败')
       }
     } catch (error) {
       console.error('分享失败:', error)
@@ -154,33 +171,35 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={handleAddExcuse}
-            disabled={!excuse.trim() || isAddingExcuse}
-            className="flex-1"
-          >
-            <MessageSquare size={14} className="mr-1" />
-            添加借口
-          </Button>
-          
-          <Button
-            size="sm"
-            onClick={handleShareToSquare}
-            disabled={isSharing || !latestExcuse}
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
-          >
-            <Share2 size={14} className="mr-1" />
-            {isSharing ? '分享中...' : '分享到广场'}
-          </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Button
+              size="default"
+              onClick={handleAddExcuse}
+              disabled={!excuse.trim() || isAddingExcuse}
+              className="flex-1 h-10"
+            >
+              <MessageSquare size={16} className="mr-2" />
+              添加借口
+            </Button>
+            
+            <Button
+              size="default"
+              onClick={handleShareToSquare}
+              disabled={isSharing || !latestExcuse}
+              className="flex-1 h-10 bg-blue-600 hover:bg-blue-700"
+            >
+              <Share2 size={16} className="mr-2" />
+              {isSharing ? '分享中...' : '分享到广场'}
+            </Button>
+          </div>
           
           <Button
             size="sm"
             onClick={handleMarkCompleted}
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            className="w-full bg-green-600 hover:bg-green-700 text-sm"
           >
-            终于完成了
+            糟糕，完成了！
           </Button>
         </div>
       </div>

@@ -1,41 +1,41 @@
 'use client'
 
-
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { Link, usePathname } from '@/lib/i18n/config'
 import { ClipboardList, Clock, Users, Zap, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const navigation = [
-  {
-    name: '任务',
-    href: '/',
-    icon: ClipboardList,
-  },
-  {
-    name: '拖延',
-    href: '/delayed',
-    icon: Clock,
-  },
-  {
-    name: '广场',
-    href: '/square',
-    icon: Users,
-  },
-  {
-    name: '暴走',
-    href: '/rage',
-    icon: Zap,
-  },
-  {
-    name: '我的',
-    href: '/profile',
-    icon: User,
-  },
-]
-
 export function BottomNav() {
   const pathname = usePathname()
+  const t = useTranslations('navigation')
+
+  const navigation = [
+    {
+      name: t('home'),
+      href: '/',
+      icon: ClipboardList,
+    },
+    {
+      name: t('delayed'),
+      href: '/delayed',
+      icon: Clock,
+    },
+    {
+      name: t('square'),
+      href: '/square',
+      icon: Users,
+    },
+    {
+      name: t('rage'),
+      href: '/rage',
+      icon: Zap,
+    },
+    {
+      name: t('profile'),
+      href: '/profile',
+      icon: User,
+    },
+  ]
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">

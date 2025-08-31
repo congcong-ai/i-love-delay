@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { TaskItem } from './task-item'
 import { Card } from '@/components/ui/card'
@@ -13,6 +14,7 @@ interface TaskListProps {
 
 export function TaskList({ status = 'todo', tasks: customTasks }: TaskListProps) {
   const { loadTasks, getTasksByStatus, isLoading } = useTaskStore()
+  const t = useTranslations('tasks')
 
   useEffect(() => {
     loadTasks()
@@ -40,14 +42,14 @@ export function TaskList({ status = 'todo', tasks: customTasks }: TaskListProps)
       <Card className="p-8 text-center">
         <div className="text-gray-500">
           <p className="text-lg mb-2">
-            {status === 'todo' && '今天还没有任务，快来创建一个吧！'}
-            {status === 'delayed' && '还没有拖延的任务，继续保持！'}
-            {status === 'completed' && '还没有完成的任务，加油！'}
+            {status === 'todo' && t('noTasksToday')}
+            {status === 'delayed' && t('noDelayedTasks')}
+            {status === 'completed' && t('noCompletedTasks')}
           </p>
           <p className="text-sm">
-            {status === 'todo' && '拖延从创建任务开始～'}
-            {status === 'delayed' && '拖延是门艺术，需要慢慢培养～'}
-            {status === 'completed' && '完成任务的成就感最棒了！'}
+            {status === 'todo' && t('procrastinationStarts')}
+            {status === 'delayed' && t('artOfDelay')}
+            {status === 'completed' && t('completionSatisfaction')}
           </p>
         </div>
       </Card>

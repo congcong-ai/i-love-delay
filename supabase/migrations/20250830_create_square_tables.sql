@@ -54,34 +54,34 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_public_tasks_updated_at BEFORE UPDATE ON public_tasks
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- 设置RLS（行级安全）
-ALTER TABLE public_tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public_task_comments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_interactions ENABLE ROW LEVEL SECURITY;
+-- 暂时禁用RLS（行级安全）以便客户端直接访问
+-- ALTER TABLE public_tasks ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public_task_comments ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE user_interactions ENABLE ROW LEVEL SECURITY;
 
 -- 创建策略：允许所有用户读取广场内容
-CREATE POLICY "Allow read access to all users" ON public_tasks
-    FOR SELECT USING (true);
+-- CREATE POLICY "Allow read access to all users" ON public_tasks
+--     FOR SELECT USING (true);
 
-CREATE POLICY "Allow read access to comments" ON public_task_comments
-    FOR SELECT USING (true);
+-- CREATE POLICY "Allow read access to comments" ON public_task_comments
+--     FOR SELECT USING (true);
 
 -- 创建策略：用户只能创建自己的分享
-CREATE POLICY "Users can create their own shares" ON public_tasks
-    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+-- CREATE POLICY "Users can create their own shares" ON public_tasks
+--     FOR INSERT WITH CHECK (auth.uid()::text = user_id);
 
 -- 创建策略：用户只能删除自己的分享
-CREATE POLICY "Users can delete their own shares" ON public_tasks
-    FOR DELETE USING (auth.uid()::text = user_id);
+-- CREATE POLICY "Users can delete their own shares" ON public_tasks
+--     FOR DELETE USING (auth.uid()::text = user_id);
 
 -- 创建策略：用户只能创建自己的评论
-CREATE POLICY "Users can create their own comments" ON public_task_comments
-    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+-- CREATE POLICY "Users can create their own comments" ON public_task_comments
+--     FOR INSERT WITH CHECK (auth.uid()::text = user_id);
 
 -- 创建策略：用户只能删除自己的评论
-CREATE POLICY "Users can delete their own comments" ON public_task_comments
-    FOR DELETE USING (auth.uid()::text = user_id);
+-- CREATE POLICY "Users can delete their own comments" ON public_task_comments
+--     FOR DELETE USING (auth.uid()::text = user_id);
 
 -- 创建策略：用户只能管理自己的互动
-CREATE POLICY "Users can manage their own interactions" ON user_interactions
-    FOR ALL USING (auth.uid()::text = user_id);
+-- CREATE POLICY "Users can manage their own interactions" ON user_interactions
+--     FOR ALL USING (auth.uid()::text = user_id);

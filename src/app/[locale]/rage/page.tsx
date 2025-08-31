@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { initDatabase } from '@/lib/db'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { useUIStore } from '@/lib/stores/ui-store'
@@ -14,6 +15,7 @@ import { Zap, CheckCircle2 } from 'lucide-react'
 export default function RagePage() {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
   const [isRaging, setIsRaging] = useState(false)
+  const t = useTranslations('rage')
   
   const { tasks, loadTasks, updateTaskStatus, updateOverdueTasks } = useTaskStore()
   const { setCurrentTab } = useUIStore()
@@ -74,12 +76,12 @@ export default function RagePage() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            暴走模式
+            {t('title')}
           </h1>
           <p className="text-gray-600">
             {isRaging 
-              ? '集中精力，一口气完成所有任务！' 
-              : '选择今天要突击完成的任务'}
+              ? t('focusAndComplete') 
+              : t('selectTasksToday')}
           </p>
         </header>
 
@@ -89,9 +91,9 @@ export default function RagePage() {
               <div className="flex items-center gap-3 mb-4">
                 <Zap className="text-orange-600" size={24} />
                 <div>
-                  <h2 className="text-lg font-semibold">选择暴走任务</h2>
+                  <h2 className="text-lg font-semibold">{t('selectRageTasks')}</h2>
                   <p className="text-sm text-gray-600">
-                    从待办和拖延任务中选择今天要突击完成的
+                    {t('selectFromTasks')}
                   </p>
                 </div>
               </div>
@@ -112,7 +114,7 @@ export default function RagePage() {
                     onClick={handleStartRage}
                   >
                     <Zap size={20} className="mr-2" />
-                    开始暴走 ({selectedTasks.length} 个任务)
+                    {t('startRage')} ({selectedTasks.length} tasks)
                   </Button>
                 </div>
               )}
@@ -124,10 +126,10 @@ export default function RagePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-orange-800">
-                    暴走进行中！
+                    {t('rageInProgress')}
                   </h2>
                   <p className="text-sm text-orange-600">
-                    集中精力完成 {selectedTasks.length} 个任务
+                    {t('focusComplete', { count: selectedTasks.length })}
                   </p>
                 </div>
                 <Button
@@ -135,7 +137,7 @@ export default function RagePage() {
                   variant="outline"
                   onClick={() => setIsRaging(false)}
                 >
-                  重新选择
+                  {t('reselect')}
                 </Button>
               </div>
             </Card>
@@ -156,7 +158,7 @@ export default function RagePage() {
                   )}
                 >
                   <CheckCircle2 size={20} className="mr-2" />
-                  全部完成
+                  {t('completeAll')}
                 </Button>
               </div>
             )}

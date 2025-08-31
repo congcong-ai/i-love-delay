@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { initDatabase } from '@/lib/db'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { useUIStore } from '@/lib/stores/ui-store'
@@ -12,6 +13,7 @@ import { Card } from '@/components/ui/card'
 export default function HomePage() {
   const { loadTasks, updateOverdueTasks, getTasksByStatus } = useTaskStore()
   const { setCurrentTab } = useUIStore()
+  const t = useTranslations('tasks')
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -38,28 +40,28 @@ export default function HomePage() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            今日任务
+            {t('title')}
           </h1>
           <p className="text-gray-600">
-            创建任务，然后尽情拖延吧！
+            {t('createAndProcrastinate')}
           </p>
         </header>
 
         <Card className="p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">创建新任务</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('addTask')}</h2>
           <TaskForm />
         </Card>
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">
-              待办任务 ({todoTasks.length})
+              {t('pending')} ({todoTasks.length})
             </h2>
           </div>
           
           {todoTasks.length > 0 && (
             <p className="text-sm text-gray-600 mb-4">
-              你有 {todoTasks.length} 个任务等待被拖延，加油！
+              {t('tasksWaitingMessage', { count: todoTasks.length })}
             </p>
           )}
           
@@ -69,10 +71,10 @@ export default function HomePage() {
         {todoTasks.length === 0 && (
           <Card className="p-8 text-center bg-gradient-to-r from-blue-50 to-purple-50">
             <div className="text-gray-700">
-              <h3 className="text-xl font-semibold mb-2">今天很清闲？</h3>
-              <p className="mb-4">创建一些任务来开始你的拖延之旅吧！</p>
+              <h3 className="text-xl font-semibold mb-2">{t('feelingFreeToday')}</h3>
+              <p className="mb-4">{t('createToStartProcrastination')}</p>
               <p className="text-sm text-gray-500">
-                记住：拖延不是懒惰，是时间管理的高级形式 😎
+                {t('procrastinationQuote')}
               </p>
             </div>
           </Card>

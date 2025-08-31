@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Clock, MessageSquare, TrendingUp, Award } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { useTaskStore } from '@/lib/stores/task-store'
@@ -40,36 +41,38 @@ export function StatsCard() {
     loadStats()
   }, [getDelayedTasks, getExcuseStats])
 
+  const t = useTranslations('delayed')
+  
   const statItems = [
     {
       icon: Clock,
-      label: '拖延任务',
+      label: t('totalDelayedTasks'),
       value: stats.totalDelayed,
       color: 'text-orange-600'
     },
     {
       icon: MessageSquare,
-      label: '总借口数',
+      label: t('totalExcuses'),
       value: stats.totalExcuses,
       color: 'text-blue-600'
     },
     {
       icon: TrendingUp,
-      label: '平均借口长度',
-      value: `${stats.averageExcuseLength}字`,
+      label: t('averageExcuseLength'),
+      value: `${stats.averageExcuseLength}${t('characters')}`,
       color: 'text-purple-600'
     },
     {
       icon: Award,
-      label: '最长拖延',
-      value: `${stats.longestStreak}次`,
+      label: t('longestDelay'),
+      value: `${stats.longestStreak}${t('times')}`,
       color: 'text-red-600'
     }
   ]
 
   return (
     <Card className="p-6 mb-6">
-      <h2 className="text-lg font-semibold mb-4">拖延统计</h2>
+      <h2 className="text-lg font-semibold mb-4">{t('procrastinationStats')}</h2>
       <div className="grid grid-cols-2 gap-4">
         {statItems.map((item) => (
           <div key={item.label} className="text-center">

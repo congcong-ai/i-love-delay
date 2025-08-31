@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react'
 import { syncManager } from '@/lib/sync-manager'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ export function SyncStatus() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
   const [pendingChanges, setPendingChanges] = useState(0)
+  const t = useTranslations('profile')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -21,10 +23,8 @@ export function SyncStatus() {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // 初始状态
     setIsOnline(navigator.onLine)
 
-    // 定期更新同步状态
     const interval = setInterval(() => {
       const status = syncManager.getStatus()
       setLastSyncTime(status.lastSyncTime ? new Date(status.lastSyncTime) : null)
@@ -50,21 +50,21 @@ export function SyncStatus() {
   }
 
   const formatLastSync = (date: Date | null) => {
-    if (!date) return '从未同步'
+    if (!date) return t('neverSynced')
     
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     const minutes = Math.floor(diff / 60000)
     
-    if (minutes < 1) return '刚刚'
-    if (minutes < 60) return `${minutes}分钟前`
-    if (minutes < 1440) return `${Math.floor(minutes / 60)}小时前`
-    return `${Math.floor(minutes / 1440)}天前`
+    if (minutes < 1) return t('justNow')
+    if (minutes < 60) return t('minutesAgo', { minutes })
+    if (minutes < 1440) return t('hoursAgo', { hours: Math.floor(minutes / 60) })
+    return t('daysAgo', { days: Math.floor(minutes / 1440) })
   }
 
   return (
     <div className="flex items-center space-x-2 text-sm">
-      {/* 网络状态 */}
+      {/* Network status */}
       <div className="flex items-center space-x-1">
         {isOnline ? (
           <Wifi className="w-4 h-4 text-green-500" />
@@ -75,20 +75,20 @@ export function SyncStatus() {
           'text-xs',
           isOnline ? 'text-green-600' : 'text-red-600'
         )}>
-          {isOnline ? '在线' : '离线'}
+          {isOnline ? t('online') : t('offline')}
         </span>
       </div>
 
-      {/* 同步状态 */}
+      {/* Sync status */}
       {isOnline && (
         <>
           <span className="text-xs text-gray-500">
-            上次同步: {formatLastSync(lastSyncTime)}
+            {t('lastSync')}: {formatLastSync(lastSyncTime)}
           </span>
           
           {pendingChanges > 0 && (
             <span className="text-xs text-orange-500">
-              {pendingChanges}项待同步
+              {t('pendingChanges', { count: pendingChanges })}
             </span>
           )}
 
@@ -103,7 +103,7 @@ export function SyncStatus() {
               'w-3 h-3 mr-1',
               isSyncing && 'animate-spin'
             )} />
-            {isSyncing ? '同步中...' : '立即同步'}
+            {isSyncing ? t('syncing') : t('forceSync')}
           </Button>
         </>
       )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,13 +51,15 @@ export function TaskForm({ onTaskAdded }: TaskFormProps) {
     setShowSuggestions(value.length > 0 && suggestions.length > 0)
   }
 
+  const t = useTranslations('tasks')
+  
   return (
     <div className="relative">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="flex-1 relative">
           <Input
             type="text"
-            placeholder="今天想拖延什么任务？"
+            placeholder={t('whatToProcrastinate')}
             value={taskName}
             onChange={handleInputChange}
             onFocus={() => setShowSuggestions(taskName.length > 0)}

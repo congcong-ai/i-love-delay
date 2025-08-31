@@ -1,6 +1,6 @@
 'use client'
 
-
+import { useTranslations } from 'next-intl'
 import { LogIn, LogOut, User } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import {
 
 export function LoginButton() {
   const { user, isLoggedIn, isLoading, login, logout } = useAuthStore()
+  const t = useTranslations('auth')
 
   if (!isLoggedIn) {
     return (
@@ -25,7 +26,7 @@ export function LoginButton() {
         className="flex items-center space-x-2"
       >
         <LogIn className="w-4 h-4" />
-        <span>{isLoading ? '登录中...' : '微信登录'}</span>
+        <span>{isLoading ? t('loggingIn') : t('wechatLogin')}</span>
       </Button>
     )
   }
@@ -56,7 +57,7 @@ export function LoginButton() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>退出登录</span>
+          <span>{t('logout')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

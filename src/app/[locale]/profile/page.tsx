@@ -7,19 +7,23 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { SyncStatus } from '@/components/sync/sync-status'
 import { LoginButton } from '@/components/auth/login-button'
-import { User, Settings, Cloud, Clock } from 'lucide-react'
+import { LanguageSelector } from '@/components/settings/language-selector'
+import { User, Settings, Cloud } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth-store'
+import { useTranslations } from 'next-intl'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('account')
   const { user } = useAuthStore()
+  const t = useTranslations('profile')
+  const tCommon = useTranslations('common')
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">我的</h1>
-          <p className="text-sm text-gray-600 mt-1">管理账户和同步设置</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-sm text-gray-600 mt-1">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -28,24 +32,24 @@ export default function ProfilePage() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="account" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              账户
+              {t('account')}
             </TabsTrigger>
             <TabsTrigger value="sync" className="flex items-center gap-2">
               <Cloud className="h-4 w-4" />
-              数据同步
+              {t('sync')}
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              设置
+              {t('settings')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="account">
             <Card>
               <CardHeader>
-                <CardTitle>账户信息</CardTitle>
+                <CardTitle>{t('accountInfo')}</CardTitle>
                 <CardDescription>
-                  管理您的账户和登录状态
+                  {t('accountDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -56,20 +60,24 @@ export default function ProfilePage() {
                         <User className="h-8 w-8 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-medium">{user.nickname || '微信用户'}</p>
+                        <p className="font-medium">{user.nickname || t('wechatUser')}</p>
                         <p className="text-sm text-gray-600">{user.openid}</p>
-                        <Badge variant="secondary" className="mt-1">已登录</Badge>
+                        <Badge variant="secondary" className="mt-1">{t('auth.loggedIn')}</Badge>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full">
-                      退出登录
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => useAuthStore.getState().logout()}
+                    >
+                      {t('logout')}
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div className="text-center py-8">
                       <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-4">登录后享受云端同步功能</p>
+                      <p className="text-gray-600 mb-4">{t('loginToSync')}</p>
                       <LoginButton />
                     </div>
                   </div>
@@ -81,9 +89,9 @@ export default function ProfilePage() {
           <TabsContent value="sync">
             <Card>
               <CardHeader>
-                <CardTitle>数据同步</CardTitle>
+                <CardTitle>{t('dataSync')}</CardTitle>
                 <CardDescription>
-                  管理您的数据同步状态和设置
+                  {t('syncDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -92,23 +100,23 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">自动同步</h4>
-                      <p className="text-sm text-gray-600">网络恢复时自动同步数据</p>
+                      <h4 className="font-medium">{t('autoSync')}</h4>
+                      <p className="text-sm text-gray-600">{t('autoSyncDescription')}</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      立即同步
+                      {t('syncNow')}
                     </Button>
                   </div>
 
                   <div className="border-t pt-4">
-                    <h4 className="font-medium mb-2">同步统计</h4>
+                    <h4 className="font-medium mb-2">{t('syncStats')}</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-600">总任务数</p>
+                        <p className="text-gray-600">{t('totalTasks')}</p>
                         <p className="font-medium">--</p>
                       </div>
                       <div>
-                        <p className="text-gray-600">同步次数</p>
+                        <p className="text-gray-600">{t('syncCount')}</p>
                         <p className="font-medium">--</p>
                       </div>
                     </div>
@@ -121,36 +129,34 @@ export default function ProfilePage() {
           <TabsContent value="settings">
             <Card>
               <CardHeader>
-                <CardTitle>应用设置</CardTitle>
+                <CardTitle>{t('appSettings')}</CardTitle>
                 <CardDescription>
-                  个性化您的应用体验
+                  {t('settingsDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">深色模式</h4>
-                      <p className="text-sm text-gray-600">切换应用主题</p>
+                      <h4 className="font-medium">{tCommon('darkMode')}</h4>
+                      <p className="text-sm text-gray-600">{t('themeDescription')}</p>
                     </div>
                     <Button variant="outline" size="sm">
-                      跟随系统
+                      {tCommon('system')}
                     </Button>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">语言设置</h4>
-                      <p className="text-sm text-gray-600">选择应用语言</p>
+                      <h4 className="font-medium">{t('languageSettings')}</h4>
+                      <p className="text-sm text-gray-600">{t('languageDescription')}</p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      简体中文
-                    </Button>
+                    <LanguageSelector />
                   </div>
 
                   <div className="border-t pt-4">
                     <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700">
-                      清除本地数据
+                      {t('clearLocalData')}
                     </Button>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 'use client'
 
 
+import { useTranslations } from 'next-intl'
 import { Zap, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -23,6 +24,7 @@ export function RageTaskSelector({
   onSelectAll, 
   onClearAll 
 }: RageTaskSelectorProps) {
+  const t = useTranslations('rage')
   const todoTasks = tasks.filter(task => task.status === 'todo')
   const delayedTasks = tasks.filter(task => task.status === 'delayed')
 
@@ -51,15 +53,15 @@ export function RageTaskSelector({
               variant={task.status === 'delayed' ? 'destructive' : 'secondary'}
               className={task.status === 'delayed' ? 'bg-orange-100 text-orange-800' : ''}
             >
-              {task.status === 'delayed' ? '拖延' : '待办'}
+              {task.status === 'delayed' ? t('delayed') : t('todo')}
             </Badge>
           </div>
           <div className="text-sm text-gray-500">
             {task.status === 'delayed' && task.delayCount > 0 && (
-              <span>已拖延 {task.delayCount} 次</span>
+              <span>{t('delayedCountTimes', { count: task.delayCount })}</span>
             )}
             {task.status === 'todo' && (
-              <span>创建于 {new Date(task.createdAt).toLocaleDateString('zh-CN')}</span>
+              <span>{t('createdOn', { date: new Date(task.createdAt).toLocaleDateString('en-US') })}</span>
             )}
           </div>
         </div>
@@ -73,9 +75,9 @@ export function RageTaskSelector({
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold">选择任务</h3>
+            <h3 className="font-semibold">{t('selectTasksTitle')}</h3>
             <p className="text-sm text-gray-600">
-              已选择 {selectedCount} 个任务
+              {t('selectedCount', { count: selectedCount })}
             </p>
           </div>
           <div className="flex gap-2">
@@ -85,7 +87,7 @@ export function RageTaskSelector({
               onClick={onSelectAll}
               disabled={tasks.length === 0}
             >
-              全选
+              {t('selectAll')}
             </Button>
             <Button
               size="sm"
@@ -93,7 +95,7 @@ export function RageTaskSelector({
               onClick={onClearAll}
               disabled={selectedCount === 0}
             >
-              清空
+              {t('clearAll')}
             </Button>
           </div>
         </div>
@@ -104,7 +106,7 @@ export function RageTaskSelector({
         <div>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Clock size={16} />
-            待办任务 ({todoTasks.length})
+            {t('todoTasks')} ({todoTasks.length})
           </h3>
           <div className="space-y-3">
             {todoTasks.map(task => (
@@ -119,7 +121,7 @@ export function RageTaskSelector({
         <div>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Zap size={16} />
-            拖延任务 ({delayedTasks.length})
+            {t('delayedTasks')} ({delayedTasks.length})
           </h3>
           <div className="space-y-3">
             {delayedTasks.map(task => (
@@ -133,8 +135,8 @@ export function RageTaskSelector({
         <Card className="p-8 text-center">
           <div className="text-gray-500">
             <Zap size={48} className="mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-semibold mb-2">没有可选择的任务</h3>
-            <p>先去创建一些任务，然后再来暴走模式吧！</p>
+            <h3 className="text-lg font-semibold mb-2">{t('noTasksAvailable')}</h3>
+            <p>{t('createTasksFirst')}</p>
           </div>
         </Card>
       )}
