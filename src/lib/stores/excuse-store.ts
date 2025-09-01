@@ -6,7 +6,7 @@ import { db } from '@/lib/db'
 interface ExcuseStore {
   excuses: Excuse[]
   isLoading: boolean
-  
+
   // Actions
   loadExcuses: () => Promise<void>
   addExcuse: (taskId: string, content: string) => Promise<void>
@@ -39,7 +39,7 @@ export const useExcuseStore = create<ExcuseStore>()(
 
       addExcuse: async (taskId: string, content: string) => {
         if (!content.trim()) return
-        
+
         try {
           await db.addExcuse(taskId, content)
           await get().loadExcuses()
@@ -53,8 +53,12 @@ export const useExcuseStore = create<ExcuseStore>()(
       },
 
       getExcuseStats: async () => {
-        const excuses = await db.excuses.toArray()
-        
+        // 先尝试使用 store 中的数据，如果为空则直接从数据库查询
+        let excuses = get().excuses
+        if (excuses.length === 0) {
+          excuses = await db.excuses.toArray()
+        }
+
         if (excuses.length === 0) {
           return {
             totalExcuses: 0,
@@ -65,9 +69,9 @@ export const useExcuseStore = create<ExcuseStore>()(
         }
 
         const totalLength = excuses.reduce((sum, excuse) => sum + excuse.wordCount, 0)
-        const longestExcuse = excuses.reduce((longest, excuse) => 
+        const longestExcuse = excuses.reduce((longest, excuse) =>
           excuse.wordCount > (longest?.wordCount || 0) ? excuse : longest
-        , null as Excuse | null)
+          , null as Excuse | null)
 
         const recentExcuses = excuses
           .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())

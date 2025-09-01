@@ -8,13 +8,18 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export function SyncStatus() {
-  const [isOnline, setIsOnline] = useState(true)
+  // 设置安全的默认值，避免水合错误
+  const [isOnline, setIsOnline] = useState(true) // 默认假设在线
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
   const [pendingChanges, setPendingChanges] = useState(0)
+  const [isClient, setIsClient] = useState(false) // 跟踪是否在客户端
   const t = useTranslations('profile')
 
   useEffect(() => {
+    // 标记为客户端环境
+    setIsClient(true)
+
     if (typeof window === 'undefined') return
 
     const handleOnline = () => setIsOnline(true)
@@ -23,6 +28,7 @@ export function SyncStatus() {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
+    // 只在客户端设置实际的网络状态
     setIsOnline(navigator.onLine)
 
     const interval = setInterval(() => {
@@ -40,7 +46,7 @@ export function SyncStatus() {
 
   const handleForceSync = async () => {
     if (!isOnline) return
-    
+
     setIsSyncing(true)
     try {
       await syncManager.forceSync()
@@ -51,11 +57,17 @@ export function SyncStatus() {
 
   const formatLastSync = (date: Date | null) => {
     if (!date) return t('neverSynced')
-    
+
+    // 使用固定的时间戳计算，避免水合错误
+    if (!isClient) {
+      // 服务器端渲染时显示默认状态
+      return t('neverSynced')
+    }
+
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     const minutes = Math.floor(diff / 60000)
-    
+
     if (minutes < 1) return t('justNow')
     if (minutes < 60) return t('minutesAgo', { minutes })
     if (minutes < 1440) return t('hoursAgo', { hours: Math.floor(minutes / 60) })
@@ -85,7 +97,7 @@ export function SyncStatus() {
           <span className="text-xs text-gray-500">
             {t('lastSync')}: {formatLastSync(lastSyncTime)}
           </span>
-          
+
           {pendingChanges > 0 && (
             <span className="text-xs text-orange-500">
               {t('pendingChanges', { count: pendingChanges })}

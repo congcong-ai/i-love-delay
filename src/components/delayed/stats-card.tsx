@@ -9,8 +9,9 @@ import { useExcuseStore } from '@/lib/stores/excuse-store'
 
 export function StatsCard() {
   const { getDelayedTasks } = useTaskStore()
-  const { getExcuseStats } = useExcuseStore()
-  
+  const { getExcuseStats, excuses } = useExcuseStore()
+  const [isClient, setIsClient] = useState(false)
+
   const [stats, setStats] = useState({
     totalDelayed: 0,
     totalExcuses: 0,
@@ -19,10 +20,16 @@ export function StatsCard() {
   })
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+
     const loadStats = async () => {
       const delayedTasks = getDelayedTasks()
       const excuseStats = await getExcuseStats()
-      
+
       const taskDelayCounts = delayedTasks.reduce((acc, task) => {
         acc[task.name] = (acc[task.name] || 0) + task.delayCount
         return acc
@@ -39,10 +46,10 @@ export function StatsCard() {
     }
 
     loadStats()
-  }, [getDelayedTasks, getExcuseStats])
+  }, [isClient, getDelayedTasks, getExcuseStats, excuses])
 
   const t = useTranslations('delayed')
-  
+
   const statItems = [
     {
       icon: Clock,

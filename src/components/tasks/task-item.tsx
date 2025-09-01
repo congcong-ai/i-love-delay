@@ -32,10 +32,11 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
   }
 
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric'
-    })
+    // 使用固定格式避免水合错误
+    const d = new Date(date)
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${month}月${day}日`
   }
 
   return (
@@ -47,7 +48,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
             创建于 {formatDate(task.createdAt)}
           </p>
         </div>
-        
+
         <Button
           variant="ghost"
           size="icon"
@@ -58,7 +59,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
           <Trash2 size={16} />
         </Button>
       </div>
-      
+
       <div className="flex gap-2 mt-4">
         <Button
           size="sm"
@@ -69,7 +70,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
           <Clock size={14} />
           拖延
         </Button>
-        
+
         <Button
           size="sm"
           onClick={handleMarkCompleted}

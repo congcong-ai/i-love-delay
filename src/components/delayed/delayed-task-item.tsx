@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare, Calendar, Share2 } from 'lucide-react'
+import { MessageSquare, Calendar, Share2, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,16 +20,18 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
   const [excuse, setExcuse] = useState('')
   const [isAddingExcuse, setIsAddingExcuse] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
+  const [showHistoryExcuses, setShowHistoryExcuses] = useState(false)
   const { updateTaskStatus } = useTaskStore()
   const { addExcuse, getExcusesByTask } = useExcuseStore()
   const { user, isLoggedIn, login } = useAuthStore()
 
   const excuses = getExcusesByTask(task.id)
   const latestExcuse = excuses[0]
+  const historyExcuses = excuses.slice(1) // 除了最新的借口之外的历史借口
 
   const handleAddExcuse = async () => {
     if (!excuse.trim()) return
-    
+
     setIsAddingExcuse(true)
     await addExcuse(task.id, excuse)
     setExcuse('')
@@ -50,7 +52,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
         const checkLogin = () => new Promise<void>((resolve, reject) => {
           const maxAttempts = 20
           let attempts = 0
-          
+
           const check = () => {
             attempts++
             if (useAuthStore.getState().isLoggedIn) {
@@ -61,10 +63,10 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
               setTimeout(check, 500)
             }
           }
-          
+
           check()
         })
-        
+
         await checkLogin()
       } catch (error) {
         console.error('登录失败:', error)
@@ -113,12 +115,13 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
   }
 
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    // 使用固定格式避免水合错误
+    const d = new Date(date)
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const hour = String(d.getHours()).padStart(2, '0')
+    const minute = String(d.getMinutes()).padStart(2, '0')
+    return `${month}月${day}日 ${hour}:${minute}`
   }
 
   return (
@@ -137,7 +140,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
             )}
           </div>
         </div>
-        
+
         <Badge variant="destructive" className="bg-orange-100 text-orange-800">
           拖延中
         </Badge>
@@ -182,7 +185,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
               <MessageSquare size={16} className="mr-2" />
               添加借口
             </Button>
-            
+
             <Button
               size="default"
               onClick={handleShareToSquare}
@@ -193,7 +196,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
               {isSharing ? '分享中...' : '分享到广场'}
             </Button>
           </div>
-          
+
           <Button
             size="sm"
             onClick={handleMarkCompleted}
@@ -204,11 +207,37 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
         </div>
       </div>
 
-      {excuses.length > 1 && (
+      {historyExcuses.length > 0 && (
         <div className="mt-4 pt-3 border-t border-gray-100">
-          <p className="text-xs text-gray-500">
-            历史借口 ({excuses.length - 1} 条)
-          </p>
+          <button
+            onClick={() => setShowHistoryExcuses(!showHistoryExcuses)}
+            className="flex items-center justify-between w-full text-left text-xs text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <span>历史借口 ({historyExcuses.length} 条)</span>
+            {showHistoryExcuses ? (
+              <ChevronUp size={14} />
+            ) : (
+              <ChevronDown size={14} />
+            )}
+          </button>
+
+          {showHistoryExcuses && (
+            <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
+              {historyExcuses.map((excuse) => (
+                <div key={excuse.id} className="p-2 bg-gray-50 rounded-md border border-gray-100">
+                  <div className="flex items-start gap-2">
+                    <MessageSquare size={12} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-gray-700 break-words">{excuse.content}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {formatDate(excuse.createdAt)} • {excuse.wordCount} 字
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </Card>

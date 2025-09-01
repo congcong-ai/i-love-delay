@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Task } from '@/lib/types'
+import { formatDateLocale } from '@/lib/utils'
 
 interface RageTaskListProps {
   tasks: Task[]
@@ -29,22 +30,19 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
 
   const TaskCard = ({ task }: { task: Task }) => {
     const completed = isCompleted(task.id)
-    
+
     return (
-      <Card 
-        className={`p-4 transition-all ${
-          completed ? 'bg-green-50 border-green-200' : ''
-        }`}
+      <Card
+        className={`p-4 transition-all ${completed ? 'bg-green-50 border-green-200' : ''
+          }`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`w-2 h-2 rounded-full ${
-              task.status === 'delayed' ? 'bg-orange-500' : 'bg-blue-500'
-            }`} />
+            <div className={`w-2 h-2 rounded-full ${task.status === 'delayed' ? 'bg-orange-500' : 'bg-blue-500'
+              }`} />
             <div>
-              <h4 className={`font-medium ${
-                completed ? 'text-green-700 line-through' : 'text-gray-900'
-              }`}>
+              <h4 className={`font-medium ${completed ? 'text-green-700 line-through' : 'text-gray-900'
+                }`}>
                 {task.name}
               </h4>
               <div className="text-sm text-gray-500">
@@ -52,20 +50,20 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
                   <span>{t('delayedCountTimes', { count: task.delayCount })}</span>
                 )}
                 {task.status === 'todo' && (
-                  <span>{t('createdOn', { date: new Date(task.createdAt).toLocaleDateString('en-US') })}</span>
+                  <span>{t('createdOn', { date: formatDateLocale(task.createdAt) })}</span>
                 )}
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <Badge 
+            <Badge
               variant={task.status === 'delayed' ? 'destructive' : 'secondary'}
               className={task.status === 'delayed' ? 'bg-orange-100 text-orange-800' : ''}
             >
               {task.status === 'delayed' ? t('delayed') : t('todo')}
             </Badge>
-            
+
             {!completed ? (
               <Button
                 size="sm"
@@ -102,7 +100,7 @@ export function RageTaskList({ tasks, onTaskCompleted }: RageTaskListProps) {
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-green-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${(completedCount / totalCount) * 100}%` }}
             />

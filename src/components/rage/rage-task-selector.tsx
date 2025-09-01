@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Task } from '@/lib/types'
+import { formatDateLocale } from '@/lib/utils'
 
 interface RageTaskSelectorProps {
   tasks: Task[]
@@ -17,12 +18,12 @@ interface RageTaskSelectorProps {
   onClearAll: () => void
 }
 
-export function RageTaskSelector({ 
-  tasks, 
-  selectedTasks, 
-  onTaskToggle, 
-  onSelectAll, 
-  onClearAll 
+export function RageTaskSelector({
+  tasks,
+  selectedTasks,
+  onTaskToggle,
+  onSelectAll,
+  onClearAll
 }: RageTaskSelectorProps) {
   const t = useTranslations('rage')
   const todoTasks = tasks.filter(task => task.status === 'todo')
@@ -32,12 +33,11 @@ export function RageTaskSelector({
   const selectedCount = selectedTasks.length
 
   const TaskCard = ({ task }: { task: Task }) => (
-    <Card 
-      className={`p-4 cursor-pointer transition-all ${
-        isSelected(task.id) 
-          ? 'ring-2 ring-blue-500 bg-blue-50' 
+    <Card
+      className={`p-4 cursor-pointer transition-all ${isSelected(task.id)
+          ? 'ring-2 ring-blue-500 bg-blue-50'
           : 'hover:shadow-md'
-      }`}
+        }`}
       onClick={() => onTaskToggle(task.id)}
     >
       <div className="flex items-start gap-3">
@@ -49,7 +49,7 @@ export function RageTaskSelector({
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1">
             <h4 className="font-medium text-gray-900">{task.name}</h4>
-            <Badge 
+            <Badge
               variant={task.status === 'delayed' ? 'destructive' : 'secondary'}
               className={task.status === 'delayed' ? 'bg-orange-100 text-orange-800' : ''}
             >
@@ -61,7 +61,7 @@ export function RageTaskSelector({
               <span>{t('delayedCountTimes', { count: task.delayCount })}</span>
             )}
             {task.status === 'todo' && (
-              <span>{t('createdOn', { date: new Date(task.createdAt).toLocaleDateString('en-US') })}</span>
+              <span>{t('createdOn', { date: formatDateLocale(task.createdAt) })}</span>
             )}
           </div>
         </div>
