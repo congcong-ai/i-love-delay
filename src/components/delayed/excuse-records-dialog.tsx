@@ -12,6 +12,18 @@ import { Excuse } from '@/lib/types'
 
 // 详细的日期格式化函数，显示时间信息
 const formatDateTime = (date: Date) => {
+    // 确保在客户端和服务器端使用相同的格式
+    if (typeof window === 'undefined') {
+        // 服务器端使用 ISO 格式
+        return new Date(date).toLocaleDateString('zh-CN', {
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    }
+
+    // 客户端使用本地化格式
     const d = new Date(date)
     const month = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')

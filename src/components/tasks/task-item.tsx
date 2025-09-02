@@ -13,11 +13,11 @@ interface TaskItemProps {
 }
 
 export function TaskItem({ task, onUpdate }: TaskItemProps) {
-  const { updateTaskStatus, deleteTask } = useTaskStore()
+  const { updateTaskStatus, markTaskDelayed, deleteTask } = useTaskStore()
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleMarkDelayed = async () => {
-    await updateTaskStatus(task.id, 'delayed')
+    await markTaskDelayed(task.id)
     onUpdate?.()
   }
 
@@ -32,7 +32,16 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
   }
 
   const formatDate = (date: Date) => {
-    // 使用固定格式避免水合错误
+    // 确保在客户端和服务器端使用相同的格式
+    if (typeof window === 'undefined') {
+      // 服务器端使用 ISO 格式
+      return new Date(date).toLocaleDateString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit'
+      })
+    }
+
+    // 客户端使用本地化格式
     const d = new Date(date)
     const month = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
@@ -44,8 +53,8 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className={`font-medium mb-1 ${task.status === 'completed'
-              ? 'text-green-700 line-through'
-              : 'text-gray-900'
+            ? 'text-green-700 line-through'
+            : 'text-gray-900'
             }`}>
             {task.name}
           </h3>

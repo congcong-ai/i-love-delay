@@ -7,12 +7,14 @@ import { Card } from '@/components/ui/card'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { useExcuseStore } from '@/lib/stores/excuse-store'
 import { ExcuseRecordsDialog } from './excuse-records-dialog'
+import { DelayRankingDialog } from './delay-ranking-dialog'
 
 export function StatsCard() {
-  const { getDelayedTasks } = useTaskStore()
+  const { getDelayedTasks, tasks } = useTaskStore()
   const { getExcuseStats, excuses } = useExcuseStore()
   const [isClient, setIsClient] = useState(false)
   const [showExcuseDialog, setShowExcuseDialog] = useState(false)
+  const [showRankingDialog, setShowRankingDialog] = useState(false)
 
   const [stats, setStats] = useState({
     totalDelayed: 0,
@@ -32,8 +34,11 @@ export function StatsCard() {
       const delayedTasks = getDelayedTasks()
       const excuseStats = await getExcuseStats()
 
-      const taskDelayCounts = delayedTasks.reduce((acc, task) => {
-        acc[task.name] = (acc[task.name] || 0) + task.delayCount
+      // 计算所有任务的拖延次数（不仅仅是状态为delayed的任务）
+      const taskDelayCounts = tasks.reduce((acc, task) => {
+        if (task.delayCount > 0) {
+          acc[task.name] = (acc[task.name] || 0) + task.delayCount
+        }
         return acc
       }, {} as Record<string, number>)
 
@@ -48,7 +53,7 @@ export function StatsCard() {
     }
 
     loadStats()
-  }, [isClient, getDelayedTasks, getExcuseStats, excuses])
+  }, [isClient, getDelayedTasks, getExcuseStats, tasks, excuses])
 
   const t = useTranslations('delayed')
 
@@ -80,7 +85,8 @@ export function StatsCard() {
       label: t('longestDelay'),
       value: `${stats.longestStreak}${t('times')}`,
       color: 'text-red-600',
-      clickable: false
+      clickable: true,
+      onClick: () => setShowRankingDialog(true)
     }
   ]
 
@@ -93,8 +99,8 @@ export function StatsCard() {
             <div
               key={item.label}
               className={`text-center ${item.clickable
-                  ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors'
-                  : ''
+                ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors'
+                : ''
                 }`}
               onClick={item.clickable ? item.onClick : undefined}
             >
@@ -106,9 +112,15 @@ export function StatsCard() {
                 }`}>
                 {item.label}
               </div>
-              {item.clickable && stats.totalExcuses > 0 && (
+              {item.clickable && (
                 <div className="text-xs text-blue-500 mt-1">
-                  {t('clickToView')}
+                  {item.label === t('longestDelay') && stats.longestStreak > 0 ? (
+                    t('clickToView')
+                  ) : (
+                    item.label === t('totalExcuses') && stats.totalExcuses > 0 ? (
+                      t('clickToView')
+                    ) : null
+                  )}
                 </div>
               )}
             </div>
@@ -119,6 +131,11 @@ export function StatsCard() {
       <ExcuseRecordsDialog
         open={showExcuseDialog}
         onOpenChange={setShowExcuseDialog}
+      />
+
+      <DelayRankingDialog
+        open={showRankingDialog}
+        onOpenChange={setShowRankingDialog}
       />
     </>
   )

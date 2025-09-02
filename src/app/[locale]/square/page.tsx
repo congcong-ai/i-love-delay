@@ -69,14 +69,21 @@ function TaskCard({ task }: { task: PublicTask }) {
   }
 
   const formatTime = (date: Date) => {
+    // 确保在客户端和服务器端使用相同的格式
+    if (typeof window === 'undefined') {
+      // 服务器端使用简化格式
+      return new Date(date).toLocaleDateString('zh-CN')
+    }
+
+    // 客户端使用相对时间格式
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    
+
     if (days === 0) return t('today')
     if (days === 1) return t('yesterday')
     if (days < 7) return t('daysAgo', { days })
-    return date.toLocaleDateString('en-US')
+    return date.toLocaleDateString('zh-CN')
   }
 
   return (
@@ -117,7 +124,7 @@ function TaskCard({ task }: { task: PublicTask }) {
             <Heart className={cn('w-4 h-4', isLiked && 'fill-current')} />
             <span>{likesCount}</span>
           </button>
-          
+
           <button
             onClick={() => setShowComments(!showComments)}
             className="flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700"
@@ -125,7 +132,7 @@ function TaskCard({ task }: { task: PublicTask }) {
             <MessageCircle className="w-4 h-4" />
             <span>{task.comments.length}</span>
           </button>
-          
+
           <button
             onClick={handleFavorite}
             className={cn(
@@ -136,7 +143,7 @@ function TaskCard({ task }: { task: PublicTask }) {
             <Bookmark className={cn('w-4 h-4', isFavorited && 'fill-current')} />
           </button>
         </div>
-        
+
         <button className="text-gray-500 hover:text-gray-700">
           <Share2 className="w-4 h-4" />
         </button>
@@ -298,8 +305,8 @@ export default function SquarePage() {
               {config.isDevelopment ? t('developmentMode') : t('noSharesYet')}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              {config.isDevelopment 
-                ? t('loadedMockData') 
+              {config.isDevelopment
+                ? t('loadedMockData')
                 : t('shareYourDelay')}
             </p>
           </div>

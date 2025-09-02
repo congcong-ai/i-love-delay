@@ -6,11 +6,12 @@ import { db } from '@/lib/db'
 interface TaskStore {
   tasks: Task[]
   isLoading: boolean
-  
+
   // Actions
   loadTasks: () => Promise<void>
   addTask: (name: string) => Promise<void>
   updateTaskStatus: (id: string, status: TaskStatus) => Promise<void>
+  markTaskDelayed: (id: string) => Promise<void>
   deleteTask: (id: string) => Promise<void>
   getTasksByStatus: (status: TaskStatus) => Task[]
   getTodayTasks: () => Task[]
@@ -39,15 +40,15 @@ export const useTaskStore = create<TaskStore>()(
         },
 
         addTask: async (name: string) => {
-      if (!name.trim()) return
-      
-      try {
-        await db.addTask(name)
-        await get().loadTasks()
-      } catch (error) {
-        console.error('Failed to add task:', error)
-      }
-    },
+          if (!name.trim()) return
+
+          try {
+            await db.addTask(name)
+            await get().loadTasks()
+          } catch (error) {
+            console.error('Failed to add task:', error)
+          }
+        },
 
         updateTaskStatus: async (id: string, status: TaskStatus) => {
           try {
@@ -55,6 +56,15 @@ export const useTaskStore = create<TaskStore>()(
             await get().loadTasks()
           } catch (error) {
             console.error('Failed to update task status:', error)
+          }
+        },
+
+        markTaskDelayed: async (id: string) => {
+          try {
+            await db.markTaskDelayed(id)
+            await get().loadTasks()
+          } catch (error) {
+            console.error('Failed to mark task as delayed:', error)
           }
         },
 
@@ -74,8 +84,8 @@ export const useTaskStore = create<TaskStore>()(
         getTodayTasks: () => {
           const today = new Date()
           today.setHours(0, 0, 0, 0)
-          
-          return get().tasks.filter(task => 
+
+          return get().tasks.filter(task =>
             task.createdAt >= today && task.status === 'todo'
           )
         },
@@ -103,7 +113,7 @@ export const useTaskStore = create<TaskStore>()(
       }),
       {
         name: 'task-store',
-        partialize: () => ({ 
+        partialize: () => ({
           // Only persist UI state, not data
         })
       }

@@ -8,7 +8,7 @@ export class ILoveDelayDatabase extends Dexie {
 
   constructor() {
     super('ILoveDelayDB')
-    
+
     this.version(1).stores({
       tasks: '++id, name, status, createdAt, updatedAt, delayCount',
       excuses: '++id, taskId, content, createdAt, wordCount',
@@ -17,11 +17,11 @@ export class ILoveDelayDatabase extends Dexie {
   }
 
   async addTask(name: string): Promise<string> {
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
       : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     const now = new Date()
-    
+
     await this.tasks.add({
       id,
       name: name.trim(),
@@ -30,7 +30,7 @@ export class ILoveDelayDatabase extends Dexie {
       updatedAt: now,
       delayCount: 0
     })
-    
+
     return id
   }
 
@@ -54,17 +54,17 @@ export class ILoveDelayDatabase extends Dexie {
 
     await this.tasks.update(id, {
       status: 'delayed',
-      delayCount: task.delayCount + 1,
+      delayCount: (task.delayCount || 0) + 1,
       lastDelayedAt: new Date(),
       updatedAt: new Date()
     })
   }
 
   async addExcuse(taskId: string, content: string): Promise<string> {
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
       : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    
+
     await this.excuses.add({
       id,
       taskId,
@@ -72,7 +72,18 @@ export class ILoveDelayDatabase extends Dexie {
       createdAt: new Date(),
       wordCount: content.trim().length
     })
-    
+
+    // 在添加借口的同时，增加对应任务的拖延次数，并更新相关时间字段
+    const task = await this.tasks.get(taskId as any)
+    if (task) {
+      await this.tasks.update(task.id as any, {
+        status: 'delayed',
+        delayCount: (task.delayCount || 0) + 1,
+        lastDelayedAt: new Date(),
+        updatedAt: new Date()
+      })
+    }
+
     return id
   }
 
@@ -83,7 +94,7 @@ export class ILoveDelayDatabase extends Dexie {
   async getTodayTasks(): Promise<Task[]> {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
+
     return this.tasks
       .where('createdAt')
       .aboveOrEqual(today)
@@ -115,21 +126,46 @@ export class ILoveDelayDatabase extends Dexie {
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
     yesterday.setHours(23, 59, 59, 999)
-    
+
     const overdueTasks = await this.tasks
       .where('status')
       .equals('todo')
       .and(task => task.createdAt < yesterday)
       .toArray()
-    
+
     let updatedCount = 0
-    
+
     for (const task of overdueTasks) {
       await this.markTaskDelayed(task.id)
       updatedCount++
     }
-    
+
     return updatedCount
+  }
+
+  // 同步任务的拖延次数为对应借口数量的上限（用于历史数据回填）
+  async syncDelayCountsWithExcuses(): Promise<number> {
+    const [tasks, excuses] = await Promise.all([
+      this.tasks.toArray(),
+      this.excuses.toArray()
+    ])
+
+    const counts = excuses.reduce((acc, e) => {
+      const key = String(e.taskId)
+      acc[key] = (acc[key] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    let updated = 0
+    for (const task of tasks) {
+      const current = typeof task.delayCount === 'number' ? task.delayCount : 0
+      const byExcuses = counts[String(task.id)] || 0
+      if (byExcuses > current) {
+        await this.tasks.update(task.id as any, { delayCount: byExcuses })
+        updated++
+      }
+    }
+    return updated
   }
 
   async getTaskStats() {
@@ -140,7 +176,7 @@ export class ILoveDelayDatabase extends Dexie {
 
     const delayedTasks = tasks.filter(t => t.status === 'delayed')
     const completedTasks = tasks.filter(t => t.status === 'completed')
-    
+
     const taskDelayCounts = tasks.reduce((acc, task) => {
       if (task.delayCount > 0) {
         acc[task.name] = (acc[task.name] || 0) + task.delayCount
@@ -149,7 +185,7 @@ export class ILoveDelayDatabase extends Dexie {
     }, {} as Record<string, number>)
 
     const mostDelayedTask = Object.entries(taskDelayCounts)
-      .sort(([,a], [,b]) => b - a)[0]
+      .sort(([, a], [, b]) => b - a)[0]
 
     const totalExcuseWords = excuses.reduce((sum, excuse) => sum + excuse.wordCount, 0)
 
@@ -169,6 +205,12 @@ export const db = new ILoveDelayDatabase()
 
 export const initDatabase = async () => {
   try {
+    // 只在客户端初始化数据库
+    if (typeof window === 'undefined') {
+      console.log('Database initialization skipped on server')
+      return
+    }
+
     await db.open()
     console.log('Database initialized successfully')
   } catch (error) {

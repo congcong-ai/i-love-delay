@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { initDatabase } from '@/lib/db'
+import { initDatabase, db } from '@/lib/db'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { useExcuseStore } from '@/lib/stores/excuse-store'
 import { useUIStore } from '@/lib/stores/ui-store'
@@ -27,6 +27,11 @@ export default function DelayedPage() {
         loadTasks(),
         loadExcuses()
       ])
+      // 历史数据回填：将借口数量同步到任务的 delayCount
+      const updated = await db.syncDelayCountsWithExcuses()
+      if (updated > 0) {
+        await loadTasks()
+      }
       setCurrentTab('delayed')
     }
 

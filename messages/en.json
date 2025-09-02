@@ -143,7 +143,22 @@
     "totalCount": "Total {count}",
     "noExcuseRecords": "No excuse records yet",
     "startCreatingExcuses": "Start creating some wonderful excuses for your procrastination!",
-    "showingRange": "Showing {start}-{end} of {total}"
+    "showingRange": "Showing {start}-{end} of {total}",
+    "delayRanking": "Delay Ranking",
+    "delayRankingDesc": "View delay ranking across all tasks",
+    "noDelayRanking": "No delay ranking data yet",
+    "createTasksForRanking": "Create some tasks and start procrastinating!",
+    "rankNumber": "Rank {rank}",
+    "delayCountWithTimes": "{count} times",
+    "rankingParticipants": "{count} tasks participated in ranking",
+    "delayDetailsTitle": "{taskName} Delay Details",
+    "backToRanking": "Back to ranking",
+    "delayedInstancesCount": "Delayed instances: {count}",
+    "createdAtLabel": "Created at {date}",
+    "completedAtLabel": "Completed at {date}",
+    "notCompletedYet": "Not completed yet",
+    "summaryCounts": "Created {total} times, delayed {delayed} times, completed {completed} among delayed",
+    "noDelayedInstances": "No delayed instances for this task"
   },
   "rage": {
     "title": "Rage",

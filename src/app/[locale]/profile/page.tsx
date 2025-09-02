@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,15 +8,22 @@ import { Badge } from '@/components/ui/badge'
 import { SyncStatus } from '@/components/sync/sync-status'
 import { LoginButton } from '@/components/auth/login-button'
 import { LanguageSelector } from '@/components/settings/language-selector'
+import { BottomNav } from '@/components/layout/bottom-nav'
 import { User, Settings, Cloud } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth-store'
+import { useUIStore } from '@/lib/stores/ui-store'
 import { useTranslations } from 'next-intl'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('account')
   const { user } = useAuthStore()
+  const { setCurrentTab } = useUIStore()
   const t = useTranslations('profile')
   const tCommon = useTranslations('common')
+
+  useEffect(() => {
+    setCurrentTab('profile')
+  }, [setCurrentTab])
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -65,8 +72,8 @@ export default function ProfilePage() {
                         <Badge variant="secondary" className="mt-1">{t('auth.loggedIn')}</Badge>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
                       onClick={() => useAuthStore.getState().logout()}
                     >
@@ -96,7 +103,7 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <SyncStatus />
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -165,6 +172,8 @@ export default function ProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <BottomNav />
     </div>
   )
 }

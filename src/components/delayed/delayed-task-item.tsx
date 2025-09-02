@@ -10,6 +10,7 @@ import { useTaskStore } from '@/lib/stores/task-store'
 import { useExcuseStore } from '@/lib/stores/excuse-store'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { Task } from '@/lib/types'
+import { DelayDetailsDialog } from './delay-details-dialog'
 
 interface DelayedTaskItemProps {
   task: Task
@@ -21,6 +22,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
   const [isAddingExcuse, setIsAddingExcuse] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const [showHistoryExcuses, setShowHistoryExcuses] = useState(false)
+  const [showDelayDetails, setShowDelayDetails] = useState(false)
   const { updateTaskStatus } = useTaskStore()
   const { addExcuse, getExcusesByTask } = useExcuseStore()
   const { user, isLoggedIn, login } = useAuthStore()
@@ -131,7 +133,14 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
           <h3 className="font-medium text-gray-900 mb-1">{task.name}</h3>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Calendar size={14} />
-            <span>拖延 {task.delayCount} 次</span>
+            <button
+              type="button"
+              onClick={() => setShowDelayDetails(true)}
+              className="underline decoration-dotted hover:text-blue-600 focus:outline-none"
+              aria-label="view delay details"
+            >
+              拖延 {task.delayCount} 次
+            </button>
             {task.lastDelayedAt && (
               <>
                 <span>•</span>
@@ -240,6 +249,11 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
           )}
         </div>
       )}
+      <DelayDetailsDialog
+        open={showDelayDetails}
+        onOpenChange={setShowDelayDetails}
+        taskName={task.name}
+      />
     </Card>
   )
 }
