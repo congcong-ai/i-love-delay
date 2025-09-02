@@ -137,7 +137,13 @@
     "averageExcuseLength": "平均借口长度",
     "longestDelay": "最长拖延",
     "characters": "字",
-    "times": "次"
+    "times": "次",
+    "clickToView": "点击查看",
+    "allExcuseRecords": "所有借口记录",
+    "totalCount": "共 {count} 条",
+    "noExcuseRecords": "暂无借口记录",
+    "startCreatingExcuses": "开始为您的拖延创造一些精彩的借口吧！",
+    "showingRange": "显示 {start}-{end} 条，共 {total} 条"
   },
   "rage": {
     "title": "暴走",

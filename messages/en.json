@@ -137,7 +137,13 @@
     "averageExcuseLength": "Average Excuse Length",
     "longestDelay": "Longest Delay",
     "characters": "characters",
-    "times": "times"
+    "times": "times",
+    "clickToView": "Click to view",
+    "allExcuseRecords": "All Excuse Records",
+    "totalCount": "Total {count}",
+    "noExcuseRecords": "No excuse records yet",
+    "startCreatingExcuses": "Start creating some wonderful excuses for your procrastination!",
+    "showingRange": "Showing {start}-{end} of {total}"
   },
   "rage": {
     "title": "Rage",

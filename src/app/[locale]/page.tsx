@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { initDatabase } from '@/lib/db'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { useUIStore } from '@/lib/stores/ui-store'
@@ -14,6 +15,7 @@ export default function HomePage() {
   const { loadTasks, updateOverdueTasks, getTasksByStatus } = useTaskStore()
   const { setCurrentTab } = useUIStore()
   const t = useTranslations('tasks')
+  const [isCompletedExpanded, setIsCompletedExpanded] = useState(false)
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -34,6 +36,7 @@ export default function HomePage() {
   }, [loadTasks, updateOverdueTasks, setCurrentTab])
 
   const todoTasks = getTasksByStatus('todo')
+  const completedTasks = getTasksByStatus('completed')
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -58,13 +61,13 @@ export default function HomePage() {
               {t('pending')} ({todoTasks.length})
             </h2>
           </div>
-          
+
           {todoTasks.length > 0 && (
             <p className="text-sm text-gray-600 mb-4">
               {t('tasksWaitingMessage', { count: todoTasks.length })}
             </p>
           )}
-          
+
           <TaskList status="todo" />
         </div>
 
@@ -79,8 +82,40 @@ export default function HomePage() {
             </div>
           </Card>
         )}
+
+        {/* 已完成任务列表 */}
+        {completedTasks.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">
+                {t('completed')} ({completedTasks.length})
+              </h2>
+              <button
+                onClick={() => setIsCompletedExpanded(!isCompletedExpanded)}
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <span>{isCompletedExpanded ? '收起' : '展开'}</span>
+                {isCompletedExpanded ? (
+                  <ChevronUp size={16} />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
+              </button>
+            </div>
+
+            {isCompletedExpanded && (
+              <>
+                <p className="text-sm text-gray-600 mb-4">
+                  {t('completionSatisfaction')}
+                </p>
+
+                <TaskList status="completed" />
+              </>
+            )}
+          </div>
+        )}
       </div>
-      
+
       <BottomNav />
     </div>
   )

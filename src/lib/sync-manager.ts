@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { db } from '@/lib/db'
 import { Task, Excuse } from '@/lib/types'
 
@@ -55,9 +55,14 @@ export class SyncManager {
   }
 
   async syncAll() {
+    if (!isSupabaseConfigured) {
+      console.log('Skipping sync: Supabase not configured in development mode')
+      return
+    }
+
     try {
       console.log('Starting data sync...')
-      
+
       await Promise.all([
         this.syncTasks(),
         this.syncExcuses(),
@@ -73,15 +78,8 @@ export class SyncManager {
 
   private async syncTasks() {
     try {
-      // 检查是否是开发环境且使用占位符配置
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder') || 
-          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost:54321')) {
-        console.log('Skipping Supabase sync in development mode')
-        return
-      }
-
       const localTasks = await db.tasks.toArray()
-      
+
       const { data: cloudTasks, error } = await supabase
         .from('tasks')
         .select('*')
@@ -91,7 +89,7 @@ export class SyncManager {
 
       // 同步任务（云端优先）
       const taskMap = new Map<string, Task>()
-      
+
       localTasks.forEach(task => {
         taskMap.set(task.id, task)
       })
@@ -122,15 +120,8 @@ export class SyncManager {
 
   private async syncExcuses() {
     try {
-      // 检查是否是开发环境且使用占位符配置
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder') || 
-          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost:54321')) {
-        console.log('Skipping Supabase sync in development mode')
-        return
-      }
-
       const localExcuses = await db.excuses.toArray()
-      
+
       const { data: cloudExcuses, error } = await supabase
         .from('excuses')
         .select('*')
@@ -140,7 +131,7 @@ export class SyncManager {
 
       // 同步借口（云端优先）
       const excuseMap = new Map<string, Excuse>()
-      
+
       localExcuses.forEach(excuse => {
         excuseMap.set(excuse.id, excuse)
       })
@@ -164,18 +155,11 @@ export class SyncManager {
 
   private async syncUserData() {
     try {
-      // 检查是否是开发环境且使用占位符配置
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder') || 
-          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost:54321')) {
-        console.log('Skipping Supabase auth in development mode')
-        return
-      }
-
       // 获取用户信息
       const { data: userData, error } = await supabase.auth.getUser()
-      
+
       if (error) throw error
-      
+
       if (userData.user) {
         // 存储用户信息到本地
         localStorage.setItem('user_id', userData.user.id)
@@ -190,7 +174,7 @@ export class SyncManager {
     try {
       // 获取需要推送的变更
       const pendingChanges = await this.getPendingChanges(table)
-      
+
       for (const change of pendingChanges) {
         switch (change.type) {
           case 'create':
@@ -203,7 +187,7 @@ export class SyncManager {
             await supabase.from(table).delete().eq('id', change.id)
             break
         }
-     }
+      }
 
       // 清除已同步的变更
       await this.clearPendingChanges(table)
@@ -236,14 +220,14 @@ export class SyncManager {
   }
 
   async createTask(task: Omit<Task, 'id'>) {
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
       : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     const newTask = { ...task, id }
-    
+
     // 保存到本地
     await db.tasks.add(newTask)
-    
+
     // 添加到待同步队列
     await this.addPendingChange('tasks', {
       id,
@@ -269,7 +253,7 @@ export class SyncManager {
   async updateTask(id: string, updates: Partial<Task>) {
     // 更新本地
     await db.tasks.update(id, updates)
-    
+
     // 添加到待同步队列
     await this.addPendingChange('tasks', {
       id,
@@ -287,7 +271,7 @@ export class SyncManager {
   async deleteTask(id: string) {
     // 删除本地
     await db.tasks.delete(id)
-    
+
     // 添加到待同步队列
     await this.addPendingChange('tasks', {
       id,

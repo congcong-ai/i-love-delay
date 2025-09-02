@@ -11,6 +11,7 @@ interface ExcuseStore {
   loadExcuses: () => Promise<void>
   addExcuse: (taskId: string, content: string) => Promise<void>
   getExcusesByTask: (taskId: string) => Excuse[]
+  getAllExcusesWithTask: () => Promise<Array<Excuse & { taskName?: string }>>
   getExcuseStats: () => Promise<{
     totalExcuses: number
     averageLength: number
@@ -50,6 +51,23 @@ export const useExcuseStore = create<ExcuseStore>()(
 
       getExcusesByTask: (taskId: string) => {
         return get().excuses.filter(excuse => excuse.taskId === taskId)
+      },
+
+      getAllExcusesWithTask: async () => {
+        // 优先使用 store 中的数据，如果为空则从数据库查询
+        let excuses = get().excuses
+        if (excuses.length === 0) {
+          excuses = await db.excuses.orderBy('createdAt').reverse().toArray()
+        }
+
+        // 获取所有任务数据来匹配任务名称
+        const tasks = await db.tasks.toArray()
+        const taskMap = new Map(tasks.map(task => [task.id, task.name]))
+
+        return excuses.map(excuse => ({
+          ...excuse,
+          taskName: taskMap.get(excuse.taskId) || '未知任务'
+        }))
       },
 
       getExcuseStats: async () => {

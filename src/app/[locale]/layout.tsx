@@ -2,17 +2,18 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { AppProvider } from "@/components/providers/app-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: 'swap',
 });
 
 export default async function LocaleLayout({
@@ -32,7 +33,6 @@ export default async function LocaleLayout({
           <AppProvider>
             <div className="min-h-screen bg-gray-50">
               {children}
-              <BottomNav />
             </div>
           </AppProvider>
         </NextIntlClientProvider>
