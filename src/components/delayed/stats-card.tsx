@@ -112,17 +112,7 @@ export function StatsCard() {
                 }`}>
                 {item.label}
               </div>
-              {item.clickable && (
-                <div className="text-xs text-blue-500 mt-1">
-                  {item.label === t('longestDelay') && stats.longestStreak > 0 ? (
-                    t('clickToView')
-                  ) : (
-                    item.label === t('totalExcuses') && stats.totalExcuses > 0 ? (
-                      t('clickToView')
-                    ) : null
-                  )}
-                </div>
-              )}
+
             </div>
           ))}
         </div>
