@@ -73,7 +73,7 @@ npm run lint
 ## 📁 项目结构
 
 ```
-i-love-dalay-web/
+i-love-delay-web/
 ├── app/                    # Next.js App Router
 │   ├── globals.css        # 全局样式
 │   ├── layout.tsx         # 根布局（已弃用，使用[locale]/layout.tsx）
@@ -306,14 +306,14 @@ interface UserInteraction {
 ### 环境变量
 ```bash
 # 开发环境
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_ENV=development
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 NEXT_PUBLIC_DEFAULT_LOCALE=zh
 
 # 生产环境
-NEXT_PUBLIC_API_URL=https://your-domain.com
+NEXT_PUBLIC_APP_URL=https://your-domain.com
 NEXT_PUBLIC_ENV=production
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key

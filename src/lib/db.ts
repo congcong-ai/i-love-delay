@@ -14,6 +14,41 @@ export class ILoveDelayDatabase extends Dexie {
       excuses: '++id, taskId, content, createdAt, wordCount',
       settings: '++id, theme, language'
     })
+
+    // v2: switch primary keys to string-based 'id' for all tables to align with types and code usage
+    this.version(2).stores({
+      tasks: 'id, name, status, createdAt, updatedAt, delayCount',
+      excuses: 'id, taskId, content, createdAt, wordCount',
+      settings: 'id, theme, language'
+    }).upgrade(async (tx) => {
+      // Migrate tasks: coerce numeric auto-increment IDs to string IDs
+      const oldTasks = await tx.table('tasks').toArray()
+      await tx.table('tasks').clear()
+      for (const t of oldTasks) {
+        const anyT = t as any
+        const newId = typeof anyT.id === 'string' ? anyT.id : String(anyT.id)
+        await tx.table('tasks').add({ ...anyT, id: newId })
+      }
+
+      // Migrate excuses: coerce id and taskId to strings
+      const oldExcuses = await tx.table('excuses').toArray()
+      await tx.table('excuses').clear()
+      for (const e of oldExcuses) {
+        const anyE = e as any
+        const newId = typeof anyE.id === 'string' ? anyE.id : String(anyE.id)
+        const newTaskId = typeof anyE.taskId === 'string' ? anyE.taskId : String(anyE.taskId)
+        await tx.table('excuses').add({ ...anyE, id: newId, taskId: newTaskId })
+      }
+
+      // Migrate settings: coerce id to string
+      const oldSettings = await tx.table('settings').toArray()
+      await tx.table('settings').clear()
+      for (const s of oldSettings) {
+        const anyS = s as any
+        const newId = typeof anyS.id === 'string' ? anyS.id : String(anyS.id)
+        await tx.table('settings').add({ ...anyS, id: newId })
+      }
+    })
   }
 
   async addTask(name: string): Promise<string> {

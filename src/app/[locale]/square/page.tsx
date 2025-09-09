@@ -193,7 +193,17 @@ export default function SquarePage() {
       const response = await fetch('/api/square/share')
       if (response.ok) {
         const data = await response.json()
-        setTasks(data)
+        const normalized: PublicTask[] = Array.isArray(data)
+          ? data.map((item: any) => ({
+              ...item,
+              createdAt: new Date(item.createdAt),
+              comments: Array.isArray(item.comments) ? item.comments.map((c: any) => ({
+                ...c,
+                createdAt: new Date(c.createdAt)
+              })) : []
+            }))
+          : []
+        setTasks(normalized)
       } else {
         // Use mock data in development
         if (config.isDevelopment) {
