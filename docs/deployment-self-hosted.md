@@ -1,0 +1,243 @@
+# 自建部署指南（Ubuntu 24.04 + PostgreSQL + Supervisor + Nginx）
+
+本文档指导将本项目从 Supabase 切换到自建 PostgreSQL，并在自有服务器（Ubuntu 24.04）上部署 Next.js 应用与反向代理。
+
+## 架构说明
+
+- 前端（浏览器）仅访问 Next.js 提供的 API 路由（如 `/api/square/share`）。
+- Next.js 运行在服务器上（Node.js 运行时），在服务器端通过 `DATABASE_URL` 连接 PostgreSQL。
+- 无需单独的后端项目，Next.js 的 API 路由就是后端。
+- 数据库使用两个库（推荐命名）：
+  - 生产库：`i_love_delay`
+  - 开发库：`i_love_delay_dev`
+
+> 命名建议采用全小写 + 下划线的 snake_case，避免连字符与大小写带来的兼容问题。
+
+---
+
+## 一、准备服务器环境
+
+1) 更新系统
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+2) 安装 Node.js（推荐 LTS 20/22）
+
+使用官方 NodeSource（示例以 Node 20 为例）：
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+node -v
+npm -v
+```
+
+3) 安装 Git（可选，若用 git 拉代码）
+
+```bash
+sudo apt install -y git
+```
+
+4) 安装 Nginx（反向代理）
+
+```bash
+sudo apt install -y nginx
+nginx -v
+```
+
+5) 安装 Supervisor（进程守护）
+
+```bash
+sudo apt install -y supervisor
+supervisord -v
+```
+
+---
+
+## 二、安装 PostgreSQL 并初始化数据库
+
+1) 安装 PostgreSQL（示例 PostgreSQL 16）
+
+```bash
+sudo apt install -y postgresql postgresql-contrib
+psql --version
+```
+
+2) 创建数据库用户与数据库
+
+```bash
+sudo -u postgres psql <<'SQL'
+-- 创建应用角色（请替换强密码）
+CREATE ROLE app_user WITH LOGIN PASSWORD 'REPLACE_STRONG_PASSWORD';
+-- 生产库
+CREATE DATABASE i_love_delay OWNER app_user;
+-- 开发库
+CREATE DATABASE i_love_delay_dev OWNER app_user;
+SQL
+```
+
+3) 为两个数据库启用扩展 `pgcrypto`（用于 `gen_random_uuid()`）并导入表结构
+
+将项目代码上传至服务器任意目录，例如 `/var/www/i-love-delay-web/`。
+
+```bash
+cd /var/www/i-love-delay-web/
+# 对生产库执行迁移
+sudo -u postgres psql -d i_love_delay -f db/migrations/0001_init.sql
+# 对开发库执行迁移
+sudo -u postgres psql -d i_love_delay_dev -f db/migrations/0001_init.sql
+```
+
+> 如需远程访问数据库，请在 `postgresql.conf` 和 `pg_hba.conf` 中按需放行；默认仅本机可访问更安全。
+
+---
+
+## 三、配置环境变量
+
+在项目目录创建 `.env.production`（生产）与 `.env.local`（本地开发），关键变量如下：
+
+```bash
+# 通用
+NEXT_PUBLIC_APP_NAME="i love delay"
+NEXT_PUBLIC_DEFAULT_LOCALE=zh
+
+# 生产环境（示例）
+NEXT_PUBLIC_ENV=production
+NEXT_PUBLIC_APP_URL=https://your-domain.example.com
+DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@127.0.0.1:5432/i_love_delay
+# 如需 SSL：
+# PGSSLMODE=require
+
+# 开发环境（示例，本地直连线上 dev 库）
+NEXT_PUBLIC_ENV=development
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@<your-server-ip>:5432/i_love_delay_dev
+```
+
+> 注意：`DATABASE_URL` 仅在服务器端使用，前端无法读取；`NEXT_PUBLIC_` 前缀的变量才会暴露给浏览器。
+
+---
+
+## 四、构建与运行（服务器）
+
+在服务器项目目录执行：
+
+```bash
+# 安装依赖
+npm ci
+# 或 npm install
+
+# 构建生产包
+npm run build
+
+# 以 3000 端口启动（测试用）
+npm start
+# 然后访问 http://SERVER_IP:3000/zh 验证页面
+```
+
+---
+
+## 五、使用 Supervisor 常驻运行
+
+新建 Supervisor 配置 `/etc/supervisor/conf.d/i-love-delay-web.conf`：
+
+```ini
+[program:i-love-delay-web]
+directory=/var/www/i-love-delay-web
+command=/bin/bash -lc 'set -a && source .env.production && exec npm start'
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+stderr_logfile=/var/log/i-love-delay-web.err.log
+stdout_logfile=/var/log/i-love-delay-web.out.log
+environment=NODE_ENV="production"
+# 根据需要调整用户
+user=www-data
+```
+
+应用配置并启动：
+
+```bash
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl status i-love-delay-web
+# 重启：
+sudo supervisorctl restart i-love-delay-web
+```
+
+> 日志位置：`/var/log/i-love-delay-web.*.log`
+
+---
+
+## 六、配置 Nginx 反向代理与 TLS
+
+1) 新建站点配置 `/etc/nginx/sites-available/i-love-delay-web.conf`
+
+```nginx
+server {
+  listen 80;
+  server_name your-domain.example.com;
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+2) 启用站点并重载 Nginx
+
+```bash
+sudo ln -s /etc/nginx/sites-available/i-love-delay-web.conf /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+3) 配置 HTTPS（推荐使用 Certbot）
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d your-domain.example.com
+```
+
+---
+
+## 七、端到端验证（E2E）
+
+- 访问主页 `https://your-domain.example.com/zh` 创建任务。
+- 打开拖延页 `https://your-domain.example.com/zh/delayed` 添加借口并点击“分享到广场”。
+- 打开广场页 `https://your-domain.example.com/zh/square` 校验分享是否展示。
+- 可直接请求只读接口验证：
+
+```bash
+curl -s 'https://your-domain.example.com/api/square/share?limit=3' | jq
+```
+
+---
+
+## 八、常见问题
+
+- 无法连接数据库
+  - 核对 `DATABASE_URL`、防火墙、`pg_hba.conf` 与 `postgresql.conf`。
+  - 本机部署推荐使用 `127.0.0.1` 并仅本机监听。
+- API 报错但页面仍显示数据
+  - 开发模式下页面会回退到 mock 数据，这是预期行为。生产环境应确保接口可用。
+- 端口被占用
+  - 调整 `npm start` 端口：`next start -p 3001`，并同步修改 Nginx `proxy_pass`。
+
+---
+
+## 九、后续可选优化
+
+- 使用系统用户专门运行服务，并最小化数据库权限。
+- 为任务/借口等业务数据添加更多表与索引。
+- 将部署流程容器化（Docker + docker-compose），便于一键部署与回滚。
+- 使用 Prometheus + Grafana 监控运行状况。
