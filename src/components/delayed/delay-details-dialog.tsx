@@ -15,18 +15,24 @@ interface DelayDetailsDialogProps {
 export function DelayDetailsDialog({ open, onOpenChange, taskName }: DelayDetailsDialogProps) {
   const { tasks } = useTaskStore()
   const t = useTranslations('delayed')
+  const tTime = useTranslations('time')
 
   const allInstances = useMemo(() => tasks.filter(t => t.name === taskName), [tasks, taskName])
   const delayedInstances = useMemo(() => allInstances.filter(t => (t.delayCount || 0) > 0), [allInstances])
   const completedAmongDelayed = useMemo(() => delayedInstances.filter(t => !!t.completedAt).length, [delayedInstances])
 
-  const formatDateTime = (date: Date) => {
+  const formatRelative = (date: Date) => {
     const d = new Date(date)
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    const hh = String(d.getHours()).padStart(2, '0')
-    const mm = String(d.getMinutes()).padStart(2, '0')
-    return `${m}/${day} ${hh}:${mm}`
+    const now = new Date()
+    const diffMs = now.getTime() - d.getTime()
+    const minutes = Math.floor(diffMs / 60000)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+    if (minutes < 1) return tTime('justNow')
+    if (minutes < 60) return tTime('minutesAgo', { minutes })
+    if (hours < 24) return tTime('hoursAgo', { hours })
+    if (days === 1) return tTime('yesterday')
+    return tTime('daysAgo', { days })
   }
 
   return (
@@ -54,9 +60,9 @@ export function DelayDetailsDialog({ open, onOpenChange, taskName }: DelayDetail
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{ins.name}</p>
-                    <p className="text-xs text-gray-500">{t('createdAtLabel', { date: formatDateTime(ins.createdAt) })}</p>
+                    <p className="text-xs text-gray-500">{t('createdAtLabel', { date: formatRelative(ins.createdAt) })}</p>
                     {ins.completedAt ? (
-                      <p className="text-xs text-green-600">{t('completedAtLabel', { date: formatDateTime(ins.completedAt) })}</p>
+                      <p className="text-xs text-green-600">{t('completedAtLabel', { date: formatRelative(ins.completedAt) })}</p>
                     ) : (
                       <p className="text-xs text-orange-600">{t('notCompletedYet')}</p>
                     )}
