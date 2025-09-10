@@ -11,6 +11,7 @@ import { useExcuseStore } from '@/lib/stores/excuse-store'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { Task } from '@/lib/types'
 import { DelayDetailsDialog } from './delay-details-dialog'
+import { useTranslations } from 'next-intl'
 
 interface DelayedTaskItemProps {
   task: Task
@@ -18,6 +19,9 @@ interface DelayedTaskItemProps {
 }
 
 export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
+  const t = useTranslations('delayed')
+  const tNet = useTranslations('network')
+  const tAuth = useTranslations('auth')
   const [excuse, setExcuse] = useState('')
   const [isAddingExcuse, setIsAddingExcuse] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
@@ -32,6 +36,10 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
   const historyExcuses = excuses.slice(1) // 除了最新的借口之外的历史借口
 
   const handleAddExcuse = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
     if (!excuse.trim()) return
 
     setIsAddingExcuse(true)
@@ -42,12 +50,25 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
   }
 
   const handleMarkCompleted = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
     await updateTaskStatus(task.id, 'completed')
     onUpdate?.()
   }
 
   const handleShareToSquare = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
     if (!isLoggedIn) {
+      const confirmLogin = window.confirm(t('shareConfirmLogin'))
+      if (!confirmLogin) {
+        alert(t('shareCancelled'))
+        return
+      }
       try {
         await login()
         // 等待登录状态更新
@@ -60,7 +81,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
             if (useAuthStore.getState().isLoggedIn) {
               resolve()
             } else if (attempts >= maxAttempts) {
-              reject(new Error('登录超时'))
+              reject(new Error(tAuth('loginTimeout')))
             } else {
               setTimeout(check, 500)
             }
@@ -71,14 +92,37 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
 
         await checkLogin()
       } catch (error) {
-        console.error('登录失败:', error)
-        alert('登录失败，无法分享')
+        console.error('login failed:', error)
+        alert(t('shareLoginFailed'))
         return
       }
     }
 
-    if (!latestExcuse) {
-      alert('请先添加一个借口再分享！')
+    // 确保有可分享的借口：优先使用最新借口；如没有但输入框有内容，则先添加再分享
+    let shareContent = latestExcuse?.content
+    if (!shareContent) {
+      if (excuse.trim()) {
+        const confirmUseInput = window.confirm(t('shareUseInputConfirm'))
+        if (!confirmUseInput) {
+          alert(t('shareCancelled'))
+          return
+        }
+        try {
+          setIsAddingExcuse(true)
+          await addExcuse(task.id, excuse.trim())
+          shareContent = excuse.trim()
+          setExcuse('')
+        } finally {
+          setIsAddingExcuse(false)
+        }
+      } else {
+        alert(t('shareNeedExcuse'))
+        return
+      }
+    }
+
+    if (!user?.openid || !user?.nickname) {
+      alert(t('shareNeedLogin'))
       return
     }
 
@@ -92,25 +136,25 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
         body: JSON.stringify({
           taskId: task.id,
           taskName: task.name,
-          excuse: latestExcuse.content,
+          excuse: shareContent,
           delayCount: task.delayCount,
-          userId: user?.openid,
-          userName: user?.nickname,
-          userAvatar: user?.avatar,
+          userId: user.openid,
+          userName: user.nickname,
+          userAvatar: user.avatar,
         }),
       })
 
       const result = await response.json()
 
       if (response.ok) {
-        alert('分享成功！你的拖延故事已发布到广场')
+        alert(t('shareSuccess'))
       } else {
-        console.error('分享失败详情:', result)
-        throw new Error(result.error || result.message || '分享失败')
+        console.error('share failed details:', result)
+        throw new Error(result.error || result.message || t('shareFailed'))
       }
     } catch (error) {
-      console.error('分享失败:', error)
-      alert(error instanceof Error ? error.message : '分享失败，请稍后重试')
+      console.error('share failed:', error)
+      alert(error instanceof Error ? error.message : t('shareFailedRetry'))
     } finally {
       setIsSharing(false)
     }
@@ -139,19 +183,19 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
               className="underline decoration-dotted hover:text-blue-600 focus:outline-none"
               aria-label="view delay details"
             >
-              拖延 {task.delayCount} 次
+              {t('delayCountShort', { count: task.delayCount })}
             </button>
             {task.lastDelayedAt && (
               <>
                 <span>•</span>
-                <span>上次 {formatDate(task.lastDelayedAt)}</span>
+                <span>{t('lastLabel', { time: formatDate(task.lastDelayedAt) })}</span>
               </>
             )}
           </div>
         </div>
 
         <Badge variant="destructive" className="bg-orange-100 text-orange-800">
-          拖延中
+          {t('delayingBadge')}
         </Badge>
       </div>
 
@@ -172,7 +216,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
       <div className="space-y-3">
         <div>
           <Textarea
-            placeholder="为你的拖延找个借口吧..."
+            placeholder={t('placeholderAddExcuse')}
             value={excuse}
             onChange={(e) => setExcuse(e.target.value)}
             className="min-h-[60px] text-sm"
@@ -192,17 +236,17 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
               className="flex-1 h-10"
             >
               <MessageSquare size={16} className="mr-2" />
-              添加借口
+              {t('addExcuseButton')}
             </Button>
 
             <Button
               size="default"
               onClick={handleShareToSquare}
-              disabled={isSharing || !latestExcuse}
+              disabled={isSharing}
               className="flex-1 h-10 bg-blue-600 hover:bg-blue-700"
             >
               <Share2 size={16} className="mr-2" />
-              {isSharing ? '分享中...' : '分享到广场'}
+              {isSharing ? t('sharing') : t('shareToSquareButton')}
             </Button>
           </div>
 
@@ -211,7 +255,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
             onClick={handleMarkCompleted}
             className="w-full bg-green-600 hover:bg-green-700 text-sm"
           >
-            糟糕，完成了！
+            {t('completeButton')}
           </Button>
         </div>
       </div>
@@ -222,7 +266,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
             onClick={() => setShowHistoryExcuses(!showHistoryExcuses)}
             className="flex items-center justify-between w-full text-left text-xs text-gray-500 hover:text-gray-700 transition-colors"
           >
-            <span>历史借口 ({historyExcuses.length} 条)</span>
+            <span>{t('historyExcuses', { count: historyExcuses.length })}</span>
             {showHistoryExcuses ? (
               <ChevronUp size={14} />
             ) : (
@@ -239,7 +283,7 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-gray-700 break-words">{excuse.content}</p>
                       <p className="text-xs text-gray-400 mt-1">
-                        {formatDate(excuse.createdAt)} • {excuse.wordCount} 字
+                        {formatDate(excuse.createdAt)} • {excuse.wordCount} {t('wordsUnit')}
                       </p>
                     </div>
                   </div>

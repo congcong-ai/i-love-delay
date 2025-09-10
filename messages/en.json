@@ -39,16 +39,18 @@
   },
   "profile": {
     "title": "Profile",
-    "subtitle": "Manage account and sync settings",
+    "subtitle": "Manage account and app settings",
     "account": "Account",
     "sync": "Data Sync",
     "settings": "Settings",
+    "activity": "Activity",
     "accountInfo": "Account Information",
     "accountDescription": "Manage your account and login status",
     "loggedInAs": "Logged in as",
     "wechatUser": "WeChat User",
     "logout": "Logout",
-    "loginToSync": "Login to enjoy cloud sync features",
+    "loginToSync": "Login to unlock more features",
+    "loginToViewActivity": "Login to view your square activity",
     "dataSync": "Data Sync",
     "syncDescription": "Manage your data sync status and settings",
     "autoSync": "Auto Sync",
@@ -75,7 +77,15 @@
     "neverSynced": "Never synced",
     "syncing": "Syncing...",
     "forceSync": "Force Sync",
-    "pendingChanges": "{count} pending changes"
+    "pendingChanges": "{count} pending changes",
+    "activityAll": "All",
+    "activityLikes": "Likes",
+    "activityFavorites": "Favorites",
+    "activityComments": "Comments",
+    "activityEmpty": "No activity yet",
+    "activityYouLiked": "You liked {name}'s \"{task}\"",
+    "activityYouFavorited": "You favorited {name}'s \"{task}\"",
+    "activityYouCommented": "You commented on {name}'s \"{task}\""
   },
   "auth": {
     "login": "Login",
@@ -85,7 +95,8 @@
     "notLoggedIn": "Not Logged In",
     "wechatLogin": "WeChat Login",
     "loggingIn": "Logging in...",
-    "logoutConfirm": "Logout"
+    "logoutConfirm": "Logout",
+    "loginTimeout": "Login timed out"
   },
   "tasks": {
     "title": "Tasks",
@@ -104,6 +115,12 @@
     "deleteTask": "Delete Task",
     "markComplete": "Mark Complete",
     "markIncomplete": "Mark Incomplete",
+    "delayed": "Delay",
+    "finish": "Finish",
+    "createdAtOn": "Created on {date}",
+    "completedAtOn": "Completed on {date}",
+    "collapse": "Collapse",
+    "expand": "Expand",
     "whatToProcrastinate": "What task do you want to procrastinate on today?",
     "noTasksToday": "No tasks today, come create one!",
     "procrastinationStarts": "Procrastination starts with creating tasks~",
@@ -158,7 +175,31 @@
     "completedAtLabel": "Completed at {date}",
     "notCompletedYet": "Not completed yet",
     "summaryCounts": "Created {total} times, delayed {delayed} times, completed {completed} among delayed",
-    "noDelayedInstances": "No delayed instances for this task"
+    "noDelayedInstances": "No delayed instances for this task",
+    "shareConfirmLogin": "Sharing requires login. Login now?",
+    "shareCancelled": "Share cancelled",
+    "shareLoginFailed": "Login failed. Unable to share",
+    "shareUseInputConfirm": "Detected text in the input. Use it directly as the excuse to share?\nClick OK to save and share.",
+    "shareNeedExcuse": "Please add an excuse before sharing!",
+    "shareNeedLogin": "Please login before sharing",
+    "shareSuccess": "Shared successfully! Your procrastination story has been posted",
+    "shareFailed": "Share failed",
+    "shareFailedRetry": "Share failed, please try again later",
+    "addExcuseButton": "Add Excuse",
+    "shareToSquareButton": "Share to Square",
+    "sharing": "Sharing...",
+    "completeButton": "Oops, Completed!",
+    "delayingBadge": "Delaying",
+    "delayCountShort": "delayed {count} times",
+    "lastLabel": "last {time}",
+    "historyExcuses": "History ({count} records)",
+    "wordsUnit": "chars",
+    "placeholderAddExcuse": "Find an excuse for your procrastination..."
+  },
+  "network": {
+    "offlineTitle": "Offline",
+    "offlineDesc": "This app requires an internet connection. Please connect and try again.",
+    "retry": "Retry"
   },
   "rage": {
     "title": "Rage",
@@ -217,6 +258,18 @@
     "noSharesYet": "No one has shared procrastination tasks yet",
     "shareYourDelay": "Go procrastinate on something, then share it with everyone!",
     "developmentMode": "Development Mode",
-    "loadedMockData": "Mock data loaded for development testing"
+    "loadedMockData": "Mock data loaded for development testing",
+    "commentPlaceholder": "Write a comment...",
+    "sending": "Sending...",
+    "send": "Send",
+    "noComments": "No comments yet. Be the first!",
+    "loading": "Loading...",
+    "loginToComment": "Commenting requires login. Login now?",
+    "loginFailed": "Login failed. Unable to comment",
+    "postFailed": "Failed to post comment",
+    "postError": "Error while posting comment",
+    "enterComment": "Please enter a comment",
+    "interactLogin": "Login required to interact. Login now?",
+    "interactionFailed": "Action failed, please try again later"
   }
 }

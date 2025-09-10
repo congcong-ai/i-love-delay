@@ -58,6 +58,7 @@ export interface PublicTask {
   isFavorited: boolean
   createdAt: Date
   comments: Comment[]
+  commentsCount?: number
 }
 
 export interface Comment {

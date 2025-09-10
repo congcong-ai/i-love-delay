@@ -43,7 +43,7 @@ npm run dev
  - **React 19.1.0** 与 **TypeScript 5.9.2**
  - **Tailwind CSS 4.x**（^4.1.12）与 **@tailwindcss/postcss**
  - **next-intl 4.x**（国际化与本地化路由）
- - **Supabase JS 2.x**（认证、数据库、同步）
+ - **PostgreSQL（自建）+ pg**（通过 Next.js API 路由在服务端访问）
  - **Dexie 4.x**（IndexedDB 封装，本地数据）
  - **Zustand 5.x**（状态管理）
  - **Radix UI + shadcn 风格组件**（见 `src/components/ui/`）
@@ -138,22 +138,19 @@ npm run kill-port
 
 ## 🔑 环境变量
 
-参见示例文件：`.env.example` 与 `.env.local.example`
+参见示例文件：`.env.example`
 
-- 必需（Supabase）
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY`（仅服务端使用，切勿暴露到客户端）
-- 应用配置
+- 必需
   - `NEXT_PUBLIC_APP_NAME`，`NEXT_PUBLIC_APP_URL`
   - `NEXT_PUBLIC_DEFAULT_LOCALE`（默认 `zh`）
+  - `NEXT_PUBLIC_ENV`（`development`/`production`）
+  - `DATABASE_URL`（PostgreSQL 连接串，仅服务器端使用）
+  - `PGSSLMODE`（可选，如数据库要求 SSL，可设为 `require`）
 - 可选集成
   - 微信登录：`NEXT_PUBLIC_WECHAT_APP_ID`，`WECHAT_APP_SECRET`
   - 分析：`NEXT_PUBLIC_GA_ID`，`NEXT_PUBLIC_VERCEL_ANALYTICS_ID`
   - 错误监控：`NEXT_PUBLIC_SENTRY_DSN`，`SENTRY_AUTH_TOKEN`
-  - 运行模式：`NEXT_PUBLIC_UNIAPP_MODE`，`NEXT_PUBLIC_ENV`
-
-安全提示：开发模式下若检测到 Supabase 占位符，`src/lib/supabase.ts` 将禁用 `autoRefreshToken/persistSession/detectSessionInUrl`，以防误用。
+  - 运行模式：`NEXT_PUBLIC_UNIAPP_MODE`
 
 ## 🌐 国际化（i18n）
 
@@ -173,13 +170,11 @@ npm run kill-port
   - `src/lib/task-scheduler.ts`：
     - 启动即检查一次；随后每 30 分钟检查过期任务
     - 页面可见性变化时主动检查
-- 云端同步（Supabase）
-  - `src/lib/sync-manager.ts`：
-    - 在线/离线检测 + 每 5 分钟定时同步
-    - 待同步队列缓存在 `localStorage`（`pending_changes_*`）
-    - 目前包含 `tasks`、`excuses` 同步逻辑（需在 Supabase 端创建对应表，详见 `docs/supabase-setup.md`）
-  - 广场相关表（分享/评论/互动）：`supabase/migrations/20250830_create_square_tables.sql`
-    - `public_tasks`、`public_task_comments`、`user_interactions` 及索引/触发器
+- 广场（Square）
+  - API：`src/app/api/square/share/route.ts` 使用 PostgreSQL（`pg`）在服务端访问数据库。
+  - 前端：`src/app/[locale]/square/page.tsx` 使用相对路径 `/api/square/share` 获取/发布数据；开发下失败回退到 mock。
+- Supabase 相关模块
+  - `src/lib/supabase.ts`、`src/lib/sync-manager.ts` 属于可选/遗留模块，当前 Square 流程不依赖，可按需启用或移除。
 
 ### 🔒 权限与安全（Supabase）
 

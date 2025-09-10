@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useTaskStore } from '@/lib/stores/task-store'
 import { Task } from '@/lib/types'
+import { useTranslations } from 'next-intl'
 
 interface TaskItemProps {
   task: Task
@@ -15,18 +16,32 @@ interface TaskItemProps {
 export function TaskItem({ task, onUpdate }: TaskItemProps) {
   const { updateTaskStatus, markTaskDelayed, deleteTask } = useTaskStore()
   const [isDeleting, setIsDeleting] = useState(false)
+  const t = useTranslations('tasks')
+  const tNet = useTranslations('network')
 
   const handleMarkDelayed = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
     await markTaskDelayed(task.id)
     onUpdate?.()
   }
 
   const handleMarkCompleted = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
     await updateTaskStatus(task.id, 'completed')
     onUpdate?.()
   }
 
   const handleDelete = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
     setIsDeleting(true)
     await deleteTask(task.id)
   }
@@ -41,11 +56,11 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
       })
     }
 
-    // 客户端使用本地化格式
+    // 客户端使用本地化格式（固定格式避免水合差异）
     const d = new Date(date)
     const month = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
-    return `${month}月${day}日`
+    return `${month}/${day}`
   }
 
   return (
@@ -60,10 +75,11 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
           </h3>
           <p className="text-sm text-gray-500">
             {task.status === 'completed' && task.completedAt
-              ? `完成于 ${formatDate(task.completedAt)}`
-              : `创建于 ${formatDate(task.createdAt)}`
+              ? t('completedAtOn', { date: formatDate(task.completedAt) })
+              : t('createdAtOn', { date: formatDate(task.createdAt) })
             }
           </p>
+
         </div>
 
         {task.status !== 'completed' && (
@@ -81,9 +97,10 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
         {task.status === 'completed' && (
           <div className="flex items-center text-green-600">
             <CheckCircle2 size={16} className="mr-1" />
-            <span className="text-sm font-medium">已完成</span>
+            <span className="text-sm font-medium">{t('completed')}</span>
           </div>
         )}
+
       </div>
 
       {task.status === 'todo' && (
@@ -95,7 +112,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
             className="flex items-center gap-1 text-orange-600 border-orange-200 hover:bg-orange-50"
           >
             <Clock size={14} />
-            拖延
+            {t('delayed')}
           </Button>
 
           <Button
@@ -104,8 +121,9 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
             className="flex items-center gap-1 bg-green-600 hover:bg-green-700"
           >
             <CheckCircle2 size={14} />
-            完成
+            {t('finish')}
           </Button>
+
         </div>
       )}
     </Card>

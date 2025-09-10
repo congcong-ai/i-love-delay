@@ -39,16 +39,18 @@
   },
   "profile": {
     "title": "我的",
-    "subtitle": "管理账户和同步设置",
+    "subtitle": "管理账户与应用设置",
     "account": "账户",
     "sync": "数据同步",
     "settings": "设置",
+    "activity": "动态",
     "accountInfo": "账户信息",
     "accountDescription": "管理您的账户和登录状态",
     "loggedInAs": "已登录为",
     "wechatUser": "微信用户",
     "logout": "退出登录",
-    "loginToSync": "登录后享受云端同步功能",
+    "loginToSync": "登录后可使用更多功能",
+    "loginToViewActivity": "登录后查看你的广场动态",
     "dataSync": "数据同步",
     "syncDescription": "管理您的数据同步状态和设置",
     "autoSync": "自动同步",
@@ -75,7 +77,15 @@
     "neverSynced": "从未同步",
     "syncing": "同步中...",
     "forceSync": "强制同步",
-    "pendingChanges": "{count}个待同步的更改"
+    "pendingChanges": "{count}个待同步的更改",
+    "activityAll": "全部",
+    "activityLikes": "点赞",
+    "activityFavorites": "收藏",
+    "activityComments": "评论",
+    "activityEmpty": "暂无动态",
+    "activityYouLiked": "你赞了 {name} 的「{task}」",
+    "activityYouFavorited": "你收藏了 {name} 的「{task}」",
+    "activityYouCommented": "你评论了 {name} 的「{task}」"
   },
   "auth": {
     "login": "登录",
@@ -85,7 +95,8 @@
     "notLoggedIn": "未登录",
     "wechatLogin": "微信登录",
     "loggingIn": "登录中...",
-    "logoutConfirm": "退出登录"
+    "logoutConfirm": "退出登录",
+    "loginTimeout": "登录超时"
   },
   "tasks": {
     "title": "任务",
@@ -104,6 +115,12 @@
     "deleteTask": "删除任务",
     "markComplete": "标记完成",
     "markIncomplete": "标记未完成",
+    "createdAtOn": "创建于 {date}",
+    "completedAtOn": "完成于 {date}",
+    "delayed": "拖延",
+    "finish": "完成",
+    "collapse": "收起",
+    "expand": "展开",
     "whatToProcrastinate": "今天想拖延什么任务？",
     "noTasksToday": "今天还没有任务，快来创建一个吧！",
     "procrastinationStarts": "拖延从创建任务开始～",
@@ -158,7 +175,31 @@
     "completedAtLabel": "完成于 {date}",
     "notCompletedYet": "尚未完成",
     "summaryCounts": "共创建 {total} 次，其中拖延 {delayed} 次，拖延后完成 {completed} 次",
-    "noDelayedInstances": "该任务暂无被拖延的实例"
+    "noDelayedInstances": "该任务暂无被拖延的实例",
+    "shareConfirmLogin": "分享需要登录，是否现在登录？",
+    "shareCancelled": "已取消分享",
+    "shareLoginFailed": "登录失败，无法分享",
+    "shareUseInputConfirm": "检测到输入框有内容，是否直接用这段借口分享？\n选择“确定”将自动保存并分享。",
+    "shareNeedExcuse": "请先添加一个借口再分享！",
+    "shareNeedLogin": "请先登录后再分享",
+    "shareSuccess": "分享成功！你的拖延故事已发布到广场",
+    "shareFailed": "分享失败",
+    "shareFailedRetry": "分享失败，请稍后重试",
+    "addExcuseButton": "添加借口",
+    "shareToSquareButton": "分享到广场",
+    "sharing": "分享中...",
+    "completeButton": "糟糕，完成了！",
+    "delayingBadge": "拖延中",
+    "delayCountShort": "拖延 {count} 次",
+    "lastLabel": "上次 {time}",
+    "historyExcuses": "历史借口 ({count} 条)",
+    "wordsUnit": "字",
+    "placeholderAddExcuse": "为你的拖延找个借口吧..."
+  },
+  "network": {
+    "offlineTitle": "当前离线",
+    "offlineDesc": "本应用需联网使用，请连接网络后重试。",
+    "retry": "重试"
   },
   "rage": {
     "title": "暴走",
@@ -217,6 +258,18 @@
     "noSharesYet": "还没有人分享拖延任务",
     "shareYourDelay": "快去拖延点什么，然后分享给大家吧！",
     "developmentMode": "开发环境",
-    "loadedMockData": "已加载模拟数据用于开发测试"
+    "loadedMockData": "已加载模拟数据用于开发测试",
+    "commentPlaceholder": "写评论...",
+    "sending": "发送中...",
+    "send": "发送",
+    "noComments": "暂无评论，来抢沙发吧～",
+    "loading": "加载中...",
+    "loginToComment": "评论需要登录，是否现在登录？",
+    "loginFailed": "登录失败，无法评论",
+    "postFailed": "发布评论失败",
+    "postError": "发布评论异常",
+    "enterComment": "请输入评论内容",
+    "interactLogin": "需要登录才能进行互动，是否现在登录？",
+    "interactionFailed": "操作失败，请稍后重试"
   }
 }

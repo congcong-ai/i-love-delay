@@ -26,7 +26,7 @@ export function DelayDetailsDialog({ open, onOpenChange, taskName }: DelayDetail
     const day = String(d.getDate()).padStart(2, '0')
     const hh = String(d.getHours()).padStart(2, '0')
     const mm = String(d.getMinutes()).padStart(2, '0')
-    return `${m}月${day}日 ${hh}:${mm}`
+    return `${m}/${day} ${hh}:${mm}`
   }
 
   return (

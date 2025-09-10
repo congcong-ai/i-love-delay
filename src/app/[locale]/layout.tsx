@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { AppProvider } from "@/components/providers/app-provider";
+import { OnlineGuard } from "@/components/system/online-guard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <AppProvider>
             <div className="min-h-screen bg-gray-50">
+              <OnlineGuard />
               {children}
             </div>
           </AppProvider>
