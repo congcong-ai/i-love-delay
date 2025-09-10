@@ -18,6 +18,7 @@ function TaskCard({ task }: { task: PublicTask }) {
   const t = useTranslations('square')
   const tNet = useTranslations('network')
   const tAuth = useT('auth')
+  const tTime = useTranslations('time')
   const [isLiked, setIsLiked] = useState(task.isLiked)
   const [isFavorited, setIsFavorited] = useState(task.isFavorited)
   const [likesCount, setLikesCount] = useState(task.likesCount)
@@ -191,21 +192,16 @@ function TaskCard({ task }: { task: PublicTask }) {
   }
 
   const formatTime = (date: Date) => {
-    // 确保在客户端和服务器端使用相同的格式
-    if (typeof window === 'undefined') {
-      // 服务器端使用简化格式
-      return new Date(date).toLocaleDateString('zh-CN')
-    }
-
-    // 客户端使用相对时间格式
     const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-    if (days === 0) return t('today')
-    if (days === 1) return t('yesterday')
-    if (days < 7) return t('daysAgo', { days })
-    return date.toLocaleDateString('zh-CN')
+    const diffMs = now.getTime() - date.getTime()
+    const minutes = Math.floor(diffMs / 60000)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+    if (minutes < 1) return tTime('justNow')
+    if (minutes < 60) return tTime('minutesAgo', { minutes })
+    if (hours < 24) return tTime('hoursAgo', { hours })
+    if (days === 1) return tTime('yesterday')
+    return tTime('daysAgo', { days })
   }
 
   return (
@@ -340,51 +336,80 @@ export default function SquarePage() {
   const t = useTranslations('square')
   const [tasks, setTasks] = useState<PublicTask[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [filter, setFilter] = useState<'all' | 'popular' | 'recent'>('all')
   const { user } = useAuthStore()
+  const [page, setPage] = useState(1)
+  const limit = 20
+  const [hasMore, setHasMore] = useState(true)
+
+  const currentSort = filter === 'popular' ? 'trending' : 'recent'
 
   useEffect(() => {
-    fetchPublicTasks()
+    // 初次加载
+    loadPage(1, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const fetchPublicTasks = async () => {
-    try {
-      const userIdParam = user?.openid ? `?userId=${encodeURIComponent(user.openid)}` : ''
-      const response = await fetch(`/api/square/share${userIdParam}`)
-      if (response.ok) {
-        const data = await response.json()
-        const normalized: PublicTask[] = Array.isArray(data)
-          ? data.map((item: any) => ({
-              ...item,
-              createdAt: new Date(item.createdAt),
-              comments: Array.isArray(item.comments) ? item.comments.map((c: any) => ({
-                ...c,
-                createdAt: new Date(c.createdAt)
-              })) : []
-            }))
-          : []
-        setTasks(normalized)
-      } else {
-        setTasks([])
+  useEffect(() => {
+    // 登录状态或筛选变化后重置并重新加载
+    setPage(1)
+    setHasMore(true)
+    loadPage(1, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.openid, filter])
+
+  useEffect(() => {
+    if (page === 1) return
+    loadPage(page, false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page])
+
+  useEffect(() => {
+    if (!('IntersectionObserver' in window)) return
+    const el = document.getElementById('square-sentinel')
+    if (!el) return
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0]
+      if (entry.isIntersecting && hasMore && !loadingMore) {
+        setPage((p) => p + 1)
       }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasMore, loadingMore])
+
+  const loadPage = async (pageNumber: number, reset: boolean) => {
+    try {
+      if (reset) setLoading(true)
+      else setLoadingMore(true)
+      const params = new URLSearchParams()
+      params.set('sort', currentSort)
+      params.set('limit', String(limit))
+      params.set('offset', String((pageNumber - 1) * limit))
+      if (user?.openid) params.set('userId', user.openid)
+      const response = await fetch(`/api/square/share?${params.toString()}`)
+      const data = response.ok ? await response.json() : []
+      const batch: PublicTask[] = Array.isArray(data)
+        ? data.map((item: any) => ({
+            ...item,
+            createdAt: new Date(item.createdAt),
+            comments: Array.isArray(item.comments) ? item.comments.map((c: any) => ({
+              ...c,
+              createdAt: new Date(c.createdAt)
+            })) : []
+          }))
+        : []
+      setHasMore(batch.length >= limit)
+      setTasks(prev => reset ? batch : [...prev, ...batch])
     } catch (error) {
       console.error('Failed to fetch square data:', error)
-      setTasks([])
+      if (reset) setTasks([])
     } finally {
-      setLoading(false)
+      if (reset) setLoading(false)
+      else setLoadingMore(false)
     }
   }
-
-  const filteredTasks = tasks.filter(task => {
-    switch (filter) {
-      case 'popular':
-        return task.likesCount > 10
-      case 'recent':
-        return new Date().getTime() - task.createdAt.getTime() < 24 * 60 * 60 * 1000
-      default:
-        return true
-    }
-  })
 
   if (loading) {
     return (
@@ -457,7 +482,7 @@ export default function SquarePage() {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 py-6">
-        {filteredTasks.length === 0 ? (
+        {tasks.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-2">🤔</div>
             <p className="text-gray-500">
@@ -471,20 +496,26 @@ export default function SquarePage() {
           <div
             className={cn(
               'grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-              filteredTasks.length === 1 && 'md:grid-cols-1 lg:grid-cols-1'
+              tasks.length === 1 && 'md:grid-cols-1 lg:grid-cols-1'
             )}
           >
-            {filteredTasks.map((task) => (
+            {tasks.map((task: PublicTask) => (
               <div
                 key={task.id}
+                id={`pt-${task.id}`}
                 className={cn(
-                  filteredTasks.length === 1 ? 'md:max-w-2xl md:mx-auto' : ''
+                  tasks.length === 1 ? 'md:max-w-2xl md:mx-auto' : ''
                 )}
               >
                 <TaskCard task={task} />
               </div>
             ))}
           </div>
+        )}
+        {/* 无限滚动哨兵与加载更多指示 */}
+        <div id="square-sentinel" className="h-10" />
+        {loadingMore && (
+          <div className="text-center text-xs text-gray-400 py-4">{t('loading')}</div>
         )}
       </div>
 

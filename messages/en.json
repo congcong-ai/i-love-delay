@@ -82,10 +82,19 @@
     "activityLikes": "Likes",
     "activityFavorites": "Favorites",
     "activityComments": "Comments",
+    "activityShares": "Shares",
     "activityEmpty": "No activity yet",
     "activityYouLiked": "You liked {name}'s \"{task}\"",
     "activityYouFavorited": "You favorited {name}'s \"{task}\"",
-    "activityYouCommented": "You commented on {name}'s \"{task}\""
+    "activityYouCommented": "You commented on {name}'s \"{task}\"",
+    "activityYouShared": "You shared \"{task}\""
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{minutes} minutes ago",
+    "hoursAgo": "{hours} hours ago",
+    "yesterday": "Yesterday",
+    "daysAgo": "{days} days ago"
   },
   "auth": {
     "login": "Login",

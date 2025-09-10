@@ -82,10 +82,19 @@
     "activityLikes": "点赞",
     "activityFavorites": "收藏",
     "activityComments": "评论",
+    "activityShares": "发布",
     "activityEmpty": "暂无动态",
     "activityYouLiked": "你赞了 {name} 的「{task}」",
     "activityYouFavorited": "你收藏了 {name} 的「{task}」",
-    "activityYouCommented": "你评论了 {name} 的「{task}」"
+    "activityYouCommented": "你评论了 {name} 的「{task}」",
+    "activityYouShared": "你发布了「{task}」"
+  },
+  "time": {
+    "justNow": "刚刚",
+    "minutesAgo": "{minutes} 分钟前",
+    "hoursAgo": "{hours} 小时前",
+    "yesterday": "昨天",
+    "daysAgo": "{days} 天前"
   },
   "auth": {
     "login": "登录",

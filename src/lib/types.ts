@@ -54,6 +54,7 @@ export interface PublicTask {
   excuse: string
   delayCount: number
   likesCount: number
+  favoritesCount?: number
   isLiked: boolean
   isFavorited: boolean
   createdAt: Date

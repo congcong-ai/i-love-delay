@@ -6,11 +6,26 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const limit = Math.min(Number(searchParams.get('limit') ?? '50'), 200)
     const userId = (searchParams.get('userId') ?? '').trim()
+    const offset = Math.max(Number(searchParams.get('offset') ?? '0'), 0)
+    const sort = (searchParams.get('sort') ?? 'recent').toLowerCase()
+
+    const orderClause = sort === 'trending'
+      ? 'ORDER BY trending_score DESC, created_at DESC'
+      : 'ORDER BY created_at DESC'
 
     const { rows } = await query<any>(
       `SELECT id, task_id, user_id, user_name, user_avatar, task_name, excuse,
               COALESCE(delay_count, 0) AS delay_count,
               COALESCE(likes_count, 0) AS likes_count,
+              (
+                SELECT COUNT(*) FROM user_interactions ui
+                 WHERE ui.public_task_id = public_tasks.id AND ui.interaction_type = 'favorite'
+              ) AS favorites_count,
+              (
+                SELECT COUNT(*)
+                FROM public_task_comments c
+                WHERE c.public_task_id = public_tasks.id
+              ) AS comments_count,
               -- per-user flags derived from user_interactions
               CASE WHEN $2 <> '' AND EXISTS (
                 SELECT 1 FROM user_interactions ui
@@ -23,15 +38,18 @@ export async function GET(request: NextRequest) {
                    AND ui.user_id = $2 AND ui.interaction_type = 'favorite'
               ) THEN true ELSE false END AS is_favorited,
               created_at,
+              -- weighted trending score
               (
-                SELECT COUNT(*)
-                FROM public_task_comments c
-                WHERE c.public_task_id = public_tasks.id
-              ) AS comments_count
+                (COALESCE(likes_count, 0) * 3.0)
+                + ((SELECT COUNT(*) FROM user_interactions ui WHERE ui.public_task_id = public_tasks.id AND ui.interaction_type = 'favorite') * 2.0)
+                + ((SELECT COUNT(*) FROM public_task_comments c WHERE c.public_task_id = public_tasks.id) * 4.0)
+                + (COALESCE(delay_count, 0) * 0.5)
+                - (EXTRACT(EPOCH FROM (NOW() - created_at)) / 3600.0) * 0.1
+              ) AS trending_score
        FROM public_tasks
-       ORDER BY created_at DESC
-       LIMIT $1`,
-      [limit, userId]
+       ${orderClause}
+       LIMIT $1 OFFSET $3`,
+      [limit, userId, offset]
     )
 
     const result = (rows || []).map((row: any) => ({
@@ -44,6 +62,7 @@ export async function GET(request: NextRequest) {
       excuse: row.excuse,
       delayCount: Number(row.delay_count) || 0,
       likesCount: Number(row.likes_count) || 0,
+      favoritesCount: Number(row.favorites_count) || 0,
       isLiked: Boolean(row.is_liked),
       isFavorited: Boolean(row.is_favorited),
       createdAt: row.created_at,
