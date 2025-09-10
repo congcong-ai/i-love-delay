@@ -12,10 +12,13 @@ interface TaskFormProps {
 }
 
 export function TaskForm({ onTaskAdded }: TaskFormProps) {
+
   const [taskName, setTaskName] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const { addTask, getTaskHistory } = useTaskStore()
+  const t = useTranslations('tasks')
+  const tNet = useTranslations('network')
 
   useEffect(() => {
     const loadSuggestions = async () => {
@@ -33,7 +36,10 @@ export function TaskForm({ onTaskAdded }: TaskFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!taskName.trim()) return
-
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
     await addTask(taskName)
     setTaskName('')
     setShowSuggestions(false)
@@ -51,8 +57,6 @@ export function TaskForm({ onTaskAdded }: TaskFormProps) {
     setShowSuggestions(value.length > 0 && suggestions.length > 0)
   }
 
-  const t = useTranslations('tasks')
-  
   return (
     <div className="relative">
       <form onSubmit={handleSubmit} className="flex gap-2">

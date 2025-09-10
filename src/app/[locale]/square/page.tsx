@@ -1,71 +1,193 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { PublicTask } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { config } from '@/lib/config'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/lib/stores/auth-store'
+import { useTranslations as useT } from 'next-intl'
 
-// 开发环境模拟数据
-const mockPublicTasks: PublicTask[] = [
-  {
-    id: '1',
-    taskId: 'task1',
-    userId: 'user1',
-    userName: '拖延大师',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-    taskName: '学习React',
-    excuse: '今天状态不好，明天一定学！状态不好是因为昨晚熬夜追剧，现在脑子都是浆糊。',
-    delayCount: 5,
-    likesCount: 12,
-    isLiked: false,
-    isFavorited: false,
-    createdAt: new Date('2024-01-15'),
-    comments: [
-      {
-        id: 'c1',
-        userId: 'user2',
-        userName: '借口专家',
-        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-        content: '这个借口我给9分，还有1分怕你骄傲',
-        createdAt: new Date('2024-01-16')
-      }
-    ]
-  },
-  {
-    id: '2',
-    taskId: 'task2',
-    userId: 'user2',
-    userName: '借口专家',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-    taskName: '健身计划',
-    excuse: '天气太冷了，等暖和点再去。而且今天健身房肯定很多人，去了也抢不到器械。',
-    delayCount: 3,
-    likesCount: 8,
-    isLiked: true,
-    isFavorited: false,
-    createdAt: new Date('2024-01-14'),
-    comments: []
-  }
-]
+// 已移除开发模式下的本地 mock 数据，所有数据均需在线获取
 
 function TaskCard({ task }: { task: PublicTask }) {
   const t = useTranslations('square')
+  const tNet = useTranslations('network')
+  const tAuth = useT('auth')
   const [isLiked, setIsLiked] = useState(task.isLiked)
   const [isFavorited, setIsFavorited] = useState(task.isFavorited)
   const [likesCount, setLikesCount] = useState(task.likesCount)
   const [showComments, setShowComments] = useState(false)
+  const [comments, setComments] = useState(task.comments || [])
+  const [commentsCount, setCommentsCount] = useState<number>(
+    typeof task.commentsCount === 'number' ? task.commentsCount : (task.comments?.length || 0)
+  )
+  const [loadingComments, setLoadingComments] = useState(false)
+  const [commentText, setCommentText] = useState('')
+  const [posting, setPosting] = useState(false)
+  const { user, isLoggedIn, login } = useAuthStore()
+  const commentInputRef = useRef<HTMLInputElement>(null)
 
-  const handleLike = () => {
-    setIsLiked(!isLiked)
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1)
+  const handleLike = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
+    if (!isLoggedIn) {
+      const ok = window.confirm(t('interactLogin'))
+      if (!ok) return
+      try {
+        await login()
+        await waitLogin()
+      } catch (e) {
+        alert(t('loginFailed'))
+        return
+      }
+    }
+    try {
+      const state = useAuthStore.getState()
+      const resp = await fetch('/api/square/interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicTaskId: task.id, type: 'like', userId: state.user?.openid })
+      })
+      const result = await resp.json()
+      if (resp.ok && result?.success) {
+        setIsLiked(Boolean(result.data?.active))
+        if (typeof result.data?.likesCount === 'number') {
+          setLikesCount(result.data.likesCount)
+        }
+      } else {
+        alert(result?.error || result?.message || t('interactionFailed'))
+      }
+    } catch (e) {
+      console.error('like failed', e)
+      alert(t('interactionFailed'))
+    }
   }
 
-  const handleFavorite = () => {
-    setIsFavorited(!isFavorited)
+  const handleFavorite = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
+    if (!isLoggedIn) {
+      const ok = window.confirm(t('interactLogin'))
+      if (!ok) return
+      try {
+        await login()
+        await waitLogin()
+      } catch (e) {
+        alert(t('loginFailed'))
+        return
+      }
+    }
+    try {
+      const state = useAuthStore.getState()
+      const resp = await fetch('/api/square/interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicTaskId: task.id, type: 'favorite', userId: state.user?.openid })
+      })
+      const result = await resp.json()
+      if (resp.ok && result?.success) {
+        setIsFavorited(Boolean(result.data?.active))
+      } else {
+        alert(result?.error || result?.message || t('interactionFailed'))
+      }
+    } catch (e) {
+      console.error('favorite failed', e)
+      alert(t('interactionFailed'))
+    }
+  }
+
+  const fetchComments = async () => {
+    try {
+      setLoadingComments(true)
+      const resp = await fetch(`/api/square/comments?publicTaskId=${task.id}`)
+      if (resp.ok) {
+        const data = await resp.json()
+        const normalized = Array.isArray(data)
+          ? data.map((c: any) => ({ ...c, createdAt: new Date(c.createdAt) }))
+          : []
+        setComments(normalized)
+        setCommentsCount(normalized.length)
+      }
+    } catch (e) {
+      console.error('加载评论失败:', e)
+    } finally {
+      setLoadingComments(false)
+    }
+  }
+
+  const waitLogin = () => new Promise<void>((resolve, reject) => {
+    const maxAttempts = 20
+    let attempts = 0
+    const check = () => {
+      attempts++
+      if (useAuthStore.getState().isLoggedIn) return resolve()
+      if (attempts >= maxAttempts) return reject(new Error(tAuth('loginTimeout')))
+      setTimeout(check, 500)
+    }
+    check()
+  })
+
+  const handleSubmitComment = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert(tNet('offlineDesc'))
+      return
+    }
+    if (!commentText.trim()) {
+      alert(t('enterComment'))
+      return
+    }
+    if (!isLoggedIn) {
+      const confirmLogin = window.confirm(t('loginToComment'))
+      if (!confirmLogin) return
+      try {
+        await login()
+        await waitLogin()
+      } catch (e) {
+        console.error('login failed:', e)
+        alert(t('loginFailed'))
+        return
+      }
+    }
+
+    setPosting(true)
+    try {
+      const state = useAuthStore.getState()
+      const resp = await fetch('/api/square/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          publicTaskId: task.id,
+          content: commentText.trim(),
+          userId: state.user?.openid,
+          userName: state.user?.nickname,
+          userAvatar: state.user?.avatar,
+        })
+      })
+      const result = await resp.json()
+      if (resp.ok && result?.success) {
+        const mapped = { ...result.data, createdAt: new Date(result.data.createdAt) }
+        setComments(prev => [...prev, mapped])
+        setCommentsCount(c => c + 1)
+        setCommentText('')
+      } else {
+        console.error('post comment failed:', result)
+        alert(result?.error || result?.message || t('postFailed'))
+      }
+    } catch (e) {
+      console.error('post comment error:', e)
+      alert(t('postError'))
+    } finally {
+      setPosting(false)
+    }
   }
 
   const formatTime = (date: Date) => {
@@ -87,7 +209,7 @@ function TaskCard({ task }: { task: PublicTask }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 md:p-5 mb-4 hover:shadow-md transition-shadow">
       {/* 用户信息 */}
       <div className="flex items-center mb-3">
         <Image
@@ -95,7 +217,8 @@ function TaskCard({ task }: { task: PublicTask }) {
           alt={task.userName}
           width={40}
           height={40}
-          className="rounded-full mr-3"
+          className="rounded-full mr-3 ring-1 ring-gray-100"
+          unoptimized
         />
         <div>
           <div className="font-medium text-sm">{task.userName}</div>
@@ -108,7 +231,7 @@ function TaskCard({ task }: { task: PublicTask }) {
       {/* 任务内容 */}
       <div className="mb-3">
         <h3 className="font-medium text-gray-900 mb-2">{task.taskName}</h3>
-        <p className="text-sm text-gray-600 leading-relaxed">{task.excuse}</p>
+        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{task.excuse}</p>
       </div>
 
       {/* 操作按钮 */}
@@ -126,11 +249,20 @@ function TaskCard({ task }: { task: PublicTask }) {
           </button>
 
           <button
-            onClick={() => setShowComments(!showComments)}
+            onClick={async () => {
+              const next = !showComments
+              setShowComments(next)
+              if (next && comments.length === 0) {
+                await fetchComments()
+              }
+              if (next) {
+                setTimeout(() => commentInputRef.current?.focus(), 0)
+              }
+            }}
             className="flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700"
           >
             <MessageCircle className="w-4 h-4" />
-            <span>{task.comments.length}</span>
+            <span>{commentsCount}</span>
           </button>
 
           <button
@@ -150,28 +282,54 @@ function TaskCard({ task }: { task: PublicTask }) {
       </div>
 
       {/* 评论区 */}
-      {showComments && task.comments.length > 0 && (
+      {showComments && (
         <div className="mt-4 pt-3 border-t space-y-3">
-          {task.comments.map((comment) => (
-            <div key={comment.id} className="flex space-x-3">
-              <Image
-                src={comment.userAvatar}
-                alt={comment.userName}
-                width={32}
-                height={32}
-                className="rounded-full flex-shrink-0"
-              />
-              <div className="flex-1">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">{comment.userName}</span>
-                  <span className="text-xs text-gray-500">
-                    {formatTime(comment.createdAt)}
-                  </span>
+          {loadingComments ? (
+            <div className="text-xs text-gray-400">{t('loading')}</div>
+          ) : comments.length === 0 ? (
+            <div className="text-xs text-gray-400">{t('noComments')}</div>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment.id} className="flex space-x-3">
+                <Image
+                  src={comment.userAvatar}
+                  alt={comment.userName}
+                  width={32}
+                  height={32}
+                  className="rounded-full flex-shrink-0 ring-1 ring-gray-100"
+                  unoptimized
+                />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium">{comment.userName}</span>
+                    <span className="text-xs text-gray-500">
+                      {formatTime(comment.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{comment.content}</p>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{comment.content}</p>
               </div>
-            </div>
-          ))}
+            ))
+          )}
+
+          <div className="flex items-center gap-2">
+            <Input
+              ref={commentInputRef}
+              placeholder={t('commentPlaceholder')}
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              disabled={posting}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && commentText.trim() && !posting) {
+                  e.preventDefault()
+                  handleSubmitComment()
+                }
+              }}
+            />
+            <Button size="sm" onClick={handleSubmitComment} disabled={posting || !commentText.trim()}>
+              {posting ? t('sending') : t('send')}
+            </Button>
+          </div>
         </div>
       )}
     </div>
@@ -183,6 +341,7 @@ export default function SquarePage() {
   const [tasks, setTasks] = useState<PublicTask[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'popular' | 'recent'>('all')
+  const { user } = useAuthStore()
 
   useEffect(() => {
     fetchPublicTasks()
@@ -190,7 +349,8 @@ export default function SquarePage() {
 
   const fetchPublicTasks = async () => {
     try {
-      const response = await fetch('/api/square/share')
+      const userIdParam = user?.openid ? `?userId=${encodeURIComponent(user.openid)}` : ''
+      const response = await fetch(`/api/square/share${userIdParam}`)
       if (response.ok) {
         const data = await response.json()
         const normalized: PublicTask[] = Array.isArray(data)
@@ -205,17 +365,11 @@ export default function SquarePage() {
           : []
         setTasks(normalized)
       } else {
-        // Use mock data in development
-        if (config.isDevelopment) {
-          setTasks(mockPublicTasks)
-        }
+        setTasks([])
       }
     } catch (error) {
       console.error('Failed to fetch square data:', error)
-      // Use mock data in development
-      if (config.isDevelopment) {
-        setTasks(mockPublicTasks)
-      }
+      setTasks([])
     } finally {
       setLoading(false)
     }
@@ -236,26 +390,26 @@ export default function SquarePage() {
     return (
       <div className="min-h-screen bg-gray-50 pb-20">
         <div className="bg-white border-b">
-          <div className="px-4 py-3">
-            <h1 className="text-lg font-semibold">{t('procrastinationSquare')}</h1>
-            <p className="text-sm text-gray-600 mt-1">
+          <div className="max-w-5xl mx-auto px-4 py-6 text-center">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('procrastinationSquare')}</h1>
+            <p className="text-sm text-gray-600 mt-2">
               {t('seeExcuses')}
             </p>
           </div>
         </div>
-        <div className="px-4 py-8">
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm border p-4 animate-pulse">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
-                  <div>
-                    <div className="h-4 bg-gray-200 rounded w-20 mb-1"></div>
-                    <div className="h-3 bg-gray-200 rounded w-32"></div>
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 animate-pulse">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full mr-3" />
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                    <div className="h-3 bg-gray-200 rounded w-20" />
                   </div>
                 </div>
-                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-2/3" />
               </div>
             ))}
           </div>
@@ -269,22 +423,17 @@ export default function SquarePage() {
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <div className="bg-white border-b">
-        <div className="px-4 py-3">
-          <h1 className="text-lg font-semibold">{t('procrastinationSquare')}</h1>
-          <p className="text-sm text-gray-600 mt-1">
+        <div className="max-w-4xl mx-auto px-4 py-6 text-center">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('procrastinationSquare')}</h1>
+          <p className="text-sm text-gray-600 mt-2">
             {t('seeExcuses')}
-            {config.isDevelopment && (
-              <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
-                {t('developmentMode')}
-              </span>
-            )}
           </p>
         </div>
       </div>
 
       {/* Filter */}
-      <div className="bg-white border-b px-4 py-2">
-        <div className="flex space-x-1">
+      <div className="bg-white border-b">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex justify-center gap-2">
           {[
             { key: 'all', label: t('all') },
             { key: 'popular', label: t('popular') },
@@ -294,10 +443,10 @@ export default function SquarePage() {
               key={key}
               onClick={() => setFilter(key as "all" | "popular" | "recent")}
               className={cn(
-                'px-3 py-1.5 text-sm rounded-full transition-colors',
+                'px-3 py-1.5 text-sm rounded-full transition-colors border',
                 filter === key
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-green-50 text-green-700 border-green-200'
+                  : 'text-gray-600 hover:bg-gray-50 border-gray-200'
               )}
             >
               {label}
@@ -307,23 +456,33 @@ export default function SquarePage() {
       </div>
 
       {/* Content */}
-      <div className="px-4 py-4">
+      <div className="max-w-5xl mx-auto px-4 py-6">
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-2">🤔</div>
             <p className="text-gray-500">
-              {config.isDevelopment ? t('developmentMode') : t('noSharesYet')}
+              {t('noSharesYet')}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              {config.isDevelopment
-                ? t('loadedMockData')
-                : t('shareYourDelay')}
+              {t('shareYourDelay')}
             </p>
           </div>
         ) : (
-          <div>
+          <div
+            className={cn(
+              'grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+              filteredTasks.length === 1 && 'md:grid-cols-1 lg:grid-cols-1'
+            )}
+          >
             {filteredTasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <div
+                key={task.id}
+                className={cn(
+                  filteredTasks.length === 1 ? 'md:max-w-2xl md:mx-auto' : ''
+                )}
+              >
+                <TaskCard task={task} />
+              </div>
             ))}
           </div>
         )}

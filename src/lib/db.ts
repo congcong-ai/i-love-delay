@@ -249,6 +249,35 @@ export const initDatabase = async () => {
     await db.open()
     console.log('Database initialized successfully')
   } catch (error) {
+    // 处理 Dexie 升级时主键变更的限制：当从 v1(自增 id) 升级到 v2(字符串 id) 时，
+    // Dexie 不支持直接变更主键，可能抛出 UpgradeError: "Not yet support for changing primary key"。
+    // 在开发阶段，允许自动重置本地库（删除并重建）以应用新 schema。
+    const isBrowser = typeof window !== 'undefined'
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const errName = (error as any)?.name
+    const pkChangeError = /Not yet support for changing primary key/i.test(errMsg)
+
+    if (isBrowser && (errName === 'UpgradeError' || pkChangeError)) {
+      console.warn('[Dexie] Detected primary key change upgrade error. Resetting local DB...')
+      try {
+        db.close()
+        await Dexie.delete('ILoveDelayDB')
+        await db.open()
+        console.info('[Dexie] Local DB has been reset and reopened with v2 schema.')
+        return
+      } catch (e) {
+        console.error('[Dexie] Failed to reset local DB:', e)
+      }
+    }
+
     console.error('Failed to initialize database:', error)
   }
+}
+
+// 手动强制重置本地 DB（用于调试或解决 schema 不兼容问题）
+export const hardResetLocalDB = async () => {
+  if (typeof window === 'undefined') return
+  db.close()
+  await Dexie.delete('ILoveDelayDB')
+  await db.open()
 }

@@ -12,24 +12,12 @@ import { Excuse } from '@/lib/types'
 
 // 详细的日期格式化函数，显示时间信息
 const formatDateTime = (date: Date) => {
-    // 确保在客户端和服务器端使用相同的格式
-    if (typeof window === 'undefined') {
-        // 服务器端使用 ISO 格式
-        return new Date(date).toLocaleDateString('zh-CN', {
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    }
-
-    // 客户端使用本地化格式
     const d = new Date(date)
     const month = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
     const hour = String(d.getHours()).padStart(2, '0')
     const minute = String(d.getMinutes()).padStart(2, '0')
-    return `${month}月${day}日 ${hour}:${minute}`
+    return `${month}/${day} ${hour}:${minute}`
 }
 
 interface ExcuseRecordsDialogProps {
@@ -117,7 +105,7 @@ export function ExcuseRecordsDialog({ open, onOpenChange }: ExcuseRecordsDialogP
                                                     {excuse.taskName}
                                                 </Badge>
                                                 <span className="text-xs text-gray-500">
-                                                    {excuse.wordCount} 字
+                                                    {excuse.wordCount} {t('wordsUnit')}
                                                 </span>
                                             </div>
                                             <p className="text-gray-800 text-sm leading-relaxed mb-2">

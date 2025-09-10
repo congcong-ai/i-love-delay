@@ -39,35 +39,38 @@ nano .env.local
 ### 2. 配置内容
 
 ```bash
-# Supabase 配置
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-
 # 应用配置
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=i love delay
-
-# 微信配置
-NEXT_PUBLIC_WECHAT_APP_ID=your-wechat-app-id
-NEXT_PUBLIC_UNIAPP_MODE=false
-
-# 环境标识
+NEXT_PUBLIC_DEFAULT_LOCALE=zh
 NEXT_PUBLIC_ENV=development
+
+# 数据库（PostgreSQL）
+# 本地开发示例（Windows 本机安装 PostgreSQL）
+DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@localhost:5432/i_love_delay_dev
+# 若数据库要求 SSL，可启用：
+# PGSSLMODE=require
+
+# （可选）微信/统计/错误监控等
+# NEXT_PUBLIC_WECHAT_APP_ID=
+# WECHAT_APP_SECRET=
+# NEXT_PUBLIC_GA_ID=
+# NEXT_PUBLIC_VERCEL_ANALYTICS_ID=
+# NEXT_PUBLIC_SENTRY_DSN=
+# SENTRY_AUTH_TOKEN=
 ```
 
 ### 3. 生产环境配置
 
-在部署平台（Vercel/Netlify）配置：
+在自有服务器或平台中配置环境变量（推荐服务器本地以文件加载，如 `.env.production` 由 Supervisor 加载）。核心为：
 
-**Vercel:**
-1. 项目设置 → Environment Variables
-2. 添加相同的变量名和值
-3. 选择对应的环境（Production/Preview/Development）
-
-**Netlify:**
-1. Site settings → Environment variables
-2. 添加环境变量
-3. 设置对应的环境
+```bash
+NEXT_PUBLIC_ENV=production
+NEXT_PUBLIC_APP_URL=https://your-domain.example.com
+DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@127.0.0.1:5432/i_love_delay
+# 如需 SSL：
+# PGSSLMODE=require
+```
 
 ## 🚨 安全提醒
 
@@ -108,9 +111,10 @@ npm start
 
 | 变量名 | 说明 | 示例 |
 |--------|------|------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase项目URL | `https://xxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase匿名密钥 | `eyJhbGciOiJIUzI1NiIs...` |
 | `NEXT_PUBLIC_APP_URL` | 应用URL | `http://localhost:3000` |
-| `NEXT_PUBLIC_WECHAT_APP_ID` | 微信AppID | `wx1234567890abcdef` |
-| `NEXT_PUBLIC_UNIAPP_MODE` | 是否uniapp模式 | `true/false` |
-| `NEXT_PUBLIC_ENV` | 环境标识 | `development/production` |
+| `NEXT_PUBLIC_APP_NAME` | 应用名称 | `i love delay` |
+| `NEXT_PUBLIC_DEFAULT_LOCALE` | 默认语言 | `zh` |
+| `NEXT_PUBLIC_ENV` | 环境标识 | `development`/`production` |
+| `DATABASE_URL` | PostgreSQL 连接串（仅服务端使用） | `postgres://user:pass@host:5432/i_love_delay_dev` |
+| `PGSSLMODE` | 数据库 SSL 模式（可选） | `require` |
+| `NEXT_PUBLIC_WECHAT_APP_ID` | 微信AppID（可选） | `wx1234567890abcdef` |

@@ -5,14 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { SyncStatus } from '@/components/sync/sync-status'
 import { LoginButton } from '@/components/auth/login-button'
 import { LanguageSelector } from '@/components/settings/language-selector'
 import { BottomNav } from '@/components/layout/bottom-nav'
-import { User, Settings, Cloud } from 'lucide-react'
+import { User, Settings, MessageCircle } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { useUIStore } from '@/lib/stores/ui-store'
 import { useTranslations } from 'next-intl'
+import { SquareActivity } from '@/components/profile/square-activity'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('account')
@@ -20,30 +20,39 @@ export default function ProfilePage() {
   const { setCurrentTab } = useUIStore()
   const t = useTranslations('profile')
   const tCommon = useTranslations('common')
+  const tAuth = useTranslations('auth')
 
+  // Profile 页面不参与底部 Tab 高亮（避免 TabType 越界）
   useEffect(() => {
-    setCurrentTab('profile')
-  }, [setCurrentTab])
+    // no-op
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-sm text-gray-600 mt-1">{t('subtitle')}</p>
+      <div className="bg-gradient-to-r from-emerald-50 to-cyan-50 border-b">
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center ring-1 ring-emerald-100">
+              <User className="h-7 w-7 text-emerald-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+              <p className="text-sm text-gray-600 mt-1">{t('subtitle')}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-5xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="account" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               {t('account')}
             </TabsTrigger>
-            <TabsTrigger value="sync" className="flex items-center gap-2">
-              <Cloud className="h-4 w-4" />
-              {t('sync')}
+            <TabsTrigger value="activity" className="flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              {t('activity')}
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -69,7 +78,7 @@ export default function ProfilePage() {
                       <div>
                         <p className="font-medium">{user.nickname || t('wechatUser')}</p>
                         <p className="text-sm text-gray-600">{user.openid}</p>
-                        <Badge variant="secondary" className="mt-1">{t('auth.loggedIn')}</Badge>
+                        <Badge variant="secondary" className="mt-1">{tAuth('loggedIn')}</Badge>
                       </div>
                     </div>
                     <Button
@@ -93,45 +102,7 @@ export default function ProfilePage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="sync">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('dataSync')}</CardTitle>
-                <CardDescription>
-                  {t('syncDescription')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <SyncStatus />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">{t('autoSync')}</h4>
-                      <p className="text-sm text-gray-600">{t('autoSyncDescription')}</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      {t('syncNow')}
-                    </Button>
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h4 className="font-medium mb-2">{t('syncStats')}</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-600">{t('totalTasks')}</p>
-                        <p className="font-medium">--</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">{t('syncCount')}</p>
-                        <p className="font-medium">--</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          
 
           <TabsContent value="settings">
             <Card>
@@ -169,6 +140,10 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <SquareActivity />
           </TabsContent>
         </Tabs>
       </div>

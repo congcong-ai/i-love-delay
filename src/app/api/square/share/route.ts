@@ -5,18 +5,33 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const limit = Math.min(Number(searchParams.get('limit') ?? '50'), 200)
+    const userId = (searchParams.get('userId') ?? '').trim()
 
     const { rows } = await query<any>(
       `SELECT id, task_id, user_id, user_name, user_avatar, task_name, excuse,
               COALESCE(delay_count, 0) AS delay_count,
               COALESCE(likes_count, 0) AS likes_count,
-              COALESCE(is_liked, false) AS is_liked,
-              COALESCE(is_favorited, false) AS is_favorited,
-              created_at
+              -- per-user flags derived from user_interactions
+              CASE WHEN $2 <> '' AND EXISTS (
+                SELECT 1 FROM user_interactions ui
+                 WHERE ui.public_task_id = public_tasks.id
+                   AND ui.user_id = $2 AND ui.interaction_type = 'like'
+              ) THEN true ELSE false END AS is_liked,
+              CASE WHEN $2 <> '' AND EXISTS (
+                SELECT 1 FROM user_interactions ui
+                 WHERE ui.public_task_id = public_tasks.id
+                   AND ui.user_id = $2 AND ui.interaction_type = 'favorite'
+              ) THEN true ELSE false END AS is_favorited,
+              created_at,
+              (
+                SELECT COUNT(*)
+                FROM public_task_comments c
+                WHERE c.public_task_id = public_tasks.id
+              ) AS comments_count
        FROM public_tasks
        ORDER BY created_at DESC
        LIMIT $1`,
-      [limit]
+      [limit, userId]
     )
 
     const result = (rows || []).map((row: any) => ({
@@ -32,6 +47,7 @@ export async function GET(request: NextRequest) {
       isLiked: Boolean(row.is_liked),
       isFavorited: Boolean(row.is_favorited),
       createdAt: row.created_at,
+      commentsCount: Number(row.comments_count) || 0,
       comments: [] as any[],
     }))
 
