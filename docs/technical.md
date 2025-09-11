@@ -3,7 +3,7 @@
 ## 技术栈选择
 
 ### 前端技术栈
-- **Next.js 14** - React框架，支持App Router
+- **Next.js 15** - React框架，支持App Router
 - **TypeScript** - 类型安全
 - **Tailwind CSS** - 原子化CSS框架
 - **Shadcn/ui** - 现代UI组件库
@@ -31,28 +31,35 @@
 
 ```
 i-love-delay/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx         # 根布局
-│   ├── page.tsx           # 任务页（首页）
-│   ├── delayed/           # 拖延页
-│   │   └── page.tsx
-│   ├── rage/              # 暴走页
-│   │   └── page.tsx
-│   └── globals.css        # 全局样式
-├── components/            # 组件
-│   ├── ui/               # Shadcn/ui组件
-│   ├── tasks/            # 任务相关组件
-│   ├── delayed/          # 拖延页组件
-│   ├── rage/             # 暴走页组件
-│   └── layout/           # 布局组件
-├── lib/                  # 工具库
-│   ├── db/              # 数据库操作
-│   ├── stores/          # 状态管理
-│   ├── utils/           # 工具函数
-│   └── types/           # 类型定义
-├── hooks/               # 自定义hooks
-├── constants/           # 常量定义
-└── public/              # 静态资源
+├── src/
+│  ├── app/                        # Next.js App Router（本地化路由）
+│  │  ├── [locale]/
+│  │  │  ├── api/                  # API 路由（服务器端）
+│  │  │  ├── delayed/
+│  │  │  ├── rage/
+│  │  │  ├── square/
+│  │  │  └── profile/
+│  │  ├── favicon.ico
+│  │  └── globals.css
+│  ├── components/                 # 组件（ui/auth/delayed/layout/...）
+│  ├── i18n/
+│  │  └── request.ts               # next-intl 请求配置
+│  ├── lib/
+│  │  ├── server/                  # 服务器端工具（PostgreSQL 连接等）
+│  │  ├── stores/                  # Zustand stores
+│  │  └── i18n/                    # i18n 配置
+│  └── index.ts                    # 入口/类型等（如有）
+├── db/
+│  └── migrations/
+│     └── 0001_init.sql            # 服务器端数据库结构与示例数据
+├── deploy/
+│  ├── nginx.site.template.conf    # Nginx 站点模板
+│  └── supervisor.program.template.conf # Supervisor 程序模板
+├── messages/                      # 文案字典（zh/en）
+├── public/                        # 静态资源
+├── scripts/
+│  └── kill-port-3000.js           # 跨平台清理 3000 端口
+└── next.config.ts                 # Next 配置（output: 'standalone'）
 ```
 
 ## 数据架构
@@ -101,6 +108,14 @@ interface WechatUser {
   avatar: string
 }
 ```
+
+### 服务器端数据库（PostgreSQL + pg）
+
+- 迁移脚本：`db/migrations/0001_init.sql`
+- 连接池与查询：`src/lib/server/db.ts`（基于 `pg`，在服务器端使用）
+- API 路由：`src/app/[locale]/api/**`
+  - 例如：`/api/square/share`、`/api/square/comments`、`/api/square/interaction`、`/api/profile/square/activity`
+  - 前端通过相对路径请求这些 API；离线时可回退到 IndexedDB 本地数据
 
 ### 状态管理设计
 
@@ -285,6 +300,23 @@ const RagePage = dynamic(() => import('./rage/page'), {
 - 提供数据导出功能
 
 ## 部署方案
+
+### 自建部署（standalone + Supervisor + Nginx）
+
+- 构建：`next.config.ts` 设置 `output: 'standalone'`
+- 运行：Supervisor 以 `node .next/standalone/server.js` 启动
+- Nginx：将 `/_next/static` 直接 alias 到服务器本地目录，避免经 Node 回源导致 404
+
+```nginx
+location /_next/static/ {
+    alias /var/www/delay.bebackpacker.com/.next/static/;
+    expires 1y;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    access_log off;
+}
+```
+
+- 详细步骤见：`docs/deployment-self-hosted.md`
 
 ### 静态部署
 - **Vercel** - 推荐，与Next.js完美集成

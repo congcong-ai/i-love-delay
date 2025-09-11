@@ -57,7 +57,7 @@ i-love-delay/
 ├── src/
 │  ├── app/
 │  │  ├── [locale]/                 # 本地化路由（默认 zh）
-│  │  │  ├── api/                   # 接口路由
+│  │  │  ├── api/                   # 服务器端 API 路由（PostgreSQL）
 │  │  │  ├── delayed/               # 拖延页
 │  │  │  ├── rage/                  # 暴走页
 │  │  │  ├── square/                # 广场页（分享/发现）
@@ -66,48 +66,26 @@ i-love-delay/
 │  │  │  └── page.tsx               # 首页（任务列表）
 │  │  ├── favicon.ico
 │  │  └── globals.css
-│  ├── components/
-│  │  ├── auth/
-│  │  ├── delayed/
-│  │  ├── layout/
-│  │  ├── providers/
-│  │  ├── rage/
-│  │  ├── settings/
-│  │  ├── sync/
-│  │  ├── tasks/
-│  │  └── ui/                       # 基于 Radix/shadcn 风格的组件
+│  ├── components/                  # 基于 Radix/shadcn 风格的组件等
 │  ├── i18n/
 │  │  └── request.ts                # next-intl 请求配置
 │  ├── lib/
-│  │  ├── i18n/config.ts            # locales 配置（zh/en）
+│  │  ├── server/                   # 服务器端工具（pg 连接池等）
 │  │  ├── stores/                   # Zustand stores（任务/借口/UI/认证）
-│  │  ├── db.ts                     # Dexie 本地数据库
-│  │  ├── supabase.ts               # Supabase 客户端与占位符保护
-│  │  ├── sync-manager.ts           # 本地-云端双向同步管理器
-│  │  ├── task-scheduler.ts         # 过期任务调度器（30 分钟）
-│  │  ├── types.ts                  # 类型定义（Task/Excuse/PublicTask 等）
-│  │  ├── config.ts
-│  │  ├── uniapp-bridge.ts
-│  │  └── utils.ts
+│  │  └── i18n/                     # i18n 配置
 │  └── messages/
 │     ├── zh.json                   # 中文文案
 │     └── en.json                   # 英文文案
-├── docs/
-│  ├── environment-setup.md
-│  ├── requirements.md
-│  ├── supabase-setup.md
-│  ├── tasks.md
-│  ├── technical.md
-│  ├── uniapp-x-integration.md
-│  ├── vercel-deployment.md
-│  └── 初始提示词.md
-├── scripts/
-│  └── kill-port-3000.js            # 跨平台清理占用 3000 端口
-├── supabase/
+├── db/
 │  └── migrations/
-│     └── 20250830_create_square_tables.sql
-├── messages/                        # 文案字典（zh.json / en.json，供 next-intl 加载）
-├── next.config.ts
+│     └── 0001_init.sql             # 数据库结构与示例
+├── deploy/
+│  ├── nginx.site.template.conf     # Nginx 模板（含 /_next/static alias）
+│  └── supervisor.program.template.conf # Supervisor 模板（standalone）
+├── scripts/
+│  └── kill-port-3000.js            # 跨平台清理 3000 端口
+├── messages/                        # 文案字典（供 next-intl 加载）
+├── next.config.ts                   # output: 'standalone'
 ├── tsconfig.json
 ├── eslint.config.mjs
 ├── package.json
@@ -136,6 +114,50 @@ npm run kill-port
 
 说明：`scripts/kill-port-3000.js` 会在 `npm run dev` 前自动执行，清理占用 3000 端口的进程，避免端口冲突。
 
+## 🛳 部署
+
+### 自建部署（standalone + Supervisor + Nginx）
+
+推荐使用内置的 `deploy.sh` 脚本在本地完成构建并仅上传产物：
+
+1) 在项目根目录配置 `.env.local`：
+
+```dotenv
+SERVER=your.server.ip.or.domain
+SSH_USER=deployer
+REMOTE_DIR=/var/www/delay.bebackpacker.com
+SUPERVISOR=delay.bebackpacker.com
+DEPLOY_PORT=3002
+```
+
+2) 服务器上准备：
+
+- 在 `REMOTE_DIR` 放置 `.env`（运行期环境变量，包含 `DATABASE_URL`）。
+- 为 `deployer` 配置免密 `sudo supervisorctl`（见 `docs/deployment-self-hosted.md`）。
+- 按模板创建 Supervisor 配置，使用 `node .next/standalone/server.js` 启动，并将日志写入 `${REMOTE_DIR}/logs/`。
+
+3) 本地执行：
+
+```bash
+./deploy.sh
+# 选择 2) server - 远程部署（本地构建 standalone，上传产物，Supervisor 重启）
+```
+
+4) Nginx：
+
+为避免静态资源 404，推荐将 `/_next/static` 直接 alias 到服务器目录：
+
+```nginx
+location /_next/static/ {
+    alias /var/www/delay.bebackpacker.com/.next/static/;
+    expires 1y;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    access_log off;
+}
+```
+
+完整步骤详见：`docs/deployment-self-hosted.md`
+
 ## 🔑 环境变量
 
 参见示例文件：`.env.example`
@@ -154,27 +176,19 @@ npm run kill-port
 
 ## 🌐 国际化（i18n）
 
-- 基于 `next-intl`：`src/lib/i18n/config.ts`
+- 基于 `next-intl`：`src/lib/i18n/`（配置）
   - `locales: ['zh', 'en']`，`defaultLocale: 'zh'`，`localePrefix: 'always'`
 - 请求期解析：`src/i18n/request.ts`，确保非法或缺失 locale 时回退到默认语言
 - 文案字典：`/messages/zh.json`、`/messages/en.json`
-- 本地化路由：`src/app/[locale]/...`（例如 `/zh`、`/en`）
 
 ## 💾 数据存储与同步
 
 - 本地存储（IndexedDB via Dexie）
-  - `src/lib/db.ts` 定义 `tasks`、`excuses`、`settings` 三张表及常用操作
-  - 统计与过期处理：`getTaskStats()`、`updateOverdueTasks()`
-  - 任务创建/拖延/完成与借口写入保持一致性更新
-- 定时调度
-  - `src/lib/task-scheduler.ts`：
-    - 启动即检查一次；随后每 30 分钟检查过期任务
-    - 页面可见性变化时主动检查
-- 广场（Square）
-  - API：`src/app/api/square/share/route.ts` 使用 PostgreSQL（`pg`）在服务端访问数据库。
-  - 前端：`src/app/[locale]/square/page.tsx` 使用相对路径 `/api/square/share` 获取/发布数据；开发下失败回退到 mock。
-- Supabase 相关模块
-  - `src/lib/supabase.ts`、`src/lib/sync-manager.ts` 属于可选/遗留模块，当前 Square 流程不依赖，可按需启用或移除。
+  - 统计与过期处理、离线优先
+- 服务器端（PostgreSQL + pg）
+  - 连接池：`src/lib/server/db.ts`
+  - API 路由：`src/app/[locale]/api/**`（如 `/api/square/share`、`/api/square/comments` 等）
+  - 前端通过相对路径调用 API；离线时回退到本地数据
 
 ### 🔒 权限与安全（Supabase）
 
@@ -201,6 +215,7 @@ npm run kill-port
 - [任务规划](./docs/tasks.md)
 - [环境搭建](./docs/environment-setup.md)
 - [Supabase 配置与权限](./docs/supabase-setup.md)
+- [自建部署指南](./docs/deployment-self-hosted.md)
 - [Vercel 部署指南](./docs/vercel-deployment.md)
 - [Uniapp X 集成](./docs/uniapp-x-integration.md)
 
