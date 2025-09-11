@@ -70,11 +70,11 @@ psql --version
 ```bash
 sudo -u postgres psql <<'SQL'
 -- 创建应用角色（请替换强密码）
-CREATE ROLE app_user WITH LOGIN PASSWORD 'REPLACE_STRONG_PASSWORD';
+CREATE ROLE i_love_delay  WITH LOGIN PASSWORD 'REPLACE_STRONG_PASSWORD';
 -- 生产库
-CREATE DATABASE i_love_delay OWNER app_user;
+CREATE DATABASE i_love_delay OWNER i_love_delay;
 -- 开发库
-CREATE DATABASE i_love_delay_dev OWNER app_user;
+CREATE DATABASE i_love_delay_dev OWNER i_love_delay;
 SQL
 ```
 
@@ -106,14 +106,14 @@ NEXT_PUBLIC_DEFAULT_LOCALE=zh
 # 生产环境（示例）
 NEXT_PUBLIC_ENV=production
 NEXT_PUBLIC_APP_URL=https://your-domain.example.com
-DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@127.0.0.1:5432/i_love_delay
+DATABASE_URL=postgres://i_love_delay :REPLACE_STRONG_PASSWORD@127.0.0.1:5432/i_love_delay
 # 如需 SSL：
 # PGSSLMODE=require
 
 # 开发环境（示例，本地直连线上 dev 库）
 NEXT_PUBLIC_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@<your-server-ip>:5432/i_love_delay_dev
+DATABASE_URL=postgres://i_love_delay :REPLACE_STRONG_PASSWORD@<your-server-ip>:5432/i_love_delay_dev
 ```
 
 > 注意：`DATABASE_URL` 仅在服务器端使用，前端无法读取；`NEXT_PUBLIC_` 前缀的变量才会暴露给浏览器。
