@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -41,7 +41,7 @@ export function SquareActivity() {
   const pageSize = 20
   const [hasMore, setHasMore] = useState(true)
 
-  const fetchData = async (opts?: { reset?: boolean }) => {
+  const fetchData = async () => {
     if (!user?.openid) return
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       alert(tNet('offlineDesc'))
@@ -78,7 +78,7 @@ export function SquareActivity() {
 
   useEffect(() => {
     setPage(1)
-    fetchData({ reset: true })
+    fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, user?.openid])
 

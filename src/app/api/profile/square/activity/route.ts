@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
           LIMIT $3`,
         [userId, type, limit]
       )
-      return (rows || []).map(r => ({
+      return (rows || []).map((r: any) => ({
         id: r.interaction_id,
         type,
         createdAt: r.interaction_created_at,
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
           LIMIT $2`,
         [userId, limit]
       )
-      return (rows || []).map(r => ({
+      return (rows || []).map((r: any) => ({
         id: r.id,
         type: 'comment' as const,
         content: r.content,
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
           LIMIT $2`,
         [userId, limit]
       )
-      return (rows || []).map(r => ({
+      return (rows || []).map((r: any) => ({
         id: r.id,
         type: 'share' as const,
         createdAt: r.created_at,

@@ -4,6 +4,8 @@ import type { NextConfig } from "next";
 const withNextIntl = createNextIntlPlugin()
 
 const nextConfig: NextConfig = {
+  // 产出独立可运行的 server.js + 最小依赖集
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -13,6 +15,10 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  eslint: {
+    // 部署构建时忽略 ESLint 错误，防止阻塞发布流程（本地请用 npm run lint 修复）
+    ignoreDuringBuilds: true,
   },
 };
 

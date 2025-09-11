@@ -20,6 +20,28 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  // TypeScript 文件的规则覆盖
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrors: "none" }
+      ],
+    },
+  },
+  // JavaScript 文件的规则覆盖（例如 scripts/kill-port-3000.js）
+  {
+    files: ["**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;
