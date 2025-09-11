@@ -141,21 +141,21 @@ npm start
 
 ## 五、使用 Supervisor 常驻运行
 
-新建 Supervisor 配置 `/etc/supervisor/conf.d/i-love-delay-web.conf`：
+新建 Supervisor 配置 `/etc/supervisor/conf.d/delay.bebackpacker.com.conf`：
 
 ```ini
 [program:i-love-delay-web]
-directory=/var/www/i-love-delay-web
-command=/bin/bash -lc 'set -a && source .env.production && exec npm start'
+directory=/var/www/delay.bebackpacker.com
+command=/bin/bash -lc 'set -a && source .env && exec npm start -p 3002'
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
-stderr_logfile=/var/log/i-love-delay-web.err.log
-stdout_logfile=/var/log/i-love-delay-web.out.log
+stderr_logfile=/var/log/delay.bebackpacker.com.err.log
+stdout_logfile=/var/log/delay.bebackpacker.com.out.log
 environment=NODE_ENV="production"
 # 根据需要调整用户
-user=www-data
+user=deployer
 ```
 
 应用配置并启动：
@@ -163,26 +163,26 @@ user=www-data
 ```bash
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl status i-love-delay-web
+sudo supervisorctl status delay.bebackpacker.com
 # 重启：
-sudo supervisorctl restart i-love-delay-web
+sudo supervisorctl restart delay.bebackpacker.com
 ```
 
-> 日志位置：`/var/log/i-love-delay-web.*.log`
+> 日志位置：`/var/log/delay.bebackpacker.com.*.log`
 
 ---
 
 ## 六、配置 Nginx 反向代理与 TLS
 
-1) 新建站点配置 `/etc/nginx/sites-available/i-love-delay-web.conf`
+1) 新建站点配置 `/etc/nginx/sites-available/delay.bebackpacker.com.conf`
 
 ```nginx
 server {
   listen 80;
-  server_name your-domain.example.com;
+  server_name delay.bebackpacker.com;
 
   location / {
-    proxy_pass http://127.0.0.1:3000;
+    proxy_pass http://127.0.0.1:3002;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
@@ -197,7 +197,7 @@ server {
 2) 启用站点并重载 Nginx
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/i-love-delay-web.conf /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/delay.bebackpacker.com.conf /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -205,7 +205,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d your-domain.example.com
+sudo certbot --nginx -d delay.bebackpacker.com
 ```
 
 ---
