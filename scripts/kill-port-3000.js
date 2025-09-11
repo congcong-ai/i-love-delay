@@ -4,12 +4,12 @@ const os = require('os');
 const isWindows = os.platform() === 'win32';
 
 function killPort3000() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         console.log('🔍 正在检查端口 3000...');
 
         if (isWindows) {
             // Windows: 查找占用3000端口的进程
-            exec('netstat -ano | findstr :3000', (error, stdout, stderr) => {
+            exec('netstat -ano | findstr :3000', (error, stdout) => {
                 if (error || !stdout.trim()) {
                     console.log('✅ 端口 3000 未被占用');
                     resolve();
@@ -54,7 +54,7 @@ function killPort3000() {
             });
         } else {
             // Unix/Linux/macOS: 使用 lsof 查找并终止进程
-            exec('lsof -ti:3000', (error, stdout, stderr) => {
+            exec('lsof -ti:3000', (error, stdout) => {
                 if (error || !stdout.trim()) {
                     console.log('✅ 端口 3000 未被占用');
                     resolve();

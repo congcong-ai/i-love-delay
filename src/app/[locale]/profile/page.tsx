@@ -10,14 +10,12 @@ import { LanguageSelector } from '@/components/settings/language-selector'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { User, Settings, MessageCircle } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth-store'
-import { useUIStore } from '@/lib/stores/ui-store'
 import { useTranslations } from 'next-intl'
 import { SquareActivity } from '@/components/profile/square-activity'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('account')
   const { user } = useAuthStore()
-  const { setCurrentTab } = useUIStore()
   const t = useTranslations('profile')
   const tCommon = useTranslations('common')
   const tAuth = useTranslations('auth')

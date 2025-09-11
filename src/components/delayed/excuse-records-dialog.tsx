@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { MessageSquare, Calendar, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MessageSquare, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -39,13 +39,7 @@ export function ExcuseRecordsDialog({ open, onOpenChange }: ExcuseRecordsDialogP
     const endIndex = startIndex + excusesPerPage
     const currentExcuses = excuses.slice(startIndex, endIndex)
 
-    useEffect(() => {
-        if (open) {
-            loadExcuses()
-        }
-    }, [open])
-
-    const loadExcuses = async () => {
+    const loadExcuses = useCallback(async () => {
         setLoading(true)
         try {
             const excusesWithTask = await getAllExcusesWithTask()
@@ -56,7 +50,13 @@ export function ExcuseRecordsDialog({ open, onOpenChange }: ExcuseRecordsDialogP
         } finally {
             setLoading(false)
         }
-    }
+    }, [getAllExcusesWithTask])
+
+    useEffect(() => {
+        if (open) {
+            loadExcuses()
+        }
+    }, [open, loadExcuses])
 
     const handlePrevPage = () => {
         setCurrentPage(prev => Math.max(1, prev - 1))

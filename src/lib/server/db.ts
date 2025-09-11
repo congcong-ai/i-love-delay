@@ -1,4 +1,4 @@
-import { Pool } from 'pg'
+import { Pool, type QueryResult, type QueryResultRow } from 'pg'
 
 // 全局复用连接池，避免热重载导致的多连接泄漏
 // 参考 Next.js 推荐做法，将实例挂载到 globalThis
@@ -30,7 +30,10 @@ export function getPgPool() {
   return _pool
 }
 
-export async function query<T = any>(text: string, params?: any[]) {
+export async function query<T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params?: any[]
+): Promise<QueryResult<T>> {
   const pool = getPgPool()
   const result = await pool.query<T>(text, params)
   return result

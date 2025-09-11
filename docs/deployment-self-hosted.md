@@ -80,10 +80,10 @@ SQL
 
 3) 为两个数据库启用扩展 `pgcrypto`（用于 `gen_random_uuid()`）并导入表结构
 
-将项目代码上传至服务器任意目录，例如 `/var/www/i-love-delay-web/`。
+将项目代码上传至服务器任意目录，例如 `/var/www/delay.bebackpacker.com/`。
 
 ```bash
-cd /var/www/i-love-delay-web/
+cd /var/www/delay.bebackpacker.com/
 # 对生产库执行迁移
 sudo -u postgres psql -d i_love_delay -f db/migrations/0001_init.sql
 # 对开发库执行迁移
@@ -139,14 +139,46 @@ npm start
 
 ---
 
+## 四点五、本地到服务器一键部署（可选）
+
+你也可以在本地 Mac 直接一键将代码同步到服务器并构建/重启：
+
+1) 在项目根目录编辑 `.env.local`（不会提交到仓库）：
+
+```dotenv
+# 远程服务器信息（示例）
+SERVER=49.235.209.193            # 或你的域名 delay.bebackpacker.com
+SSH_USER=deployer                # 服务器上的 SSH 用户
+# 可选：若未配置 ssh-agent / ~/.ssh/config，可指定私钥路径
+# SSH_KEY=~/.ssh/id_rsa
+# 可选：远程目录，默认 /var/www/delay.bebackpacker.com
+# REMOTE_DIR=/var/www/delay.bebackpacker.com
+```
+
+2) 一键远程部署（自动 rsync 同步、安装依赖、构建、停止+重启 Supervisor 或直接启动）：
+
+```bash
+./deploy.sh --server --port 3002 --supervisor delay.bebackpacker.com
+# 若首次连接有 known_hosts 提示，可先单独 ssh 一次以接受指纹：
+# ssh deployer@49.235.209.193
+```
+
+> 说明：
+> - 如果 `.env.local` 中存在 `SERVER` 或 `SSH_USER`，`deploy.sh --server` 会自动进入远程部署模式；
+> - 亦可显式使用参数覆盖：`--remote --server-host <HOST> --ssh-user <USER> [--ssh-key <KEY>] [--remote-dir <DIR>]`；
+> - 远程部署会在服务器上执行 `npm ci/install`、`npm run build`，并按需 `supervisorctl restart`；
+> - `.env*` 会被排除同步，确保远程服务器上的 `.env`/`.env.production` 不会被覆盖。
+
+---
+
 ## 五、使用 Supervisor 常驻运行
 
 新建 Supervisor 配置 `/etc/supervisor/conf.d/delay.bebackpacker.com.conf`：
 
 ```ini
-[program:i-love-delay-web]
+[program:delay.bebackpacker.com]
 directory=/var/www/delay.bebackpacker.com
-command=/bin/bash -lc 'set -a && source .env && exec npm start -p 3002'
+command=/bin/bash -lc 'set -a && source .env && exec npm start -- -p 3002'
 autostart=true
 autorestart=true
 stopasgroup=true

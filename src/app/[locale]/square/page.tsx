@@ -30,7 +30,7 @@ function TaskCard({ task }: { task: PublicTask }) {
   const [loadingComments, setLoadingComments] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [posting, setPosting] = useState(false)
-  const { user, isLoggedIn, login } = useAuthStore()
+  const { isLoggedIn, login } = useAuthStore()
   const commentInputRef = useRef<HTMLInputElement>(null)
 
   const handleLike = async () => {
