@@ -62,14 +62,20 @@ DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@localhost:5432/i_love_d
 
 ### 3. 生产环境配置
 
-在自有服务器或平台中配置环境变量（推荐服务器本地以文件加载，如 `.env.production` 由 Supervisor 加载）。核心为：
+服务器“运行期”使用 `.env`（由 Supervisor 在启动时 `source .env`），本地“构建期”使用 `.env.production`（`deploy.sh` 在本地构建时加载）。核心变量如下：
 
 ```bash
+# 服务器运行期（/var/www/your-app/.env）
 NEXT_PUBLIC_ENV=production
 NEXT_PUBLIC_APP_URL=https://your-domain.example.com
 DATABASE_URL=postgres://app_user:REPLACE_STRONG_PASSWORD@127.0.0.1:5432/i_love_delay
 # 如需 SSL：
 # PGSSLMODE=require
+
+# 本地构建期（项目根目录 .env.production，可选）
+# 若不提供，则使用当前 shell 环境变量
+NEXT_PUBLIC_ENV=production
+NEXT_PUBLIC_APP_URL=https://your-domain.example.com
 ```
 
 ## 🚨 安全提醒

@@ -106,14 +106,14 @@ NEXT_PUBLIC_DEFAULT_LOCALE=zh
 # 生产环境（示例）
 NEXT_PUBLIC_ENV=production
 NEXT_PUBLIC_APP_URL=https://your-domain.example.com
-DATABASE_URL=postgres://i_love_delay :REPLACE_STRONG_PASSWORD@127.0.0.1:5432/i_love_delay
+DATABASE_URL=postgres://i_love_delay:REPLACE_STRONG_PASSWORD@127.0.0.1:5432/i_love_delay
 # 如需 SSL：
 # PGSSLMODE=require
 
 # 开发环境（示例，本地直连线上 dev 库）
 NEXT_PUBLIC_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-DATABASE_URL=postgres://i_love_delay :REPLACE_STRONG_PASSWORD@<your-server-ip>:5432/i_love_delay_dev
+DATABASE_URL=postgres://i_love_delay:REPLACE_STRONG_PASSWORD@<your-server-ip>:5432/i_love_delay_dev
 ```
 
 > 注意：`DATABASE_URL` 仅在服务器端使用，前端无法读取；`NEXT_PUBLIC_` 前缀的变量才会暴露给浏览器。
@@ -139,54 +139,75 @@ npm start
 
 ---
 
-## 四点五、本地到服务器一键部署（可选）
+## 四点五、本地到服务器一键部署（推荐）
 
-你也可以在本地 Mac 直接一键将代码同步到服务器并构建/重启：
+使用 `deploy.sh` 的“server 模式”，在本地完成 standalone 构建并仅上传产物，然后通过 Supervisor 重启服务。
 
-1) 在项目根目录编辑 `.env.local`（不会提交到仓库）：
+1) 在项目根目录配置 `.env.local`：
 
 ```dotenv
-# 远程服务器信息（示例）
-SERVER=49.235.209.193            # 或你的域名 delay.bebackpacker.com
-SSH_USER=deployer                # 服务器上的 SSH 用户
-# 可选：若未配置 ssh-agent / ~/.ssh/config，可指定私钥路径
-# SSH_KEY=~/.ssh/id_rsa
-# 可选：远程目录，默认 /var/www/delay.bebackpacker.com
-# REMOTE_DIR=/var/www/delay.bebackpacker.com
+# 远程服务器信息
+SERVER=49.235.209.193
+SSH_USER=deployer
+# 可选：SSH 私钥（未使用 ssh-agent 时）
+# SSH_KEY=/Users/you/.ssh/id_rsa
+
+# 远端目录与进程名
+REMOTE_DIR=/var/www/delay.bebackpacker.com
+SUPERVISOR=delay.bebackpacker.com
+
+# 端口（优先级：SERVER_PORT > PORT > DEPLOY_PORT）
+DEPLOY_PORT=3002
 ```
 
-2) 一键远程部署（自动 rsync 同步、安装依赖、构建、停止+重启 Supervisor 或直接启动）：
+2) 服务器侧准备（仅首次）：
+
+- 创建 `REMOTE_DIR` 目录，并放置 `.env`（生产环境变量）。
+- 允许 `deployer` 免密使用 `sudo supervisorctl`（否则脚本将无法重启）：
 
 ```bash
-./deploy.sh --server --port 3002 --supervisor delay.bebackpacker.com
-# 若首次连接有 known_hosts 提示，可先单独 ssh 一次以接受指纹：
-# ssh deployer@49.235.209.193
+echo 'deployer ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl' | sudo tee /etc/sudoers.d/deployer-supervisorctl
+sudo visudo -cf /etc/sudoers.d/deployer-supervisorctl
 ```
 
-> 说明：
-> - 如果 `.env.local` 中存在 `SERVER` 或 `SSH_USER`，`deploy.sh --server` 会自动进入远程部署模式；
-> - 亦可显式使用参数覆盖：`--remote --server-host <HOST> --ssh-user <USER> [--ssh-key <KEY>] [--remote-dir <DIR>]`；
-> - 远程部署会在服务器上执行 `npm ci/install`、`npm run build`，并按需 `supervisorctl restart`；
-> - `.env*` 会被排除同步，确保远程服务器上的 `.env`/`.env.production` 不会被覆盖。
+- 按照模板创建 Supervisor program（见后文“使用 Supervisor 常驻运行”）。
+
+3) 本地执行部署：
+
+```bash
+./deploy.sh
+# 选择 2) server - 远程部署（本地构建 standalone，上传产物，Supervisor 重启）
+```
+
+流程说明：
+
+- 本地使用 `.env.production` 进行 `next build` 并产出 `.next/standalone` 与 `.next/static`。
+- 脚本仅上传构建产物（.next/standalone、.next/static、public、messages、package.json），不覆盖服务器 `.env`。
+- 服务器端通过 `sudo -n supervisorctl` 停止 → 清理端口 → 启动，零停机/最小停机。
 
 ---
 
-## 五、使用 Supervisor 常驻运行
+## 五、使用 Supervisor 常驻运行（standalone 推荐）
 
-新建 Supervisor 配置 `/etc/supervisor/conf.d/delay.bebackpacker.com.conf`：
+创建 `/etc/supervisor/conf.d/delay.bebackpacker.com.conf`：
 
 ```ini
 [program:delay.bebackpacker.com]
 directory=/var/www/delay.bebackpacker.com
-command=/bin/bash -lc 'set -a && source .env && exec npm start -- -p 3002'
+command=/bin/bash -lc 'set -a && source .env && exec /usr/bin/node .next/standalone/server.js'
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
-stderr_logfile=/var/log/delay.bebackpacker.com.err.log
-stdout_logfile=/var/log/delay.bebackpacker.com.out.log
-environment=NODE_ENV="production"
-# 根据需要调整用户
+
+# 将日志写入项目目录，避免 /var/log 权限问题
+stderr_logfile=/var/www/delay.bebackpacker.com/logs/app.err.log
+stdout_logfile=/var/www/delay.bebackpacker.com/logs/app.out.log
+
+# 生产环境变量（如 .env 中已含 PORT，可移除此项）
+environment=NODE_ENV="production",PORT="3002"
+
+# 运行用户
 user=deployer
 ```
 
@@ -200,7 +221,10 @@ sudo supervisorctl status delay.bebackpacker.com
 sudo supervisorctl restart delay.bebackpacker.com
 ```
 
-> 日志位置：`/var/log/delay.bebackpacker.com.*.log`
+注意：
+
+- 确保 `/usr/bin/node` 为真实的 Node 绝对路径（`command -v node` 查询）。
+- 确保 `${REMOTE_DIR}/logs` 目录存在且可写（`deploy.sh` 会自动创建）。
 
 ---
 
@@ -209,12 +233,35 @@ sudo supervisorctl restart delay.bebackpacker.com
 1) 新建站点配置 `/etc/nginx/sites-available/delay.bebackpacker.com.conf`
 
 ```nginx
-server {
-  listen 80;
-  server_name delay.bebackpacker.com;
+upstream i_love_delay_upstream {
+    server 127.0.0.1:3002;
+    keepalive 64;
+}
 
-  location / {
-    proxy_pass http://127.0.0.1:3002;
+server {
+    listen 80;
+    server_name delay.bebackpacker.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name delay.bebackpacker.com;
+
+    # ssl_certificate     /etc/letsencrypt/live/delay.bebackpacker.com/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/delay.bebackpacker.com/privkey.pem;
+
+    # 基础安全头
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Resource-Policy "same-site" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    client_max_body_size 10m;
+
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
@@ -222,7 +269,27 @@ server {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-  }
+
+    # 直接本地输出 Next 静态资源，避免经过 Node
+    location /_next/static/ {
+        alias /var/www/delay.bebackpacker.com/.next/static/;
+        expires 1y;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        access_log off;
+    }
+
+    # 其他静态路径仍可按需缓存后走上游
+    location ~* ^/(?:static|assets)/ {
+        expires 1y;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        proxy_pass http://i_love_delay_upstream;
+    }
+
+    location / {
+        proxy_read_timeout 60s;
+        send_timeout 60s;
+        proxy_pass http://i_love_delay_upstream;
+    }
 }
 ```
 
