@@ -1,0 +1,11 @@
+module.exports = {
+  launchOptions: {
+    executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage"
+    ]
+  }
+}

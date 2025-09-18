@@ -257,16 +257,30 @@ export const initDatabase = async () => {
     const errName = (error as any)?.name
     const pkChangeError = /Not yet support for changing primary key/i.test(errMsg)
 
-    if (isBrowser && (errName === 'UpgradeError' || pkChangeError)) {
-      console.warn('[Dexie] Detected primary key change upgrade error. Resetting local DB...')
-      try {
-        db.close()
-        await Dexie.delete('ILoveDelayDB')
-        await db.open()
-        console.info('[Dexie] Local DB has been reset and reopened with v2 schema.')
-        return
-      } catch (e) {
-        console.error('[Dexie] Failed to reset local DB:', e)
+    if (isBrowser) {
+      // 情况1：主键变更导致的升级错误（或错误信息包含对应提示）→ 删除并重建
+      if (errName === 'UpgradeError' || pkChangeError) {
+        console.warn('[Dexie] Detected primary key change upgrade error. Resetting local DB...')
+        try {
+          db.close()
+          await Dexie.delete('ILoveDelayDB')
+          await db.open()
+          console.info('[Dexie] Local DB has been reset and reopened with v2 schema.')
+          return
+        } catch (e) {
+          console.error('[Dexie] Failed to reset local DB:', e)
+        }
+      }
+
+      // 情况2：DatabaseClosedError（可能是前一个错误导致的连锁反应）→ 尝试重新打开
+      if (errName === 'DatabaseClosedError') {
+        try {
+          await db.open()
+          console.info('[Dexie] DatabaseClosedError recovered by reopening DB.')
+          return
+        } catch (e) {
+          console.error('[Dexie] Failed to reopen DB after DatabaseClosedError:', e)
+        }
       }
     }
 

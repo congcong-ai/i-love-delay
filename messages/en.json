@@ -103,6 +103,7 @@
     "loggedIn": "Logged In",
     "notLoggedIn": "Not Logged In",
     "wechatLogin": "WeChat Login",
+    "huaweiLogin": "Huawei Login",
     "loggingIn": "Logging in...",
     "logoutConfirm": "Logout",
     "loginTimeout": "Login timed out"

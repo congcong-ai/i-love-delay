@@ -16,6 +16,8 @@ import {
 export function LoginButton() {
   const { user, isLoggedIn, isLoading, login, logout } = useAuthStore()
   const t = useTranslations('auth')
+  const provider = (process.env.NEXT_PUBLIC_MOBILE_AUTH_PROVIDER || 'huawei').toLowerCase()
+  const label = provider === 'wechat' ? t('wechatLogin') : t('huaweiLogin')
 
   if (!isLoggedIn) {
     return (
@@ -26,7 +28,7 @@ export function LoginButton() {
         className="flex items-center space-x-2"
       >
         <LogIn className="w-4 h-4" />
-        <span>{isLoading ? t('loggingIn') : t('wechatLogin')}</span>
+        <span>{isLoading ? t('loggingIn') : label}</span>
       </Button>
     )
   }

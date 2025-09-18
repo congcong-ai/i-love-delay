@@ -5,22 +5,23 @@ import { useTranslations } from 'next-intl'
 
 export function OnlineGuard() {
   const t = useTranslations('network')
-  const [online, setOnline] = useState<boolean>(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  )
+  // 注意：服务端渲染阶段没有 navigator；为避免 SSR/CSR 初渲染不一致，这里先用 null 占位，
+  // 等客户端挂载后再读取 navigator.onLine 并注册事件。
+  const [online, setOnline] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const on = () => setOnline(true)
-    const off = () => setOnline(false)
-    window.addEventListener('online', on)
-    window.addEventListener('offline', off)
+    const update = () => setOnline(navigator.onLine)
+    update()
+    window.addEventListener('online', update)
+    window.addEventListener('offline', update)
     return () => {
-      window.removeEventListener('online', on)
-      window.removeEventListener('offline', off)
+      window.removeEventListener('online', update)
+      window.removeEventListener('offline', update)
     }
   }, [])
 
-  if (online) return null
+  // online 为 null（尚未挂载）或 true（在线）时不渲染覆盖层，仅在明确离线(false)时渲染
+  if (online !== false) return null
 
   return (
     <div className="fixed inset-0 z-[60] bg-white/80 backdrop-blur-sm flex items-center justify-center p-6">
