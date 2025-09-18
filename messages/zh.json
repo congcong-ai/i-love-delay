@@ -103,6 +103,7 @@
     "loggedIn": "已登录",
     "notLoggedIn": "未登录",
     "wechatLogin": "微信登录",
+    "huaweiLogin": "华为登录",
     "loggingIn": "登录中...",
     "logoutConfirm": "退出登录",
     "loginTimeout": "登录超时"

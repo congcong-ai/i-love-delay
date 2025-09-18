@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'wx.qlogo.cn',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'thirdwx.qlogo.cn',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   eslint: {
