@@ -37,13 +37,8 @@ export default async function LocaleLayout({
         suppressHydrationWarning
       >
         {/* H5 <-> App 容器（web-view）桥接脚本：
-            1) 优先加载官方 CDN 版本
-            2) 如 CDN 不可用，尝试加载本地备份 /uni.webview.1.5.5.js
-            3) 若仍失败，加载本地 shim 以提供最小可用的 postMessage 能力 */}
-        <Script
-          src="https://raw.gitcode.com/dcloud/hello-uni-app-x/raw/alpha/hybrid/html/uni.webview.1.5.5.js"
-          strategy="afterInteractive"
-        />
+            1) 直接加载本地 /uni.webview.1.5.5.js（Next.js 路由，返回正确 MIME）
+            2) 若失败，降级加载 /uni-bridge-shim.js 提供最小 postMessage 能力 */}
         <Script id="uni-bridge-fallback" strategy="afterInteractive">
           {`
           (function(){
