@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { Heart, MessageCircle, Bookmark, Share2 } from 'lucide-react'
+import { Heart, MessageCircle, Bookmark } from 'lucide-react'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { PublicTask } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -271,10 +271,6 @@ function TaskCard({ task }: { task: PublicTask }) {
             <Bookmark className={cn('w-4 h-4', isFavorited && 'fill-current')} />
           </button>
         </div>
-
-        <button className="text-gray-500 hover:text-gray-700">
-          <Share2 className="w-4 h-4" />
-        </button>
       </div>
 
       {/* 评论区 */}
