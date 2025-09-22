@@ -1,0 +1,70 @@
+<view class="container">
+  <view class="header">
+    <text class="title">{{i18n.title}}</text>
+    <text class="subtitle">{{i18n.createAndProcrastinate}}</text>
+  </view>
+
+  <!-- 添加任务卡片 -->
+  <view class="card card-add shadow-md">
+    <text class="section-title section-title-add">{{i18n.addTask}}</text>
+    <view class="input-group add-row">
+      <t-input t-class="il-input" t-class-input="il-input-inner" value="{{inputValue}}" placeholder="{{i18n.whatToProcrastinate}}" clearable bind:change="onTInputChange" confirm-type="done" bind:confirm="onAddTask" />
+      <t-button class="btn-plus" theme="primary" size="large" shape="circle" bind:tap="onAddTask"><t-icon name="add" /></t-button>
+    </view>
+  </view>
+
+  <!-- 待办列表与空状态 -->
+  <view class="section">
+    <view class="row space-between">
+      <text class="section-title">{{i18n.pending}} ({{todo.length}})</text>
+    </view>
+
+    <!-- 空状态卡片 -->
+    <block wx:if="{{todo.length===0}}">
+      <view class="card shadow-md empty-card">
+        <t-empty description="{{i18n.noTasksToday}}" />
+      </view>
+      <view class="card card-gradient shadow-md tip-card">
+        <text class="tip-title">{{i18n.feelingFreeToday}}</text>
+        <text class="tip-sub muted">{{i18n.createToStartProcrastination}}</text>
+        <text class="tip-sub muted">{{i18n.procrastinationQuote}}</text>
+      </view>
+    </block>
+
+    <!-- 列表 -->
+    <view wx:if="{{todo.length>0}}" class="hint">{{tasksWaitingText}}</view>
+    <block wx:if="{{todoView.length>0}}">
+      <block wx:for="{{todoView}}" wx:key="id">
+        <view class="task-card">
+          <view class="row space-between">
+            <view class="info">
+              <text class="task-name">{{item.name}}</text>
+              <text class="task-sub muted">{{i18n.createdAtOn.replace('{date}', item.createdShort)}}</text>
+            </view>
+            <view class="actions">
+              <t-button size="small" shape="round" variant="outline" theme="warning" bind:tap="onDelay" data-id="{{item.id}}">{{i18n.delayed}}</t-button>
+              <t-button size="small" shape="round" theme="success" bind:tap="onComplete" data-id="{{item.id}}">{{i18n.finish}}</t-button>
+              <t-button size="small" shape="round" variant="text" bind:tap="onDelete" data-id="{{item.id}}">{{i18n.delete}}</t-button>
+            </view>
+          </view>
+        </view>
+      </block>
+    </block>
+  </view>
+
+  <!-- 已完成折叠区 -->
+  <view class="section" wx:if="{{completed.length>0}}">
+    <view class="row space-between">
+      <text class="section-title">{{i18n.completed}} ({{completed.length}})</text>
+      <t-button variant="text" size="small" bind:tap="toggleCompleted">{{isCompletedExpanded? i18n.collapse : i18n.expand}}</t-button>
+    </view>
+    <view wx:if="{{isCompletedExpanded}}">
+      <view class="hint">{{i18n.completionSatisfaction}}</view>
+      <block wx:for="{{completed}}" wx:key="id">
+        <view class="task-card completed">
+          <text class="task-name">{{item.name}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+</view>

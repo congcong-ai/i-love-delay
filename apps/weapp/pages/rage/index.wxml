@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="header">
+    <text class="title">{{i18n.title}}</text>
+    <text class="subtitle">{{i18n.subtitle}}</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">{{i18n.selectTasks}}</text>
+    <view class="hint" wx:if="{{all.length===0}}">{{i18n.noTasksAvailable}}</view>
+
+    <t-checkbox-group value="{{selectedIds}}" bind:change="onGroupChange">
+      <block wx:for="{{all}}" wx:key="id">
+        <view class="rage-item">
+          <t-checkbox value="{{item.id}}" label="{{item.name}}" />
+          <text class="badge">{{item.status==='todo'? i18n.todo : i18n.delayed}}</text>
+        </view>
+      </block>
+    </t-checkbox-group>
+
+    <view class="row space-between tools">
+      <text class="hint">{{i18n.selectedCount.replace('{count}', count)}}</text>
+      <view>
+        <t-button size="small" variant="outline" shape="round" bind:tap="selectAll">{{i18n.selectAll}}</t-button>
+        <t-button size="small" variant="text" shape="round" bind:tap="clearAll">{{i18n.clearAll}}</t-button>
+      </view>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{count>0}}">
+    <t-button theme="primary" size="large" class="full" shape="round" bind:tap="completeAll">{{i18n.completeAll}}</t-button>
+  </view>
+</view>

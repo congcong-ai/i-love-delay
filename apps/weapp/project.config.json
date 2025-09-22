@@ -11,7 +11,7 @@
     "postcss": true,
     "minified": true,
     "uglifyFileName": true,
-    "nodeModules": false,
+    "nodeModules": true,
     "compileWorklet": false,
     "uploadWithSourceMap": true,
     "packNpmManually": false,

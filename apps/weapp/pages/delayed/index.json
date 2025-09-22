@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "拖延",
+  "usingComponents": {
+    "t-button": "/miniprogram_npm/tdesign-miniprogram/button/button",
+    "t-textarea": "/miniprogram_npm/tdesign-miniprogram/textarea/textarea",
+    "t-empty": "/miniprogram_npm/tdesign-miniprogram/empty/empty",
+    "t-tag": "/miniprogram_npm/tdesign-miniprogram/tag/tag",
+    "t-cell-group": "/miniprogram_npm/tdesign-miniprogram/cell-group/cell-group",
+    "t-cell": "/miniprogram_npm/tdesign-miniprogram/cell/cell"
+  }
+}

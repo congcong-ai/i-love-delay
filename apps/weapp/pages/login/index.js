@@ -21,7 +21,7 @@ Page({
             const token = data.token || ''
             wx.setStorageSync('token', token)
             wx.showToast({ title: '登录成功', icon: 'success' })
-            wx.reLaunch({ url: '/pages/index/index' })
+            wx.switchTab({ url: '/pages/profile/index' })
           } else {
             wx.showToast({ title: '登录失败', icon: 'none' })
           }

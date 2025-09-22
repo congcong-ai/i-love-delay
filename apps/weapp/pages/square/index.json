@@ -1,0 +1,13 @@
+{
+  "navigationBarTitleText": "广场",
+  "usingComponents": {
+    "t-tabs": "/miniprogram_npm/tdesign-miniprogram/tabs/tabs",
+    "t-tab-panel": "/miniprogram_npm/tdesign-miniprogram/tab-panel/tab-panel",
+    "t-button": "/miniprogram_npm/tdesign-miniprogram/button/button",
+    "t-input": "/miniprogram_npm/tdesign-miniprogram/input/input",
+    "t-avatar": "/miniprogram_npm/tdesign-miniprogram/avatar/avatar",
+    "t-empty": "/miniprogram_npm/tdesign-miniprogram/empty/empty",
+    "t-divider": "/miniprogram_npm/tdesign-miniprogram/divider/divider",
+    "t-icon": "/miniprogram_npm/tdesign-miniprogram/icon/icon"
+  }
+}

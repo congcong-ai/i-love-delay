@@ -1,6 +1,43 @@
-page { background-color: #f8f9fa; color: #111827; }
-.container { padding: 24rpx; }
-.btn { margin-top: 24rpx; }
+@import "/miniprogram_npm/tdesign-miniprogram/common/style/index.wxss";
+/* 全局基础 */
+page { 
+  background-color: #f5f7fb; 
+  color: #111827; 
+  /* 自定义 TDesign 品牌主色，贴近 Web 的 #2563eb */
+  --td-brand-color: #2563eb;
+  --td-brand-color-6: #2563eb;
+  --td-primary-color-6: #2563eb;
+  /* 稍加圆角 */
+  --td-radius-default: 16rpx;
+  --td-radius-large: 20rpx;
+}
+.container { padding: 32rpx; }
+
+/* 统一卡片与阴影 */
+.card { background:#ffffff; border-radius: 24rpx; padding: 24rpx; border: 1rpx solid #edf2f7; box-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 4px 12px rgba(16,24,40,0.06); }
+.shadow-sm { box-shadow: 0 1px 2px rgba(16,24,40,0.05); }
+.shadow-md { box-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 4px 12px rgba(16,24,40,0.06); }
+.rounded-xl { border-radius: 24rpx; }
+.rounded-lg { border-radius: 16rpx; }
+.muted { color:#6b7280; }
+
+/* 渐变卡片（贴近 Web 的淡雅渐变） */
+.card-gradient { background: linear-gradient(135deg, #eef2ff 0%, #ecfeff 100%); border: none; }
+
+/* 通用按钮与输入 */
+.btn { background:#111827; color:#fff; border-radius: 16rpx; padding: 16rpx 24rpx; border: none; }
+.btn.secondary{ background:#f3f4f6; color:#111827; }
+.btn.link{ background:transparent; color:#2563eb; padding: 0; }
+.input { background:#ffffff; border: 2rpx solid #e5e7eb; border-radius: 20rpx; padding: 20rpx 24rpx; }
+
+/* 常用布局工具 */
+.row { display:flex; align-items:center; gap:16rpx; }
+.space-between { justify-content: space-between; }
+.section { margin-bottom: 24rpx; }
+.title { font-size: 44rpx; font-weight: 800; color:#111827; }
+.subtitle { color:#6b7280; }
+
+/* 头像等 */
 .avatar { width: 160rpx; height: 160rpx; border-radius: 50%; }
 .name { font-size: 32rpx; margin-top: 16rpx; font-weight: 600; }
 .tip { color: #6b7280; margin-bottom: 16rpx; }

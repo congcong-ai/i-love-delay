@@ -1,0 +1,15 @@
+{
+  "name": "weapp",
+  "version": "1.0.0",
+  "description": "本目录用于存放“微信小程序”前端代码，复用根项目 Next.js 后端。",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "tdesign-miniprogram": "^1.10.1"
+  }
+}

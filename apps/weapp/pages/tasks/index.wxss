@@ -1,0 +1,38 @@
+.header{margin-bottom:20rpx}
+.title{font-size:48rpx;font-weight:800;color:#111827}
+.subtitle{color:#6b7280;margin-top:6rpx}
+
+.card{background:#fff;border-radius:20rpx;padding:24rpx;margin-bottom:24rpx;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.06)}
+.card-add .input-group{display:flex;align-items:center;gap:16rpx;margin-top:12rpx}
+.input-group t-input{flex:1}
+.input-lg{height:80rpx; font-size:28rpx}
+.section-title-add{margin-bottom:4rpx}
+/* 自定义 TDesign 输入框外观 */
+.il-input{border:2rpx solid #e5e7eb;border-radius:20rpx;}
+.il-input-inner{min-height:80rpx}
+.btn-plus{width:80rpx;height:80rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;font-size:44rpx;line-height:1;background:#2563eb;color:#fff}
+/* 轻微投影，让 + 按钮更立体 */
+.btn-plus{box-shadow:0 8rpx 16rpx rgba(37,99,235,0.25)}
+
+.section{margin-bottom:24rpx}
+.section-title{font-weight:700;color:#111827}
+.hint{color:#6b7280;margin:12rpx 0}
+/* 列表上方提示与列表卡片拉开距离 */
+.hint{margin:8rpx 0 16rpx}
+
+.empty-card{display:flex;flex-direction:column;gap:6rpx}
+.empty-title{font-weight:700;color:#111827}
+.empty-sub{font-size:26rpx}
+.tip-card{margin-top:12rpx}
+.tip-title{font-weight:700}
+.tip-sub{font-size:26rpx}
+
+/* 列表卡片（更贴近 Web 卡片视觉） */
+.task-card{background:#fff;border-radius:20rpx;border:1rpx solid #edf2f7;padding:24rpx;margin-bottom:16rpx;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05)}
+.task-card.completed{opacity:.55}
+.task-name{font-size:30rpx;color:#111827;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info{display:flex;flex-direction:column}
+.task-sub{font-size:24rpx;color:#6b7280;margin-top:6rpx}
+.actions{display:flex;align-items:center}
+.actions t-button + t-button{margin-left:12rpx}
+.link{background:transparent;color:#2563eb}

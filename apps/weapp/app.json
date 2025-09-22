@@ -1,5 +1,10 @@
 {
   "pages": [
+    "pages/tasks/index",
+    "pages/delayed/index",
+    "pages/rage/index",
+    "pages/square/index",
+    "pages/profile/index",
     "pages/login/index",
     "pages/index/index"
   ],
@@ -8,6 +13,18 @@
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
     "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#6b7280",
+    "selectedColor": "#111827",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/tasks/index", "text": "任务" },
+      { "pagePath": "pages/delayed/index", "text": "拖延" },
+      { "pagePath": "pages/rage/index", "text": "暴走" },
+      { "pagePath": "pages/square/index", "text": "广场" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
