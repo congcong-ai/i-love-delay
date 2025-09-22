@@ -63,7 +63,13 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
       alert(tNet('offlineDesc'))
       return
     }
-    if (!isLoggedIn) {
+    // 使用实时的鉴权状态，避免闭包中的过期值
+    let state = useAuthStore.getState()
+    let loggedIn = state.isLoggedIn
+    let currentUser = state.user
+    let token = state.token
+
+    if (!loggedIn) {
       const confirmLogin = window.confirm(t('shareConfirmLogin'))
       if (!confirmLogin) {
         alert(t('shareCancelled'))
@@ -78,7 +84,8 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
 
           const check = () => {
             attempts++
-            if (useAuthStore.getState().isLoggedIn) {
+            const s = useAuthStore.getState()
+            if (s.isLoggedIn) {
               resolve()
             } else if (attempts >= maxAttempts) {
               reject(new Error(tAuth('loginTimeout')))
@@ -91,6 +98,11 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
         })
 
         await checkLogin()
+        // 登录成功后刷新一次本地 state 快照
+        state = useAuthStore.getState()
+        loggedIn = state.isLoggedIn
+        currentUser = state.user
+        token = state.token
       } catch (error) {
         console.error('login failed:', error)
         alert(t('shareLoginFailed'))
@@ -121,26 +133,30 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
       }
     }
 
-    if (!user?.openid || !user?.nickname) {
+    // 再次以最新快照校验用户信息，避免闭包旧值导致“请登录”
+    if (!currentUser?.openid || !currentUser?.nickname) {
       alert(t('shareNeedLogin'))
       return
     }
 
     setIsSharing(true)
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
       const response = await fetch('/api/square/share', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           taskId: task.id,
           taskName: task.name,
           excuse: shareContent,
           delayCount: task.delayCount,
-          userId: user.openid,
-          userName: user.nickname,
-          userAvatar: user.avatar,
+          userId: currentUser.openid,
+          userName: currentUser.nickname,
+          userAvatar: currentUser.avatar,
         }),
       })
 

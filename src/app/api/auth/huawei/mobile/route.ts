@@ -4,6 +4,14 @@ import { getOrCreateUserByIdentity, signAppToken } from '@/lib/server/auth'
 /*
 POST /api/auth/huawei/mobile
 body: { code: string }
+Exchange Huawei auth code for access_token and user info, then create/find local user and sign JWT.
+Environment variables required:
+- HUAWEI_CLIENT_ID
+- HUAWEI_CLIENT_SECRET
+- HUAWEI_REDIRECT_URI (if required by your flow)
+- HUAWEI_TOKEN_URL (default: https://oauth-login.cloud.huawei.com/oauth2/v3/token)
+- HUAWEI_USERINFO_URL (optional; if omitted, user profile falls back to generic)
+*/
 
 // 兼容 base64url 的 JWT payload 解析
 function decodeJwtPayload(jwt: string): any | null {
@@ -18,14 +26,6 @@ function decodeJwtPayload(jwt: string): any | null {
     return null
   }
 }
-Exchange Huawei auth code for access_token and user info, then create/find local user and sign JWT.
-Environment variables required:
-- HUAWEI_CLIENT_ID
-- HUAWEI_CLIENT_SECRET
-- HUAWEI_REDIRECT_URI (if required by your flow)
-- HUAWEI_TOKEN_URL (default: https://oauth-login.cloud.huawei.com/oauth2/v3/token)
-- HUAWEI_USERINFO_URL (optional; if omitted, user profile falls back to generic)
-*/
 
 export async function POST(req: Request) {
   try {
