@@ -4,6 +4,20 @@ import { getOrCreateUserByIdentity, signAppToken } from '@/lib/server/auth'
 /*
 POST /api/auth/huawei/mobile
 body: { code: string }
+
+// 兼容 base64url 的 JWT payload 解析
+function decodeJwtPayload(jwt: string): any | null {
+  try {
+    const parts = jwt.split('.')
+    if (parts.length < 2) return null
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4)
+    const json = Buffer.from(padded, 'base64').toString('utf8')
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
 Exchange Huawei auth code for access_token and user info, then create/find local user and sign JWT.
 Environment variables required:
 - HUAWEI_CLIENT_ID
@@ -53,8 +67,22 @@ export async function POST(req: Request) {
     }
 
     const accessToken: string | undefined = tokenJson.access_token
-    const unionId: string | undefined = tokenJson.union_id || tokenJson.unionId
-    const providerUserId: string | undefined = tokenJson.openid || tokenJson.user_id || tokenJson.sub
+    let unionId: string | undefined = tokenJson.union_id || tokenJson.unionId
+
+    // 从 token 响应直接尝试获取 providerUserId
+    let providerUserId: string | undefined = tokenJson.openid || tokenJson.user_id || tokenJson.sub
+
+    // 解析 id_token（若存在），进一步提取 openid/sub/unionid
+    try {
+      const idToken: string | undefined = tokenJson.id_token || tokenJson.idToken
+      if (!providerUserId && typeof idToken === 'string') {
+        const payload = decodeJwtPayload(idToken)
+        if (payload && typeof payload === 'object') {
+          providerUserId = payload.openid || payload.sub || payload.user_id || providerUserId
+          unionId = unionId || payload.unionid || payload.unionID
+        }
+      }
+    } catch {}
 
     // 2) 可选：拉取用户信息
     let displayName = '华为用户'
