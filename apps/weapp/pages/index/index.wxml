@@ -1,0 +1,11 @@
+<view class="container">
+  <view wx:if="{{!user}}">
+    <view class="tip">未登录或令牌失效</view>
+    <button class="btn" bindtap="goLogin">去登录</button>
+  </view>
+  <view wx:elif="{{user}}">
+    <image class="avatar" src="{{user.avatarUrl || defaultAvatar}}" mode="aspectFill"></image>
+    <view class="name">{{user.displayName || '用户'}}</view>
+    <button class="btn" bindtap="logout">退出登录</button>
+  </view>
+</view>

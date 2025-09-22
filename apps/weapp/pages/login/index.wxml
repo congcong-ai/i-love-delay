@@ -1,0 +1,4 @@
+<view class="container">
+  <view class="title">i love delay</view>
+  <button class="btn" type="primary" loading="{{loading}}" bindtap="onLoginTap">微信登录</button>
+</view>

@@ -1,7 +1,7 @@
 import jwt, { type SignOptions, type Secret } from 'jsonwebtoken'
 import { query } from '@/lib/server/db'
 
-export type Provider = 'wechat' | 'huawei'
+export type Provider = 'wechat' | 'huawei' | 'wechat-mini'
 
 export interface UserProfile {
   id: string
