@@ -186,12 +186,12 @@
     "notCompletedYet": "尚未完成",
     "summaryCounts": "共创建 {total} 次，其中拖延 {delayed} 次，拖延后完成 {completed} 次",
     "noDelayedInstances": "该任务暂无被拖延的实例",
-    "shareConfirmLogin": "分享需要登录，是否现在登录？",
+    "shareConfirmLogin": "分享需要登录，是否立即登录？",
     "shareCancelled": "已取消分享",
     "shareLoginFailed": "登录失败，无法分享",
     "shareUseInputConfirm": "检测到输入框有内容，是否直接用这段借口分享？\n选择“确定”将自动保存并分享。",
     "shareNeedExcuse": "请先添加一个借口再分享！",
-    "shareNeedLogin": "请先登录后再分享",
+    "shareNeedLogin": "请先登录，再分享",
     "shareSuccess": "分享成功！你的拖延故事已发布到广场",
     "shareFailed": "分享失败",
     "shareFailedRetry": "分享失败，请稍后重试",
@@ -280,6 +280,7 @@
     "postError": "发布评论异常",
     "enterComment": "请输入评论内容",
     "interactLogin": "需要登录才能进行互动，是否现在登录？",
-    "interactionFailed": "操作失败，请稍后重试"
+    "interactionFailed": "操作失败，请稍后重试",
+    "needLoginAction": "请先登录，再进行操作"
   }
 }

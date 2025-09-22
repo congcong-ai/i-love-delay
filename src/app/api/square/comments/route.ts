@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/server/db'
+import { verifyAppToken } from '@/lib/server/auth'
 
 // GET /api/square/comments?publicTaskId=<uuid>&limit=100
 export async function GET(request: NextRequest) {
@@ -42,11 +43,37 @@ export async function GET(request: NextRequest) {
 // body: { publicTaskId, content, userId, userName, userAvatar }
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { publicTaskId, content, userId, userName, userAvatar } = body || {}
+    // 优先从 Authorization 中解析用户身份
+    const auth = request.headers.get('authorization') || request.headers.get('Authorization')
+    let authedUserId: string | null = null
+    if (auth && auth.toLowerCase().startsWith('bearer ')) {
+      const token = auth.slice('bearer '.length)
+      const payload = verifyAppToken(token)
+      if (payload?.sub) authedUserId = payload.sub
+    }
 
-    if (!publicTaskId || !content || !userId || !userName) {
+    const body = await request.json()
+    const { publicTaskId, content, userId: rawUserId, userName: rawUserName, userAvatar: rawUserAvatar } = body || {}
+    const userId = (authedUserId || rawUserId || '').trim()
+
+    if (!publicTaskId || !content || !userId) {
       return NextResponse.json({ error: '缺少必填字段' }, { status: 400 })
+    }
+
+    // 若已鉴权，从数据库补齐昵称与头像；忽略前端可伪造的字段
+    let userName = rawUserName as string | undefined
+    let userAvatar = rawUserAvatar as string | undefined
+    if (authedUserId) {
+      try {
+        const rs = await query<{ displayName: string; avatarUrl: string | null }>(
+          'SELECT display_name as "displayName", avatar_url as "avatarUrl" FROM users WHERE id=$1 LIMIT 1',
+          [authedUserId]
+        )
+        if (rs.rowCount) {
+          userName = rs.rows[0].displayName || '用户'
+          userAvatar = rs.rows[0].avatarUrl || undefined
+        }
+      } catch {}
     }
 
     const { rows } = await query<any>(
@@ -57,7 +84,7 @@ export async function POST(request: NextRequest) {
       [
         publicTaskId,
         userId,
-        userName,
+        userName || '用户',
         userAvatar,
         'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
         content,

@@ -82,7 +82,8 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
     if (!loggedIn) {
       const confirmLogin = window.confirm(t('shareConfirmLogin'))
       if (!confirmLogin) {
-        alert(t('shareCancelled'))
+        // 取消后也提示需要登录，符合用户预期
+        alert(t('shareNeedLogin'))
         return
       }
       try {

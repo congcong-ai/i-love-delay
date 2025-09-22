@@ -40,7 +40,7 @@ function TaskCard({ task }: { task: PublicTask }) {
     }
     if (!isLoggedIn) {
       const ok = window.confirm(t('interactLogin'))
-      if (!ok) return
+      if (!ok) { alert(t('needLoginAction')); return }
       try {
         await login()
         await waitLogin()
@@ -51,9 +51,15 @@ function TaskCard({ task }: { task: PublicTask }) {
     }
     try {
       const state = useAuthStore.getState()
+      let token = state.token as string | undefined
+      if (!token && typeof window !== 'undefined') {
+        try { token = window.localStorage.getItem('app_token') || undefined } catch {}
+      }
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
       const resp = await fetch('/api/square/interaction', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ publicTaskId: task.id, type: 'like', userId: state.user?.openid })
       })
       const result = await resp.json()
@@ -78,7 +84,7 @@ function TaskCard({ task }: { task: PublicTask }) {
     }
     if (!isLoggedIn) {
       const ok = window.confirm(t('interactLogin'))
-      if (!ok) return
+      if (!ok) { alert(t('needLoginAction')); return }
       try {
         await login()
         await waitLogin()
@@ -89,9 +95,15 @@ function TaskCard({ task }: { task: PublicTask }) {
     }
     try {
       const state = useAuthStore.getState()
+      let token = state.token as string | undefined
+      if (!token && typeof window !== 'undefined') {
+        try { token = window.localStorage.getItem('app_token') || undefined } catch {}
+      }
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
       const resp = await fetch('/api/square/interaction', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ publicTaskId: task.id, type: 'favorite', userId: state.user?.openid })
       })
       const result = await resp.json()
@@ -148,7 +160,7 @@ function TaskCard({ task }: { task: PublicTask }) {
     }
     if (!isLoggedIn) {
       const confirmLogin = window.confirm(t('loginToComment'))
-      if (!confirmLogin) return
+      if (!confirmLogin) { alert(t('needLoginAction')); return }
       try {
         await login()
         await waitLogin()
@@ -162,9 +174,15 @@ function TaskCard({ task }: { task: PublicTask }) {
     setPosting(true)
     try {
       const state = useAuthStore.getState()
+      let token = state.token as string | undefined
+      if (!token && typeof window !== 'undefined') {
+        try { token = window.localStorage.getItem('app_token') || undefined } catch {}
+      }
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
       const resp = await fetch('/api/square/comments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           publicTaskId: task.id,
           content: commentText.trim(),

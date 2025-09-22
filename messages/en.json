@@ -280,6 +280,7 @@
     "postError": "Error while posting comment",
     "enterComment": "Please enter a comment",
     "interactLogin": "Login required to interact. Login now?",
-    "interactionFailed": "Action failed, please try again later"
+    "interactionFailed": "Action failed, please try again later",
+    "needLoginAction": "Please log in before proceeding"
   }
 }

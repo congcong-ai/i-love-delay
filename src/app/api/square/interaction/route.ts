@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/server/db'
+import { verifyAppToken } from '@/lib/server/auth'
 
 /*
 POST /api/square/interaction
@@ -8,8 +9,18 @@ Toggles interaction. For 'like' also updates likes_count in public_tasks.
 */
 export async function POST(request: NextRequest) {
   try {
+    // 优先从 Authorization 中解析用户身份
+    const auth = request.headers.get('authorization') || request.headers.get('Authorization')
+    let authedUserId: string | null = null
+    if (auth && auth.toLowerCase().startsWith('bearer ')) {
+      const token = auth.slice('bearer '.length)
+      const payload = verifyAppToken(token)
+      if (payload?.sub) authedUserId = payload.sub
+    }
+
     const body = await request.json()
-    const { publicTaskId, type, userId } = body || {}
+    const { publicTaskId, type, userId: rawUserId } = body || {}
+    const userId = (authedUserId || rawUserId || '').trim()
 
     if (!publicTaskId || !type || !userId || !['like', 'favorite'].includes(type)) {
       return NextResponse.json({ error: '缺少必填字段' }, { status: 400 })
