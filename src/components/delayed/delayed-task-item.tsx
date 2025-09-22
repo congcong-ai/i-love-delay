@@ -69,6 +69,16 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
     let currentUser = state.user
     let token = state.token
 
+    // 兜底：若 store 中无 token，尝试从 localStorage 恢复
+    if (!token && typeof window !== 'undefined') {
+      try {
+        const localToken = window.localStorage.getItem('app_token')
+        if (localToken) {
+          token = localToken
+        }
+      } catch {}
+    }
+
     if (!loggedIn) {
       const confirmLogin = window.confirm(t('shareConfirmLogin'))
       if (!confirmLogin) {
@@ -110,6 +120,37 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
       }
     }
 
+    // 若已拥有 token 但 user 仍为空，主动拉取一次 /api/auth/me 同步用户资料
+    if ((!currentUser || !currentUser.openid || !currentUser.nickname) && token) {
+      try {
+        await useAuthStore.getState().setToken(token)
+        // 最多等待 3 秒直至 user 填充
+        const waitUser = () => new Promise<void>((resolve, reject) => {
+          const maxAttempts = 6
+          let attempts = 0
+          const check = () => {
+            attempts++
+            const s = useAuthStore.getState()
+            if (s.user && s.user.openid && s.user.nickname) {
+              resolve()
+            } else if (attempts >= maxAttempts) {
+              reject(new Error('profile timeout'))
+            } else {
+              setTimeout(check, 500)
+            }
+          }
+          check()
+        })
+        await waitUser()
+        // 刷新快照
+        const s2 = useAuthStore.getState()
+        currentUser = s2.user
+        token = s2.token
+      } catch (e) {
+        console.warn('refresh profile failed:', e)
+      }
+    }
+
     // 确保有可分享的借口：优先使用最新借口；如没有但输入框有内容，则先添加再分享
     let shareContent = latestExcuse?.content
     if (!shareContent) {
@@ -133,8 +174,9 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
       }
     }
 
-    // 再次以最新快照校验用户信息，避免闭包旧值导致“请登录”
-    if (!currentUser?.openid || !currentUser?.nickname) {
+    // 再次以最新快照校验：若无 token 且无用户信息，则视为未登录；
+    // 只要持有 token，即使 user 还未拉取完成，也允许继续，由后端据 Authorization 校验并补足用户信息
+    if (!token && (!currentUser?.openid || !currentUser?.nickname)) {
       alert(t('shareNeedLogin'))
       return
     }
@@ -154,9 +196,9 @@ export function DelayedTaskItem({ task, onUpdate }: DelayedTaskItemProps) {
           taskName: task.name,
           excuse: shareContent,
           delayCount: task.delayCount,
-          userId: currentUser.openid,
-          userName: currentUser.nickname,
-          userAvatar: currentUser.avatar,
+          userId: currentUser?.openid,
+          userName: currentUser?.nickname,
+          userAvatar: currentUser?.avatar,
         }),
       })
 

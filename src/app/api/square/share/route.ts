@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/server/db'
+import { verifyAppToken } from '@/lib/server/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,19 +81,46 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = request.headers.get('authorization') || request.headers.get('Authorization')
+    let authedUserId: string | null = null
+    if (auth && auth.toLowerCase().startsWith('bearer ')) {
+      const token = auth.slice('bearer '.length)
+      const payload = verifyAppToken(token)
+      if (payload?.sub) authedUserId = payload.sub
+    }
+
     const body = await request.json()
     const {
       taskId,
       taskName,
       excuse,
       delayCount,
-      userId,
-      userName,
-      userAvatar
+      userId: rawUserId,
+      userName: rawUserName,
+      userAvatar: rawUserAvatar
     } = body
 
-    if (!taskId || !taskName || !excuse || !userId || !userName) {
+    // 优先使用鉴权得到的 userId
+    const userId = (authedUserId || rawUserId || '').trim()
+
+    if (!taskId || !taskName || !excuse || !userId) {
       return NextResponse.json({ error: '缺少必填字段' }, { status: 400 })
+    }
+
+    // 若已鉴权，则从数据库补齐用户昵称/头像，忽略前端传入，避免伪造
+    let userName = rawUserName as string | undefined
+    let userAvatar = rawUserAvatar as string | undefined
+    if (authedUserId) {
+      try {
+        const rs = await query<{ displayName: string; avatarUrl: string | null }>(
+          'SELECT display_name as "displayName", avatar_url as "avatarUrl" FROM users WHERE id=$1 LIMIT 1',
+          [authedUserId]
+        )
+        if (rs.rowCount) {
+          userName = rs.rows[0].displayName || '用户'
+          userAvatar = rs.rows[0].avatarUrl || undefined
+        }
+      } catch {}
     }
 
     const { rows } = await query<any>(
@@ -112,7 +140,7 @@ export async function POST(request: NextRequest) {
         excuse,
         delayCount ?? 0,
         userId,
-        userName,
+        userName || '用户',
         userAvatar,
         'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
       ]

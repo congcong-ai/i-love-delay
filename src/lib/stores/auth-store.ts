@@ -81,9 +81,11 @@ export const useAuthStore = create<AuthState>()(
           })
           const json = await resp.json()
           if (resp.ok && json?.success) {
-            const profile = json.data as { userId: string; displayName: string; avatarUrl?: string }
+            // 兼容后端可能返回 id 或 userId 字段
+            const profile = json.data as { id?: string; userId?: string; displayName?: string; avatarUrl?: string }
+            const uid = profile.userId || profile.id || ''
             const user: WechatUser = {
-              openid: profile.userId, // 这里将系统 userId 赋到 openid 字段，保持现有 UI 兼容
+              openid: uid, // 将系统内部 userId/id 写入 openid，保持现有 UI 兼容
               nickname: profile.displayName || '用户',
               avatar: profile.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=app'
             }
