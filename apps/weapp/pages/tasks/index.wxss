@@ -7,12 +7,9 @@
 .input-group t-input{flex:1}
 .input-lg{height:80rpx; font-size:28rpx}
 .section-title-add{margin-bottom:4rpx}
-/* 自定义 TDesign 输入框外观 */
-.il-input{border:2rpx solid #e5e7eb;border-radius:20rpx;}
-.il-input-inner{min-height:80rpx}
-.btn-plus{width:80rpx;height:80rpx;border-radius:20rpx;display:flex;align-items:center;justify-content:center;font-size:44rpx;line-height:1;background:#2563eb;color:#fff}
-/* 轻微投影，让 + 按钮更立体 */
-.btn-plus{box-shadow:0 8rpx 16rpx rgba(37,99,235,0.25)}
+/* Vant 输入框外观（禁用了自带下边框） */
+.task-page .van-field{border:2rpx solid #e5e7eb;border-radius:20rpx;background:#fff;padding:12rpx 12rpx}
+.task-page .van-field__button{margin-left:8rpx}
 
 .section{margin-bottom:24rpx}
 .section-title{font-weight:700;color:#111827}
@@ -27,6 +24,12 @@
 .tip-title{font-weight:700}
 .tip-sub{font-size:26rpx}
 
+/* 渐变提示卡，更温暖的引导语 */
+.card-gradient{
+  background: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(16,185,129,0.04));
+  border: 1rpx solid #e5e7eb;
+}
+
 /* 列表卡片（更贴近 Web 卡片视觉） */
 .task-card{background:#fff;border-radius:20rpx;border:1rpx solid #edf2f7;padding:24rpx;margin-bottom:16rpx;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05)}
 .task-card.completed{opacity:.55}
@@ -34,5 +37,7 @@
 .info{display:flex;flex-direction:column}
 .task-sub{font-size:24rpx;color:#6b7280;margin-top:6rpx}
 .actions{display:flex;align-items:center}
-.actions t-button + t-button{margin-left:12rpx}
+.cell-label{display:flex;justify-content:space-between;align-items:center}
+.cell-actions{display:flex;align-items:center;gap:12rpx}
+.cell-actions .van-button + .van-button{margin-left:12rpx}
 .link{background:transparent;color:#2563eb}

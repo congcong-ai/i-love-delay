@@ -64,6 +64,13 @@ Page({
   onInputChange(e){ this.setData({ inputValue: e.detail.value }) },
   // TDesign t-input 的 change 事件：e.detail.value
   onTInputChange(e){ this.setData({ inputValue: (e.detail && e.detail.value) || '' }) },
+  // Vant van-field 的 change 事件：可能是 detail 或 detail.value
+  onVanFieldChange(e){
+    const d = e && e.detail
+    const val = (d && (d.value != null ? d.value : d)) || ''
+    this.setData({ inputValue: String(val) })
+  },
+  onVanFieldConfirm(){ this.onAddTask() },
   onAddTask(){
     const name = (this.data.inputValue||'').trim()
     if(!name){ wx.showToast({ title: t('common.error'), icon:'none' }); return }

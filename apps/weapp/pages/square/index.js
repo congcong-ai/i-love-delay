@@ -14,7 +14,12 @@ Page({
     nomore: false,
     activeCommentFor: '',
     commentInput: '',
-    userId: ''
+    userId: '',
+    skeletonRowCol: [
+      [{ type: 'circle', size: '64rpx' }, { width: '40%' }],
+      [{ width: '100%' }],
+      [{ width: '80%' }]
+    ]
   },
   onShow(){ this.loadUserThenReset() },
   i18nPack(){
@@ -56,13 +61,20 @@ Page({
       const userParam = this.data.userId ? `&userId=${encodeURIComponent(this.data.userId)}` : ''
       const res = await request({ url: `/api/square/share?limit=${this.data.limit}&offset=${this.data.offset}&sort=${this.data.tab==='popular'?'trending':'recent'}${userParam}`, method: 'GET' })
       if (res.statusCode === 200 && Array.isArray(res.data)) {
-        const items = res.data.map(x => ({
-          ...x,
-          createdAtText: timeAgo(x.createdAt),
-          comments: [],
-          commentsLoaded: false,
-          commentLoading: false
-        }))
+        const items = res.data.map(x => {
+          const createdAtText = timeAgo(x.createdAt)
+          const delayedShort = typeof x.delayCount === 'number' ? t('square.delayedCount', { count: x.delayCount }) : ''
+          const metaLine = delayedShort ? `${delayedShort} · ${createdAtText}` : createdAtText
+          return {
+            ...x,
+            createdAtText,
+            delayedShort,
+            metaLine,
+            comments: [],
+            commentsLoaded: false,
+            commentLoading: false
+          }
+        })
         const list = this.data.list.concat(items)
         const nomore = items.length < this.data.limit
         this.setData({ list, offset: this.data.offset + items.length, nomore })
@@ -74,6 +86,13 @@ Page({
   onReachBottom(){ this.loadList() },
   // 兼容 TDesign t-input 的 change 事件
   onCommentInputChange(e){ this.setData({ commentInput: (e.detail && e.detail.value) || '' }) },
+  // TDesign t-tabs 切换
+  onTabsChange(e){
+    const tab = (e.detail && e.detail.value) || 'recent'
+    if (tab === this.data.tab) return
+    this.setData({ tab })
+    this.resetAndLoad()
+  },
   async toggleLike(e){
     if (!ensureLogin()) return
     const id = e.currentTarget.dataset.id

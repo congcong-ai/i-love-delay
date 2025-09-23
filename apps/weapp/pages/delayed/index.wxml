@@ -17,7 +17,7 @@
 
   <view class="section">
     <text class="section-title">{{i18n.delayedTasks}}</text>
-    <view wx:if="{{delayed.length===0}}" class="card empty-card"><t-empty description="{{i18n.noDelayedTasks}}" /></view>
+    <view wx:if="{{delayed.length===0}}" class="card empty-card"><t-empty description="{{i18n.noDelayedTasks || ''}}" /></view>
     <block wx:for="{{delayedView}}" wx:key="id">
       <view class="task-card {{item.id===selectedTaskId?'active':''}}" bindtap="onSelectTask" data-id="{{item.id}}">
         <view class="row space-between">
@@ -33,7 +33,7 @@
 
   <view class="section" wx:if="{{selectedTask}}">
     <text class="section-title">{{i18n.addExcuseButton}}</text>
-    <t-textarea value="{{excuseInput}}" placeholder="{{i18n.placeholderAddExcuse}}" autofocus bind:change="onTextareaChange" />
+    <t-textarea value="{{excuseInput}}" placeholder="{{i18n.placeholderAddExcuse || ''}}" autofocus bind:change="onTextareaChange" />
     <view class="row">
       <t-button size="small" variant="outline" shape="round" bind:tap="onAddExcuse">{{i18n.addExcuseButton}}</t-button>
       <t-button size="small" theme="primary" shape="round" loading="{{shareLoading}}" bind:tap="onShare">{{i18n.shareToSquareButton}}</t-button>
