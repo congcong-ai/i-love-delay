@@ -15,6 +15,7 @@ Page({
     const locale = getLocale()
     this.setData({ locale, i18n: this.i18nPack() })
     this.loadUser().then(() => this.loadActivities())
+    try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(4) }catch{}
   },
   i18nPack(){
     return {

@@ -11,10 +11,10 @@ page {
   --td-radius-default: 16rpx;
   --td-radius-large: 20rpx;
 }
-.container { padding: 32rpx; }
+.container { padding: 40rpx; padding-bottom: calc(40rpx + 120rpx + env(safe-area-inset-bottom)); }
 
 /* 统一卡片与阴影 */
-.card { background:#ffffff; border-radius: 24rpx; padding: 24rpx; border: 1rpx solid #edf2f7; box-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 4px 12px rgba(16,24,40,0.06); }
+.card { background:#ffffff; border-radius: 24rpx; padding: 32rpx; margin: 28rpx 0; border: 1rpx solid #edf2f7; box-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 4px 12px rgba(16,24,40,0.06); }
 .shadow-sm { box-shadow: 0 1px 2px rgba(16,24,40,0.05); }
 .shadow-md { box-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 4px 12px rgba(16,24,40,0.06); }
 .rounded-xl { border-radius: 24rpx; }
@@ -33,11 +33,18 @@ page {
 /* 常用布局工具 */
 .row { display:flex; align-items:center; gap:16rpx; }
 .space-between { justify-content: space-between; }
-.section { margin-bottom: 24rpx; }
-.title { font-size: 44rpx; font-weight: 800; color:#111827; }
+.section { margin-bottom: 32rpx; }
+.title { font-size: 52rpx; font-weight: 800; color:#111827; }
 .subtitle { color:#6b7280; }
+
+/* 渐变卡片内的文字可读性增强 */
+.card-gradient .tip-title{ color:#111827; text-align:center; font-size:30rpx; }
+.card-gradient .tip-sub{ color:#6b7280; text-align:center; }
 
 /* 头像等 */
 .avatar { width: 160rpx; height: 160rpx; border-radius: 50%; }
 .name { font-size: 32rpx; margin-top: 16rpx; font-weight: 600; }
 .tip { color: #6b7280; margin-bottom: 16rpx; }
+
+/* 禁用第三方库远程图标字体加载（TDesign / Vant），避免控制台字体加载报错 */
+.t-icon, .t-icon:before, .van-icon, .van-icon:before { font-family: inherit !important; }

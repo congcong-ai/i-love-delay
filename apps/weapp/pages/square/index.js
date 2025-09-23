@@ -21,7 +21,7 @@ Page({
       [{ width: '80%' }]
     ]
   },
-  onShow(){ this.loadUserThenReset() },
+  onShow(){ this.loadUserThenReset(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(3) }catch{} },
   i18nPack(){
     return {
       title: t('square.title'),

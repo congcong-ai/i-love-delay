@@ -9,7 +9,7 @@ Page({
     selectedIds: [],
     count: 0
   },
-  onShow(){ this.refresh() },
+  onShow(){ this.refresh(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(2) }catch{} },
   i18nPack(){
     return {
       title: t('rage.title'),

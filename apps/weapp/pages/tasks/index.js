@@ -14,6 +14,7 @@ Page({
   },
   onShow(){
     this.refresh()
+    try{ const tb = this.getTabBar && this.getTabBar(); if (tb && tb.setActive) tb.setActive(0) }catch{}
   },
   i18nPack(count){
     return {
@@ -29,8 +30,14 @@ Page({
       completionSatisfaction: t('tasks.completionSatisfaction'),
       finish: t('tasks.finish'),
       delayed: t('tasks.delayed'),
-      delete: t('tasks.delete'),
-      tasksWaitingText: t('tasks.tasksWaitingMessage', { count })
+      delete: t('common.delete'),
+      tasksWaitingText: t('tasks.tasksWaitingMessage', { count }),
+      // 空态与提示卡文案
+      noTasksToday: t('tasks.noTasksToday'),
+      procrastinationStarts: t('tasks.procrastinationStarts'),
+      feelingFreeToday: t('tasks.feelingFreeToday'),
+      createToStartProcrastination: t('tasks.createToStartProcrastination'),
+      procrastinationQuote: t('tasks.procrastinationQuote')
     }
   },
   formatDateShort(ts){

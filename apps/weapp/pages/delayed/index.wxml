@@ -1,7 +1,7 @@
 <view class="container">
   <view class="header">
-    <text class="title">{{i18n.title}}</text>
-    <text class="subtitle">{{i18n.subtitle}}</text>
+    <view class="title">{{i18n.title}}</view>
+    <view class="subtitle">{{i18n.subtitle}}</view>
   </view>
 
   <view class="cards">
@@ -34,18 +34,22 @@
   <view class="section" wx:if="{{selectedTask}}">
     <text class="section-title">{{i18n.addExcuseButton}}</text>
     <t-textarea value="{{excuseInput}}" placeholder="{{i18n.placeholderAddExcuse || ''}}" autofocus bind:change="onTextareaChange" />
-    <view class="row">
-      <t-button size="small" variant="outline" shape="round" bind:tap="onAddExcuse">{{i18n.addExcuseButton}}</t-button>
-      <t-button size="small" theme="primary" shape="round" loading="{{shareLoading}}" bind:tap="onShare">{{i18n.shareToSquareButton}}</t-button>
+    <view class="row row-right">
+      <t-button class="btn-compact" size="small" theme="primary" shape="round" bind:tap="onAddExcuse">{{i18n.addExcuseButton}}</t-button>
     </view>
   </view>
 
   <view class="section" wx:if="{{history.length>0}}">
     <text class="section-title">{{historyTitleText}} </text>
     <block wx:for="{{history}}" wx:key="id">
-      <view class="excuse-item">
-        <text class="content">{{item.content}}</text>
-        <text class="time">{{item.timeAgo}}</text>
+      <view class="excuse-card">
+        <view class="excuse-main">
+          <text class="content">{{item.content}}</text>
+          <text class="time">{{item.timeAgo}}</text>
+        </view>
+        <view class="excuse-actions" bindlongpress="onShareHint">
+          <t-button class="icon-btn" shape="circle" size="small" theme="primary" data-id="{{item.id}}" bind:tap="onShareHistory" bindlongpress="onShareHint">📤</t-button>
+        </view>
       </view>
     </block>
   </view>

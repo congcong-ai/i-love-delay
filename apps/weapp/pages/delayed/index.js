@@ -17,7 +17,7 @@ Page({
     historyTitleText: '',
     shareLoading: false
   },
-  onShow(){ this.refresh() },
+  onShow(){ this.refresh(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(1) }catch{} },
   i18nPack(){
     return {
       title: t('delayed.title'),
@@ -111,6 +111,42 @@ Page({
       wx.showToast({ title: t('delayed.shareFailedRetry'), icon: 'none' })
     } finally {
       this.setData({ shareLoading: false })
+      this.refresh()
+    }
+  }
+  ,
+  onShareHint(){
+    try{ wx.showToast({ title: this.data.i18n.shareToSquareButton || '分享到广场', icon: 'none' }) }catch{}
+  }
+  ,
+  async onShareHistory(e){
+    if (!ensureLogin()) return
+    const id = e.currentTarget.dataset.id
+    const tsk = this.data.selectedTask
+    if (!tsk) { wx.showToast({ title: t('delayed.noDelayedTasks'), icon:'none' }); return }
+    const item = (this.data.history||[]).find(h => h.id === id)
+    if (!item) { wx.showToast({ title: t('delayed.shareFailed'), icon:'none' }); return }
+    const excuse = (item.content||'').trim()
+    if (!excuse) { wx.showToast({ title: t('delayed.shareNeedExcuse'), icon:'none' }); return }
+    wx.showLoading({ title: t('delayed.sharing') || '分享中...' })
+    try {
+      const res = await request({
+        url: '/api/square/share', method: 'POST', data: {
+          taskId: tsk.id,
+          taskName: tsk.name,
+          excuse,
+          delayCount: tsk.delayCount || 0
+        }, header: { 'Content-Type': 'application/json' }
+      })
+      if (res.statusCode === 200 && res.data && (res.data.success || Array.isArray(res.data))) {
+        wx.showToast({ title: t('delayed.shareSuccess'), icon: 'success' })
+      } else {
+        wx.showToast({ title: t('delayed.shareFailed'), icon: 'none' })
+      }
+    } catch (err) {
+      wx.showToast({ title: t('delayed.shareFailedRetry'), icon: 'none' })
+    } finally {
+      wx.hideLoading()
       this.refresh()
     }
   }

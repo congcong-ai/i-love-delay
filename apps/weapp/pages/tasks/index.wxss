@@ -1,26 +1,38 @@
-.header{margin-bottom:20rpx}
-.title{font-size:48rpx;font-weight:800;color:#111827}
-.subtitle{color:#6b7280;margin-top:6rpx}
+.header{margin-bottom:32rpx;display:flex;flex-direction:column;align-items:flex-start}
+.title{font-size:52rpx;font-weight:800;color:#111827;display:block}
+.subtitle{color:#6b7280;margin-top:8rpx;display:block}
 
-.card{background:#fff;border-radius:20rpx;padding:24rpx;margin-bottom:24rpx;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.06)}
+.card{background:#fff;border-radius:24rpx;padding:32rpx;margin-bottom:36rpx;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.06)}
+.card-add{padding:32rpx 28rpx;margin:28rpx 0 48rpx}
 .card-add .input-group{display:flex;align-items:center;gap:16rpx;margin-top:12rpx}
 .input-group t-input{flex:1}
 .input-lg{height:80rpx; font-size:28rpx}
 .section-title-add{margin-bottom:4rpx}
 /* Vant 输入框外观（禁用了自带下边框） */
-.task-page .van-field{border:2rpx solid #e5e7eb;border-radius:20rpx;background:#fff;padding:12rpx 12rpx}
+.task-page .van-field{border:2rpx solid #e5e7eb;border-radius:20rpx;background:#fff;padding:20rpx 20rpx}
 .task-page .van-field__button{margin-left:8rpx}
+.task-page .van-field__control{min-height:92rpx}
 
-.section{margin-bottom:24rpx}
+/* 添加任务：按钮独占一行 */
+.add-actions{margin-top:20rpx}
+.add-actions .van-button{width:100%}
+/* 添加任务：输入与标题间距 */
+.add-input{margin-top:12rpx}
+
+/* Vant 列表组外观（圆角+描边），贴近 Web 卡片组 */
+.task-page .van-cell-group{border:1rpx solid #e5e7eb;border-radius:20rpx;margin-top:12rpx}
+.task-page .van-cell{padding:28rpx 28rpx}
+
+.section{margin-bottom:40rpx}
 .section-title{font-weight:700;color:#111827}
 .hint{color:#6b7280;margin:12rpx 0}
 /* 列表上方提示与列表卡片拉开距离 */
-.hint{margin:8rpx 0 16rpx}
+.hint{margin:12rpx 0 20rpx}
 
-.empty-card{display:flex;flex-direction:column;gap:6rpx}
+.empty-card{display:flex;flex-direction:column;gap:6rpx;align-items:center;text-align:center}
 .empty-title{font-weight:700;color:#111827}
 .empty-sub{font-size:26rpx}
-.tip-card{margin-top:12rpx}
+.tip-card{margin-top:20rpx}
 .tip-title{font-weight:700}
 .tip-sub{font-size:26rpx}
 
@@ -31,13 +43,33 @@
 }
 
 /* 列表卡片（更贴近 Web 卡片视觉） */
-.task-card{background:#fff;border-radius:20rpx;border:1rpx solid #edf2f7;padding:24rpx;margin-bottom:16rpx;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05)}
+.task-card{background:#fff;border-radius:24rpx;border:1rpx solid #edf2f7;padding:36rpx 32rpx;margin:24rpx 0;box-shadow:0 12rpx 36rpx rgba(16,24,40,0.08), 0 20rpx 48rpx rgba(16,24,40,0.06); overflow: visible}
 .task-card.completed{opacity:.55}
 .task-name{font-size:30rpx;color:#111827;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .info{display:flex;flex-direction:column}
 .task-sub{font-size:24rpx;color:#6b7280;margin-top:6rpx}
 .actions{display:flex;align-items:center}
+.actions-row{gap:16rpx;margin-top:20rpx;flex-wrap:wrap;justify-content:flex-end}
+.delete-icon{padding:8rpx;margin-right:6rpx}
+/* 紧凑按钮：宽度随内容，略加左右内边距 */
+.btn-compact{display:inline-flex;align-items:center;flex:0 0 auto;min-width:auto;padding:0 8rpx;white-space:nowrap}
+.btn-compact .van-button__text{font-size:24rpx}
+.btn-compact .van-icon,.btn-compact .van-button__icon{margin-right:8rpx}
 .cell-label{display:flex;justify-content:space-between;align-items:center}
+.cell-label-todo{display:flex;flex-direction:column;gap:10rpx}
+.cell-label-todo .muted{line-height:1.4}
+.cell-actions{display:flex;align-items:center;gap:12rpx}
+.cell-actions.two-col{display:flex;gap:20rpx}
+.cell-actions.two-col .action{flex:1 1 0;min-width:0}
 .cell-actions{display:flex;align-items:center;gap:12rpx}
 .cell-actions .van-button + .van-button{margin-left:12rpx}
+/* 两列模式下，去掉相邻按钮的额外左间距，避免总宽度不一致 */
+.cell-actions.two-col .van-button + .van-button{margin-left:0}
+/* 两列模式下，确保每个按钮等分一行 */
+.cell-actions.two-col .van-button{flex:1 1 0}
 .link{background:transparent;color:#2563eb}
+
+/* 已完成列表标题与徽记样式 */
+.cell-title.completed{color:#16a34a;font-weight:700}
+.completed-tag{margin-left:12rpx}
+.completed-tag .van-icon{margin-right:6rpx}

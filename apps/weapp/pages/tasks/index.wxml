@@ -1,15 +1,16 @@
 <view class="container task-page">
   <view class="header">
-    <text class="title">{{i18n.title}}</text>
-    <text class="subtitle">{{i18n.createAndProcrastinate}}</text>
+    <view class="title">{{i18n.title}}</view>
+    <view class="subtitle">{{i18n.createAndProcrastinate}}</view>
   </view>
 
   <!-- 添加任务卡片（Vant） -->
   <view class="card card-add shadow-md">
     <text class="section-title section-title-add">{{i18n.addTask}}</text>
-    <van-field value="{{inputValue}}" placeholder="{{i18n.whatToProcrastinate || ''}}" clearable border="{{false}}" use-button-slot bind:change="onVanFieldChange" bind:confirm="onVanFieldConfirm">
-      <van-button slot="button" icon="plus" type="primary" color="#2563eb" round size="small" bind:tap="onAddTask" />
-    </van-field>
+    <van-field class="add-input" value="{{inputValue}}" placeholder="{{i18n.whatToProcrastinate || ''}}" border="{{false}}" bind:change="onVanFieldChange" bind:confirm="onVanFieldConfirm" />
+    <view class="add-actions">
+      <van-button block type="primary" color="#93c5fd" round size="small" bind:tap="onAddTask">＋ {{i18n.addTask}}</van-button>
+    </view>
   </view>
 
   <!-- 待办列表与空状态 -->
@@ -18,47 +19,57 @@
       <text class="section-title">{{i18n.pending}} ({{todo.length}})</text>
     </view>
 
-    <!-- 空状态卡片 -->
-    <block wx:if="{{todo.length===0}}">
+    <!-- 空状态卡片（对齐 Web 文案） -->
+    <block wx:if="{{!todo.length}}">
       <view class="card shadow-md empty-card">
-        <van-empty description="{{i18n.noTasksToday || ''}}" />
+        <text class="empty-title">{{i18n.noTasksToday || '今天还没有任务，快来创建一个吧！'}}</text>
+        <text class="empty-sub muted">{{i18n.procrastinationStarts || '拖延从创建任务开始～'}}</text>
       </view>
       <view class="card card-gradient shadow-md tip-card">
-        <text class="tip-title">{{i18n.feelingFreeToday}}</text>
-        <text class="tip-sub muted">{{i18n.createToStartProcrastination}}</text>
-        <text class="tip-sub muted">{{i18n.procrastinationQuote}}</text>
+        <text class="tip-title">{{i18n.feelingFreeToday || '今天感觉很轻松？'}}</text>
+        <text class="tip-sub muted">{{i18n.createToStartProcrastination || '创建一些任务，开始您的拖延之旅！'}}</text>
+        <text class="tip-sub muted">{{i18n.procrastinationQuote || '记住：拖延不是懒惰，而是高级时间管理 😎'}}</text>
       </view>
     </block>
 
-    <!-- 列表（Vant cell group） -->
+    <!-- 列表（卡片式） -->
     <view wx:if="{{todo.length>0}}" class="hint">{{tasksWaitingText}}</view>
-    <van-cell-group wx:if="{{todoView.length>0}}" inset>
-      <block wx:for="{{todoView}}" wx:key="id">
-        <van-cell title="{{item.name}}" use-label-slot>
-          <view slot="label" class="cell-label">
-            <text class="muted">{{i18n.createdAtOn.replace('{date}', item.createdShort)}}</text>
-            <view class="cell-actions">
-              <van-button size="mini" type="warning" plain round bind:tap="onDelay" data-id="{{item.id}}">{{i18n.delayed}}</van-button>
-              <van-button size="mini" color="#22c55e" round bind:tap="onComplete" data-id="{{item.id}}">{{i18n.finish}}</van-button>
-              <van-button size="mini" type="default" plain round bind:tap="onDelete" data-id="{{item.id}}">{{i18n.delete}}</van-button>
-            </view>
+    <block wx:for="{{todoView}}" wx:key="id">
+      <view class="task-card">
+        <view class="row space-between">
+          <view>
+            <text class="task-name">{{item.name}}</text>
+            <text class="task-sub">{{i18n.createdAtOn.replace('{date}', item.createdShort)}}</text>
           </view>
-        </van-cell>
-      </block>
-    </van-cell-group>
+          <view class="delete-icon" data-id="{{item.id}}" bind:tap="onDelete">🗑</view>
+        </view>
+        <view class="actions actions-row">
+          <van-button size="mini" type="warning" plain round custom-class="btn-compact" bind:tap="onDelay" data-id="{{item.id}}">{{i18n.delayed}}</van-button>
+          <van-button size="mini" color="#16a34a" round custom-class="btn-compact" bind:tap="onComplete" data-id="{{item.id}}">{{i18n.finish}}</van-button>
+        </view>
+      </view>
+    </block>
   </view>
 
   <!-- 已完成折叠区（Vant） -->
   <view class="section" wx:if="{{completed.length>0}}">
     <view class="row space-between">
       <text class="section-title">{{i18n.completed}} ({{completed.length}})</text>
-      <van-button type="primary" color="#2563eb" plain size="mini" bind:tap="toggleCompleted">{{isCompletedExpanded? i18n.collapse : i18n.expand}}</van-button>
+      <van-button type="default" plain size="mini" bind:tap="toggleCompleted">{{isCompletedExpanded? '▲ ' + i18n.collapse : '▼ ' + i18n.expand}}</van-button>
     </view>
     <view wx:if="{{isCompletedExpanded}}">
       <view class="hint">{{i18n.completionSatisfaction}}</view>
       <van-cell-group inset>
-        <block wx:for="{{completed}}" wx:key="id">
-          <van-cell title="{{item.name}}" />
+        <block wx:for="{{completedView}}" wx:key="id">
+          <van-cell use-title-slot use-label-slot>
+            <view slot="title" class="cell-title completed">{{item.name}}</view>
+            <view slot="label" class="cell-label">
+              <text class="muted">{{'完成于 ' + item.createdShort}}</text>
+              <van-tag class="completed-tag" type="success" plain round>
+                <van-icon name="success" size="14" color="#16a34a" /> 已完成
+              </van-tag>
+            </view>
+          </van-cell>
         </block>
       </van-cell-group>
     </view>

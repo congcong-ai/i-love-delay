@@ -1,4 +1,8 @@
-<view class="container">
+<view class="container login">
+  <image class="logo" src="/assets/logo_1024.png" mode="aspectFit" />
   <view class="title">i love delay</view>
-  <button class="btn" type="primary" loading="{{loading}}" bindtap="onLoginTap">微信登录</button>
+  <view class="subtitle">一个反向任务管理应用 · 鼓励拖延，奖励借口</view>
+  <view class="desc">写下你的借口，一键分享到广场，和大家一起开摆。</view>
+  <button class="btn wechat" type="primary" loading="{{loading}}" bindtap="onLoginTap">微信登录</button>
+  <view class="hint">登录后即可将你的借口分享到广场</view>
 </view>
