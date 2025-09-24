@@ -8,14 +8,20 @@
 .space-between{justify-content:space-between}
 .author{display:flex;align-items:center;gap:12rpx}
 .avatar{border-radius:50%}
-.meta .name{font-weight:600}
-.meta .time{color:#6b7280;font-size:24rpx}
+/* 名称 + 时间 同行展示 */
+.meta-line{display:flex;align-items:center;gap:8rpx;white-space:nowrap}
+.meta-line .name{font-weight:600}
+.meta-line .time{color:#6b7280;font-size:24rpx}
+.meta-line .dot{color:#9ca3af}
 .content{margin:16rpx 0;display:flex;flex-direction:column;gap:10rpx}
 .content .task{font-weight:700}
 .content .excuse{color:#111827}
 .actions{display:flex;gap:16rpx;margin-top:8rpx}
 .link{background:transparent;color:#374151}
 .link.active{color:#2563eb}
+/* 心形点赞：未点赞灰，已点赞红 */
+.heart{color:#9ca3af}
+.heart.liked{color:#ef4444}
 .comment-box{display:flex;gap:12rpx;margin-top:16rpx}
 .comment-box t-input{flex:1}
 .comments{margin-top:16rpx;display:flex;flex-direction:column;gap:16rpx}

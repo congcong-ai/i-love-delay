@@ -1,10 +1,28 @@
-.header{margin-bottom:32rpx}.title{font-size:52rpx;font-weight:800;color:#111827;display:block}.subtitle{color:#6b7280;display:block}
-.section{margin:28rpx 0}
-.section-title{font-weight:600}
+.header{margin-bottom:32rpx}
+.title{font-size:52rpx;font-weight:800;color:#111827;display:block}
+.subtitle{color:#6b7280;display:block}
+.section{margin:36rpx 0}
+.section-title{font-weight:700;margin-bottom:12rpx;white-space:nowrap}
 .hint{color:#6b7280;margin:12rpx 0}
-.rage-item{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:24rpx;border:1rpx solid #edf2f7;padding:28rpx;margin:20rpx 0;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05)}
+.rage-item{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:24rpx;border:1rpx solid #edf2f7;padding:32rpx;margin:24rpx 0;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05)}
+.rage-item.selected{border-color:#2563eb;background:#fff}
 .badge{background:#f3f4f6;color:#374151;border-radius:9999rpx;padding:4rpx 12rpx;font-size:24rpx}
 .row{display:flex;justify-content:space-between;align-items:center;margin-top:12rpx}
 .space-between{justify-content:space-between}
 .tools{margin-top:12rpx}
 .full{width:100%}
+
+/* 卡片：提升留白 */
+.card{background:#fff;border-radius:24rpx;padding:32rpx;margin:28rpx 0;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05)}
+
+/* 进行中横幅 */
+.banner{background:linear-gradient(180deg,#fff7ed,#fff);border:1rpx solid #fed7aa}
+.banner-title{color:#b45309;font-weight:700}
+
+/* 进度条 */
+.progress{height:16rpx;border-radius:9999rpx;background:#e5e7eb;margin-top:16rpx;overflow:hidden}
+.progress .bar{height:100%;background:#fb923c}
+
+/* 列表单元格 */
+.cell-title{font-weight:600}
+.cell-actions{display:flex;align-items:center;gap:12rpx}

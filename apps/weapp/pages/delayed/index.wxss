@@ -1,28 +1,34 @@
-.header{margin-bottom:32rpx}.title{font-size:52rpx;font-weight:800;color:#111827;display:block}.subtitle{color:#6b7280;display:block}
-.cards{display:grid;gap:24rpx}
+.header{margin-bottom:32rpx}
+.title{font-size:52rpx;font-weight:800;color:#111827;display:block}
+.subtitle{color:#6b7280;display:block}
+
+/* 统计面板 */
 .card{background:#fff;border-radius:24rpx;padding:32rpx;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.06)}
-.card-title{font-weight:600;margin-bottom:12rpx}
-.stats{display:flex;gap:16rpx}
-.stat{flex:1;background:#f9fafb;border-radius:12rpx;padding:16rpx;display:flex;flex-direction:column;align-items:center}
+.card-title{font-weight:700;margin-bottom:12rpx}
+.stats-card{margin:20rpx 0 32rpx}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24rpx}
+.stat{background:#f9fafb;border-radius:20rpx;padding:20rpx;display:flex;flex-direction:column;align-items:center;text-align:center}
+.stat .icon{width:56rpx;height:56rpx;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;margin-bottom:8rpx}
 .stat .n{font-size:36rpx;font-weight:700;color:#111827}
 .stat .l{font-size:24rpx;color:#6b7280}
-.section{margin-top:36rpx}
-.section-title{font-weight:600}
-.hint{color:#6b7280;margin:12rpx 0}
-/* 任务卡片（统一风格） */
-.task-card{background:#fff;border-radius:24rpx;border:1rpx solid #edf2f7;padding:28rpx;margin:20rpx 0;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05)}
-.task-card.active{outline:2rpx solid #2563eb}
-.task-name{font-size:30rpx}
-.task-sub{color:#6b7280;font-size:24rpx;display:block;margin-top:6rpx}
-.badge{background:#111827;color:#fff;border-radius:9999rpx;padding:6rpx 16rpx;font-size:24rpx}
-.row{display:flex;gap:16rpx;align-items:center}
-.row-right{justify-content:flex-end}
+
+.section{margin-top:20rpx}
+.section-title{font-weight:700}
+.hint{color:#6b7280;margin:12rpx 0 20rpx}
+
+/* 任务卡片 */
+.task-card{border:1rpx solid #edf2f7;box-shadow:0 12rpx 36rpx rgba(16,24,40,0.08),0 20rpx 48rpx rgba(16,24,40,0.06)}
+.task-name{font-size:30rpx;color:#111827}
+.task-meta{font-size:24rpx;color:#6b7280;margin-top:6rpx}
+.textarea-wrap{margin:24rpx 0 16rpx}
+.actions.two{display:flex;gap:12rpx;margin:12rpx 0 24rpx;justify-content:flex-end;flex-wrap:nowrap}
+.actions.two .action{flex:0 0 44%;max-width:44%;min-width:0}
+.actions.two t-button{flex:0 0 auto;width:100%;font-size:26rpx}
+/* 统一顶部两个按钮高度 */
+.actions.two t-button{height:72rpx}
 .empty-card{margin:20rpx 0}
 
-/* 历史借口卡片：更大更高，右侧操作 */
-.excuse-card{background:#fff;border-radius:24rpx;border:1rpx solid #edf2f7;padding:28rpx 32rpx;margin:20rpx 0;box-shadow:0 8rpx 24rpx rgba(16,24,40,0.05);display:flex;justify-content:space-between;align-items:flex-start;gap:16rpx}
-.excuse-main{display:flex;flex-direction:column;gap:8rpx;flex:1 1 auto;min-width:0}
-.excuse-main .content{color:#111827;word-break:break-word}
-.excuse-main .time{color:#6b7280;font-size:24rpx}
-.excuse-actions{flex:0 0 auto;display:flex;align-items:center}
+/* 通用行布局（兜底，虽然 app.wxss 已有） */
+.row{display:flex;gap:16rpx;align-items:center}
+.row-right{justify-content:flex-end}
 .btn-compact{display:inline-flex;align-items:center;flex:0 0 auto;min-width:auto;padding:0 18rpx;white-space:nowrap}

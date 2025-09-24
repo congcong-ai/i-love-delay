@@ -4,29 +4,83 @@
     <view class="subtitle">{{i18n.subtitle}}</view>
   </view>
 
-  <view class="section">
-    <text class="section-title">{{i18n.selectTasks}}</text>
-    <view class="hint" wx:if="{{all.length===0}}">{{i18n.noTasksAvailable}}</view>
-
-    <t-checkbox-group value="{{selectedIds}}" bind:change="onGroupChange">
-      <block wx:for="{{all}}" wx:key="id">
-        <view class="rage-item">
-          <t-checkbox value="{{item.id}}" label="{{item.name}}" />
-          <text class="badge">{{item.status==='todo'? i18n.todo : i18n.delayed}}</text>
+  <!-- 选择任务视图 -->
+  <view wx:if="{{!rageStarted}}">
+    <view class="card">
+      <view class="row space-between">
+        <text class="section-title">{{i18n.selectTasks}}</text>
+        <view>
+          <t-button size="small" variant="outline" shape="round" bind:tap="selectAll">{{i18n.selectAll}}</t-button>
+          <t-button size="small" variant="outline" shape="round" bind:tap="clearAll">{{i18n.clearAll}}</t-button>
         </view>
-      </block>
-    </t-checkbox-group>
-
-    <view class="row space-between tools">
-      <text class="hint">{{i18n.selectedCount.replace('{count}', count)}}</text>
-      <view>
-        <t-button size="small" variant="outline" shape="round" bind:tap="selectAll">{{i18n.selectAll}}</t-button>
-        <t-button size="small" variant="text" shape="round" bind:tap="clearAll">{{i18n.clearAll}}</t-button>
       </view>
+      <text class="muted">{{i18n.selectedCount.replace('{count}', count)}}</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">{{i18n.delayed}}</text>
+      <t-checkbox-group value="{{selectedIds}}" bind:change="onGroupChange">
+        <block wx:for="{{delayedGroup}}" wx:key="id">
+          <view class="rage-item {{selectedIds.indexOf(item.id) !== -1 ? 'selected' : ''}}">
+            <t-checkbox value="{{item.id}}" label="{{item.name}}" />
+            <text class="badge">{{i18n.delayed}}</text>
+          </view>
+        </block>
+      </t-checkbox-group>
+    </view>
+
+    <view class="section">
+      <text class="section-title">{{i18n.pending}}</text>
+      <t-checkbox-group value="{{selectedIds}}" bind:change="onGroupChange">
+        <block wx:for="{{todoGroup}}" wx:key="id">
+          <view class="rage-item {{selectedIds.indexOf(item.id) !== -1 ? 'selected' : ''}}">
+            <t-checkbox value="{{item.id}}" label="{{item.name}}" />
+            <text class="badge">{{i18n.todo}}</text>
+          </view>
+        </block>
+      </t-checkbox-group>
+    </view>
+
+    <view class="section">
+      <t-button theme="primary" size="large" class="full" shape="round" bind:tap="startRage" style="width:100%;background:#2563eb;color:#fff" custom-style="width:100%;background:#2563eb;color:#fff">⚡ {{i18n.startRage}}</t-button>
     </view>
   </view>
 
-  <view class="section" wx:if="{{count>0}}">
-    <t-button theme="primary" size="large" class="full" shape="round" bind:tap="completeAll">{{i18n.completeAll}}</t-button>
+  <!-- 暴走进行中视图 -->
+  <view wx:elif="{{rageStarted}}">
+    <view class="card banner">
+      <view class="row space-between">
+        <view>
+          <text class="banner-title">{{i18n.rageInProgress}}</text>
+          <text class="muted">{{i18n.focusComplete.replace('{count}', selectedIds.length)}}</text>
+        </view>
+        <t-button size="small" variant="outline" shape="round" bind:tap="reselect">{{i18n.reselect}}</t-button>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="row space-between">
+        <text class="section-title">{{i18n.rageProgress}}</text>
+        <text class="muted">{{progressCompleted}} / {{selectedIds.length}} {{i18n.completed}}</text>
+      </view>
+      <view class="progress"><view class="bar" style="width: {{progressPercent}}%"></view></view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">{{i18n.delayedTasks}}</text>
+      <block wx:for="{{progressList}}" wx:key="id">
+        <view class="rage-item">
+          <view class="cell-title">{{item.name}}</view>
+          <view class="cell-actions">
+            <text class="badge">{{item.status==='delayed' ? i18n.delayed : i18n.todo}}</text>
+            <t-button size="small" theme="success" shape="round" data-id="{{item.id}}" bind:tap="finishOne">{{i18n.finish}}</t-button>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view class="section">
+      <t-button theme="success" size="large" class="full" shape="round" bind:tap="finishAll" style="width:100%" custom-style="width:100%">{{i18n.completeAll}}</t-button>
+    </view>
   </view>
 </view>

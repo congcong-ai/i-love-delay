@@ -8,13 +8,16 @@ Page({
     user: null,
     defaultAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=weapp',
     locale: 'zh',
+    // 顶部分栏：account | activity | settings
+    section: 'account',
+    // 动态子分栏
     tab: 'all', // all | likes | favorites | comments | shares
     activities: []
   },
   onShow(){
     const locale = getLocale()
     this.setData({ locale, i18n: this.i18nPack() })
-    this.loadUser().then(() => this.loadActivities())
+    this.loadUser().then(() => { if (this.data.section==='activity') this.loadActivities() })
     try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(4) }catch{}
   },
   i18nPack(){
@@ -23,11 +26,15 @@ Page({
       subtitle: t('profile.subtitle'),
       accountDescription: t('profile.accountDescription'),
       login: t('auth.login'),
+      wechatLogin: t('auth.wechatLogin'),
       accountInfo: t('profile.accountInfo'),
       logout: t('auth.logout'),
       languageSettings: t('profile.languageSettings'),
       simplifiedChinese: t('profile.simplifiedChinese'),
       english: t('profile.english'),
+      account: t('profile.account'),
+      activity: t('profile.activity'),
+      settings: t('profile.settings'),
       activityAll: t('profile.activityAll'),
       activityLikes: t('profile.activityLikes'),
       activityFavorites: t('profile.activityFavorites'),
@@ -67,6 +74,13 @@ Page({
     } catch {
       this.setData({ activities: [] })
     }
+  },
+  // 切换顶部分栏
+  switchSection(e){
+    const section = e.currentTarget.dataset.section
+    if (!section || section === this.data.section) return
+    this.setData({ section })
+    if (section === 'activity') this.loadActivities()
   },
   formatActivityText(item){
     if (!item) return ''

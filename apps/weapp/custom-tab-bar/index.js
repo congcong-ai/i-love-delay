@@ -4,8 +4,8 @@ Component({
     list: [
       { pagePath: 'pages/tasks/index', text: '任务' },
       { pagePath: 'pages/delayed/index', text: '拖延' },
-      { pagePath: 'pages/rage/index', text: '暴走' },
       { pagePath: 'pages/square/index', text: '广场' },
+      { pagePath: 'pages/rage/index', text: '暴走' },
       { pagePath: 'pages/profile/index', text: '我的' }
     ]
   },

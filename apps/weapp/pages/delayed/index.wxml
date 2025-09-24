@@ -1,55 +1,64 @@
 <view class="container">
   <view class="header">
     <view class="title">{{i18n.title}}</view>
-    <view class="subtitle">{{i18n.subtitle}}</view>
+    <view class="subtitle">{{i18n.perfectExcuse}}</view>
   </view>
 
-  <view class="cards">
-    <view class="card">
-      <text class="card-title">{{i18n.stats}}</text>
-      <view class="stats">
-        <view class="stat"><text class="n">{{stats.totalTasks}}</text><text class="l">{{i18n.totalDelayedTasks}}</text></view>
-        <view class="stat"><text class="n">{{stats.completedTasks}}</text><text class="l">{{i18n.completedToday}}</text></view>
-        <view class="stat"><text class="n">{{stats.delayedTasks}}</text><text class="l">{{i18n.totalDelayed}}</text></view>
+  <!-- 统计面板（2x2） -->
+  <view class="card stats-card">
+    <text class="card-title">{{i18n.procrastinationStats}}</text>
+    <view class="stats-grid">
+      <view class="stat">
+        <view class="icon">⏱</view>
+        <text class="n">{{statsView.delayedTasks}}</text>
+        <text class="l">{{i18n.totalDelayedTasks}}</text>
+      </view>
+      <view class="stat">
+        <view class="icon">💬</view>
+        <text class="n">{{statsView.totalExcuses}}</text>
+        <text class="l">{{i18n.totalExcuses}}</text>
+      </view>
+      <view class="stat">
+        <view class="icon">📈</view>
+        <text class="n">{{statsView.averageExcuseText}}</text>
+        <text class="l">{{i18n.averageExcuseLength}}</text>
+      </view>
+      <view class="stat">
+        <view class="icon">🏅</view>
+        <text class="n">{{statsView.longestStreakText}}</text>
+        <text class="l">{{i18n.delayRanking}}</text>
       </view>
     </view>
   </view>
 
+  <!-- 拖延中的任务列表 -->
   <view class="section">
-    <text class="section-title">{{i18n.delayedTasks}}</text>
+    <view class="row space-between">
+      <text class="section-title">{{i18n.delayedTasks}} ({{delayed.length}})</text>
+    </view>
+    <view class="hint">{{enjoyingDelayText}}</view>
     <view wx:if="{{delayed.length===0}}" class="card empty-card"><t-empty description="{{i18n.noDelayedTasks || ''}}" /></view>
+
     <block wx:for="{{delayedView}}" wx:key="id">
-      <view class="task-card {{item.id===selectedTaskId?'active':''}}" bindtap="onSelectTask" data-id="{{item.id}}">
+      <view class="task-card card">
         <view class="row space-between">
           <view>
             <text class="task-name">{{item.name}}</text>
-            <text class="task-sub">{{item.delayCountShortText}}</text>
+            <view class="task-meta muted">📅 {{item.delayCountShortText}} · {{i18n.lastLabel.replace('{time}', item.lastTimeShort || '-')}}</view>
           </view>
-          <t-tag wx:if="{{item.id===selectedTaskId}}" theme="warning" shape="round">{{i18n.delayingBadge}}</t-tag>
+          <t-tag theme="warning" shape="round">{{i18n.delayingBadge}}</t-tag>
         </view>
-      </view>
-    </block>
-  </view>
 
-  <view class="section" wx:if="{{selectedTask}}">
-    <text class="section-title">{{i18n.addExcuseButton}}</text>
-    <t-textarea value="{{excuseInput}}" placeholder="{{i18n.placeholderAddExcuse || ''}}" autofocus bind:change="onTextareaChange" />
-    <view class="row row-right">
-      <t-button class="btn-compact" size="small" theme="primary" shape="round" bind:tap="onAddExcuse">{{i18n.addExcuseButton}}</t-button>
-    </view>
-  </view>
+        <view class="textarea-wrap">
+          <t-textarea value="{{excuseDrafts[item.id]}}" placeholder="{{i18n.placeholderAddExcuse || ''}}" maxcharacter="{{500}}" indicator bind:change="onDraftChange" data-id="{{item.id}}" />
+        </view>
 
-  <view class="section" wx:if="{{history.length>0}}">
-    <text class="section-title">{{historyTitleText}} </text>
-    <block wx:for="{{history}}" wx:key="id">
-      <view class="excuse-card">
-        <view class="excuse-main">
-          <text class="content">{{item.content}}</text>
-          <text class="time">{{item.timeAgo}}</text>
+        <view class="actions two">
+          <view class="action"><t-button size="small" shape="round" variant="base" theme="default" data-id="{{item.id}}" bind:tap="onAddExcuse" style="background:#9ca3af;color:#fff;height:72rpx;line-height:72rpx;padding:0 16rpx;" custom-style="background:#9ca3af;color:#fff;height:72rpx;line-height:72rpx;padding:0 16rpx;">💬 {{i18n.addExcuseButton}}</t-button></view>
+          <view class="action"><t-button size="small" shape="round" theme="primary" data-id="{{item.id}}" bind:tap="onShare" style="height:72rpx;line-height:72rpx;padding:0 16rpx;" custom-style="height:72rpx;line-height:72rpx;padding:0 16rpx;">🔗 {{i18n.shareToSquareButton}}</t-button></view>
         </view>
-        <view class="excuse-actions" bindlongpress="onShareHint">
-          <t-button class="icon-btn" shape="circle" size="small" theme="primary" data-id="{{item.id}}" bind:tap="onShareHistory" bindlongpress="onShareHint">📤</t-button>
-        </view>
+
+        <t-button size="large" shape="round" data-id="{{item.id}}" bind:tap="onComplete" style="width:100%;background:#16a34a;color:#fff;height:72rpx;line-height:72rpx;padding:0 24rpx;" custom-style="width:100%;background:#16a34a;color:#fff;height:72rpx;line-height:72rpx;padding:0 24rpx;">{{i18n.completeButton}}</t-button>
       </view>
     </block>
   </view>

@@ -4,53 +4,68 @@
     <view class="subtitle">{{i18n.subtitle}}</view>
   </view>
 
-  <view wx:if="{{!user}}" class="card">
-    <text class="section-title">{{i18n.accountDescription}}</text>
-    <view class="row">
-      <t-button theme="primary" shape="round" bind:tap="goLogin">{{i18n.login}}</t-button>
-    </view>
+  <!-- 顶部分段：账户 / 动态 / 设置 -->
+  <view class="tabs">
+    <view class="tab {{section==='account'?'active':''}}" data-section="account" bindtap="switchSection">{{i18n.account}}</view>
+    <view class="tab {{section==='activity'?'active':''}}" data-section="activity" bindtap="switchSection">{{i18n.activity}}</view>
+    <view class="tab {{section==='settings'?'active':''}}" data-section="settings" bindtap="switchSection">{{i18n.settings}}</view>
   </view>
 
-  <view wx:elif="{{user}}" class="card">
-    <text class="section-title">{{i18n.accountInfo}}</text>
-    <view class="user">
-      <t-avatar class="avatar" size="48" image="{{user.avatarUrl||defaultAvatar}}"/>
-      <view class="meta">
-        <text class="name">{{user.displayName||'用户'}}</text>
-        <text class="uid">ID: {{user.id}}</text>
+  <!-- 账户 -->
+  <block wx:if="{{section==='account'}}">
+    <view wx:if="{{!user}}" class="card">
+      <text class="section-title">{{i18n.accountDescription}}</text>
+      <view class="row">
+        <t-button theme="primary" shape="round" bind:tap="goLogin">{{i18n.wechatLogin}}</t-button>
       </view>
     </view>
-    <view class="row">
-      <t-button variant="outline" shape="round" bind:tap="logout">{{i18n.logout}}</t-button>
-    </view>
-  </view>
-
-  <view class="card">
-    <text class="section-title">{{i18n.languageSettings}}</text>
-    <view class="row">
-      <t-button shape="round" variant="outline" theme="primary" wx:if="{{locale!=='zh'}}" data-locale="zh" bind:tap="setLocale">{{i18n.simplifiedChinese}}</t-button>
-      <t-button shape="round" theme="primary" wx:else data-locale="zh" bind:tap="setLocale">{{i18n.simplifiedChinese}}</t-button>
-      <t-button shape="round" variant="outline" theme="primary" wx:if="{{locale!=='en'}}" data-locale="en" bind:tap="setLocale">{{i18n.english}}</t-button>
-      <t-button shape="round" theme="primary" wx:else data-locale="en" bind:tap="setLocale">{{i18n.english}}</t-button>
-    </view>
-  </view>
-
-  <view class="card">
-    <text class="section-title">广场动态</text>
-    <view class="tabs">
-      <view class="tab {{tab==='all'?'active':''}}" data-tab="all" bindtap="switchTab">{{i18n.activityAll}}</view>
-      <view class="tab {{tab==='likes'?'active':''}}" data-tab="likes" bindtap="switchTab">{{i18n.activityLikes}}</view>
-      <view class="tab {{tab==='favorites'?'active':''}}" data-tab="favorites" bindtap="switchTab">{{i18n.activityFavorites}}</view>
-      <view class="tab {{tab==='comments'?'active':''}}" data-tab="comments" bindtap="switchTab">{{i18n.activityComments}}</view>
-      <view class="tab {{tab==='shares'?'active':''}}" data-tab="shares" bindtap="switchTab">{{i18n.activityShares}}</view>
-    </view>
-    <view wx:if="{{!user}}" class="hint">{{i18n.loginToViewActivity}}</view>
-    <view wx:elif="{{activities.length===0}}" class="hint">{{i18n.activityEmpty}}</view>
-    <block wx:for="{{activities}}" wx:key="id">
-      <view class="activity">
-        <text class="a-title">{{item.text}}</text>
-        <text class="a-time">{{item.createdAtText}}</text>
+    <view wx:elif="{{user}}" class="card">
+      <text class="section-title">{{i18n.accountInfo}}</text>
+      <view class="user">
+        <t-avatar class="avatar" size="48" image="{{user.avatarUrl||defaultAvatar}}"/>
+        <view class="meta">
+          <text class="name">{{user.displayName||'用户'}}</text>
+          <text class="uid">ID: {{user.id}}</text>
+        </view>
       </view>
-    </block>
-  </view>
+      <view class="row">
+        <t-button variant="outline" shape="round" bind:tap="logout">{{i18n.logout}}</t-button>
+      </view>
+    </view>
+  </block>
+
+  <!-- 动态 -->
+  <block wx:elif="{{section==='activity'}}">
+    <view class="card">
+      <text class="section-title">广场动态</text>
+      <view class="tabs">
+        <view class="tab {{tab==='all'?'active':''}}" data-tab="all" bindtap="switchTab">{{i18n.activityAll}}</view>
+        <view class="tab {{tab==='likes'?'active':''}}" data-tab="likes" bindtap="switchTab">{{i18n.activityLikes}}</view>
+        <view class="tab {{tab==='favorites'?'active':''}}" data-tab="favorites" bindtap="switchTab">{{i18n.activityFavorites}}</view>
+        <view class="tab {{tab==='comments'?'active':''}}" data-tab="comments" bindtap="switchTab">{{i18n.activityComments}}</view>
+        <view class="tab {{tab==='shares'?'active':''}}" data-tab="shares" bindtap="switchTab">{{i18n.activityShares}}</view>
+      </view>
+      <view wx:if="{{!user}}" class="hint">{{i18n.loginToViewActivity}}</view>
+      <view wx:elif="{{activities.length===0}}" class="hint">{{i18n.activityEmpty}}</view>
+      <block wx:for="{{activities}}" wx:key="id">
+        <view class="activity">
+          <text class="a-title">{{item.text}}</text>
+          <text class="a-time">{{item.createdAtText}}</text>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- 设置 -->
+  <block wx:elif="{{section==='settings'}}">
+    <view class="card">
+      <text class="section-title">{{i18n.languageSettings}}</text>
+      <view class="row">
+        <t-button shape="round" variant="outline" theme="primary" wx:if="{{locale!=='zh'}}" data-locale="zh" bind:tap="setLocale">{{i18n.simplifiedChinese}}</t-button>
+        <t-button shape="round" theme="primary" wx:else data-locale="zh" bind:tap="setLocale">{{i18n.simplifiedChinese}}</t-button>
+        <t-button shape="round" variant="outline" theme="primary" wx:if="{{locale!=='en'}}" data-locale="en" bind:tap="setLocale">{{i18n.english}}</t-button>
+        <t-button shape="round" theme="primary" wx:else data-locale="en" bind:tap="setLocale">{{i18n.english}}</t-button>
+      </view>
+    </view>
+  </block>
 </view>

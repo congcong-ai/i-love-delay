@@ -43,9 +43,9 @@
           </view>
           <view class="delete-icon" data-id="{{item.id}}" bind:tap="onDelete">🗑</view>
         </view>
-        <view class="actions actions-row">
-          <van-button size="mini" type="warning" plain round custom-class="btn-compact" bind:tap="onDelay" data-id="{{item.id}}">{{i18n.delayed}}</van-button>
-          <van-button size="mini" color="#16a34a" round custom-class="btn-compact" bind:tap="onComplete" data-id="{{item.id}}">{{i18n.finish}}</van-button>
+        <view class="cell-actions two-col">
+          <van-button size="small" type="warning" plain round bind:tap="onDelay" data-id="{{item.id}}">{{i18n.delayed}}</van-button>
+          <van-button size="small" color="#16a34a" round bind:tap="onComplete" data-id="{{item.id}}">{{i18n.finish}}</van-button>
         </view>
       </view>
     </block>

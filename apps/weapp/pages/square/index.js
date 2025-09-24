@@ -6,7 +6,7 @@ const { timeAgo } = require('../../utils/time')
 Page({
   data: {
     i18n: {},
-    tab: 'recent', // 'recent' | 'popular'
+    tab: 'all', // 'all' | 'recent' | 'popular'
     list: [],
     offset: 0,
     limit: 20,
@@ -21,7 +21,7 @@ Page({
       [{ width: '80%' }]
     ]
   },
-  onShow(){ this.loadUserThenReset(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(3) }catch{} },
+  onShow(){ this.loadUserThenReset(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(2) }catch{} },
   i18nPack(){
     return {
       title: t('square.title'),
@@ -58,8 +58,9 @@ Page({
     if (this.data.loading || this.data.nomore) return
     this.setData({ loading: true })
     try {
-      const userParam = this.data.userId ? `&userId=${encodeURIComponent(this.data.userId)}` : ''
-      const res = await request({ url: `/api/square/share?limit=${this.data.limit}&offset=${this.data.offset}&sort=${this.data.tab==='popular'?'trending':'recent'}${userParam}`, method: 'GET' })
+      const sort = this.data.tab === 'popular' ? 'trending' : 'recent'
+      const userParam = this.data.tab === 'all' ? '' : (this.data.userId ? `&userId=${encodeURIComponent(this.data.userId)}` : '')
+      const res = await request({ url: `/api/square/share?limit=${this.data.limit}&offset=${this.data.offset}&sort=${sort}${userParam}`, method: 'GET' })
       if (res.statusCode === 200 && Array.isArray(res.data)) {
         const items = res.data.map(x => {
           const createdAtText = timeAgo(x.createdAt)

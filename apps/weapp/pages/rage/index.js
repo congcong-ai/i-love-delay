@@ -5,11 +5,18 @@ Page({
   data: {
     i18n: {},
     all: [], // todo + delayed
+    todoGroup: [],
+    delayedGroup: [],
     selected: {},
     selectedIds: [],
-    count: 0
+    count: 0,
+    // 暴走进行中
+    rageStarted: false,
+    progressList: [],
+    progressCompleted: 0,
+    progressPercent: 0
   },
-  onShow(){ this.refresh(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(2) }catch{} },
+  onShow(){ this.refresh(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(3) }catch{} },
   i18nPack(){
     return {
       title: t('rage.title'),
@@ -21,16 +28,30 @@ Page({
       clearAll: t('rage.clearAll'),
       todo: t('rage.todo'),
       delayed: t('rage.delayed'),
+      pending: t('tasks.pending'),
+      delayedTasks: t('delayed.delayedTasks'),
+      startRage: t('rage.startRage'),
+      rageInProgress: t('rage.rageInProgress'),
+      focusComplete: t('rage.focusComplete', { count: '{count}' }),
+      reselect: t('rage.reselect'),
+      rageProgress: t('rage.rageProgress'),
+      completed: t('tasks.completed'),
+      finish: t('rage.finish'),
       completeAll: t('rage.completeAll')
     }
   },
   refresh(){
+    try { storage.updateOverdueTasks() } catch(e) {}
     const todo = storage.getTasksByStatus('todo')
     const delayed = storage.getTasksByStatus('delayed')
     const all = [...todo, ...delayed]
-    const { selectedIds } = this.data
+    const { selectedIds, rageStarted } = this.data
     const count = (selectedIds||[]).length
-    this.setData({ all, i18n: this.i18nPack(), count })
+    // 分组
+    const todoGroup = todo
+    const delayedGroup = delayed
+    this.setData({ all, todoGroup, delayedGroup, i18n: this.i18nPack(), count })
+    if (rageStarted) this.rebuildProgress()
   },
   // TDesign 复选框组回调：e.detail.value 是选中的 value 数组
   onGroupChange(e){
@@ -42,6 +63,38 @@ Page({
     this.setData({ selectedIds, count: selectedIds.length })
   },
   clearAll(){ this.setData({ selectedIds: [], count: 0 }) },
+  // 进入暴走
+  startRage(){
+    const ids = this.data.selectedIds||[]
+    if (!ids.length) return
+    const list = this.data.all.filter(it => ids.includes(it.id))
+      .map(it => ({ id: it.id, name: it.name, status: it.status }))
+    this.setData({ rageStarted: true, progressList: list }, () => this.rebuildProgress())
+  },
+  // 退出暴走选择
+  reselect(){ this.setData({ rageStarted: false, progressList: [], progressCompleted: 0, progressPercent: 0 }) },
+  rebuildProgress(){
+    const done = (this.data.progressList||[]).filter(it => it.status === 'completed').length
+    const total = (this.data.progressList||[]).length || 1
+    const percent = Math.round(done*100/total)
+    this.setData({ progressCompleted: done, progressPercent: percent })
+  },
+  finishOne(e){
+    const id = e.currentTarget.dataset.id
+    if (!id) return
+    storage.updateTaskStatus(id, 'completed')
+    const list = (this.data.progressList||[]).map(it => it.id===id? { ...it, status: 'completed' } : it)
+    this.setData({ progressList: list })
+    this.rebuildProgress()
+  },
+  finishAll(){
+    const ids = (this.data.progressList||[]).map(it => it.id)
+    for (const id of ids) storage.updateTaskStatus(id, 'completed')
+    const list = (this.data.progressList||[]).map(it => ({ ...it, status: 'completed' }))
+    this.setData({ progressList: list })
+    this.rebuildProgress()
+    wx.showToast({ title: t('rage.rageComplete') || t('common.success'), icon: 'success' })
+  },
   completeAll(){
     const ids = this.data.selectedIds || []
     if (!ids.length) return
