@@ -43,7 +43,7 @@
 }
 
 /* 列表卡片（更贴近 Web 卡片视觉） */
-.task-card{background:#fff;border-radius:24rpx;border:1rpx solid #edf2f7;padding:36rpx 32rpx;margin:24rpx 0;box-shadow:0 12rpx 36rpx rgba(16,24,40,0.08), 0 20rpx 48rpx rgba(16,24,40,0.06); overflow: visible}
+.task-card{background:#fff;border-radius:24rpx;border:1rpx solid #edf2f7;padding:40rpx 32rpx 44rpx;margin:24rpx 0;box-shadow:0 12rpx 36rpx rgba(16,24,40,0.08), 0 20rpx 48rpx rgba(16,24,40,0.06); overflow: visible}
 .task-card.completed{opacity:.55}
 .task-name{font-size:30rpx;color:#111827;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .info{display:flex;flex-direction:column}
@@ -59,17 +59,18 @@
 .cell-label-todo{display:flex;flex-direction:column;gap:10rpx}
 .cell-label-todo .muted{line-height:1.4}
 .cell-actions{display:flex;align-items:center;gap:12rpx}
-.cell-actions.two-col{display:flex;gap:20rpx}
+.cell-actions.two-col{display:flex;gap:20rpx;margin-top:16rpx}
 .cell-actions.two-col .action{flex:1 1 0;min-width:0}
 .cell-actions{display:flex;align-items:center;gap:12rpx}
 .cell-actions .van-button + .van-button{margin-left:12rpx}
 /* 两列模式下，去掉相邻按钮的额外左间距，避免总宽度不一致 */
 .cell-actions.two-col .van-button + .van-button{margin-left:0}
 /* 两列模式下，确保每个按钮等分一行，并设置最小宽度 */
-.cell-actions.two-col .van-button{flex:1 1 0; min-width: 120rpx; font-size: 26rpx;}
+.cell-actions.two-col .van-button{flex:1 1 0; min-width: 120rpx; font-size: 28rpx; height: 72rpx; line-height: 72rpx;}
 .link{background:transparent;color:#2563eb}
 
 /* 已完成列表标题与徽记样式 */
 .cell-title.completed{color:#16a34a;font-weight:700}
 .completed-tag{margin-left:12rpx}
 .completed-tag .van-icon{margin-right:6rpx}
+

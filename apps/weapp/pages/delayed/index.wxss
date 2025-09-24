@@ -21,14 +21,15 @@
 .task-name{font-size:30rpx;color:#111827}
 .task-meta{font-size:24rpx;color:#6b7280;margin-top:6rpx}
 .textarea-wrap{margin:24rpx 0 16rpx}
-.actions.two{display:flex;gap:12rpx;margin:12rpx 0 24rpx;justify-content:flex-end;flex-wrap:nowrap}
+.actions.two{display:flex;gap:12rpx;margin:12rpx 0 28rpx;justify-content:flex-end;flex-wrap:nowrap;overflow:visible}
 .actions.two .action{flex:1 1 0;min-width:0}
-.actions.two t-button{flex:0 0 auto;width:100%;font-size:24rpx;min-width:140rpx}
+.actions.two t-button{flex:0 0 auto;width:100%;font-size:26rpx;min-width:140rpx;white-space:nowrap}
 /* 统一顶部两个按钮高度 */
-.actions.two t-button{height:72rpx}
+.actions.two t-button{height:72rpx;line-height:72rpx}
 .empty-card{margin:20rpx 0}
 
 /* 通用行布局（兜底，虽然 app.wxss 已有） */
 .row{display:flex;gap:16rpx;align-items:center}
 .row-right{justify-content:flex-end}
 .btn-compact{display:inline-flex;align-items:center;flex:0 0 auto;min-width:auto;padding:0 18rpx;white-space:nowrap}
+

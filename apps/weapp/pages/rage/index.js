@@ -14,7 +14,10 @@ Page({
     rageStarted: false,
     progressList: [],
     progressCompleted: 0,
-    progressPercent: 0
+    progressPercent: 0,
+    // 开始按钮外观
+    startBtnText: '',
+    startBtnColor: '#2563eb'
   },
   onShow(){ this.refresh(); try{ const tb=this.getTabBar&&this.getTabBar(); if(tb&&tb.setActive) tb.setActive(3) }catch{} },
   i18nPack(){
@@ -40,6 +43,12 @@ Page({
       completeAll: t('rage.completeAll')
     }
   },
+  updateStartButton(){
+    const count = this.data.count || 0
+    const text = count > 0 ? `${this.data.i18n.startRage} (${count} tasks)` : this.data.i18n.startRage
+    const color = count > 0 ? '#fb923c' : '#2563eb'
+    this.setData({ startBtnText: text, startBtnColor: color })
+  },
   refresh(){
     try { storage.updateOverdueTasks() } catch(e) {}
     const todo = storage.getTasksByStatus('todo')
@@ -50,19 +59,19 @@ Page({
     // 分组
     const todoGroup = todo
     const delayedGroup = delayed
-    this.setData({ all, todoGroup, delayedGroup, i18n: this.i18nPack(), count })
+    this.setData({ all, todoGroup, delayedGroup, i18n: this.i18nPack(), count }, () => this.updateStartButton())
     if (rageStarted) this.rebuildProgress()
   },
   // TDesign 复选框组回调：e.detail.value 是选中的 value 数组
   onGroupChange(e){
     const selectedIds = e.detail && e.detail.value ? e.detail.value : []
-    this.setData({ selectedIds, count: selectedIds.length })
+    this.setData({ selectedIds, count: selectedIds.length }, () => this.updateStartButton())
   },
   selectAll(){
     const selectedIds = this.data.all.map(it => it.id)
-    this.setData({ selectedIds, count: selectedIds.length })
+    this.setData({ selectedIds, count: selectedIds.length }, () => this.updateStartButton())
   },
-  clearAll(){ this.setData({ selectedIds: [], count: 0 }) },
+  clearAll(){ this.setData({ selectedIds: [], count: 0 }, () => this.updateStartButton()) },
   // 进入暴走
   startRage(){
     const ids = this.data.selectedIds||[]
@@ -104,3 +113,4 @@ Page({
     this.refresh()
   }
 })
+

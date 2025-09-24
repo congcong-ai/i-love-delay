@@ -5,23 +5,23 @@
 .desc{ color:#6b7280; font-size: 26rpx; text-align:center; padding: 0 40rpx; margin-bottom: 40rpx }
 
 /* 登录区域 */
-.login-section{ width: 100%; padding: 0 40rpx; margin-top: 40rpx }
+.login-section{ width: 100%; padding: 0 40rpx; margin-top: 48rpx }
 .login-card{ 
   background: #fff; 
   border-radius: 24rpx; 
-  padding: 40rpx 32rpx; 
+  padding: 48rpx 36rpx 64rpx; 
   box-shadow: 0 8rpx 24rpx rgba(16,24,40,0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24rpx;
+  gap: 28rpx;
 }
 .login-title{ 
   color: #374151; 
   font-size: 28rpx; 
   font-weight: 600; 
   text-align: center;
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
 }
 .wechat.btn, .btn.wechat{ 
   background-color: #07C160; 
@@ -37,4 +37,6 @@
   font-size: 24rpx; 
   text-align: center;
   line-height: 1.4;
+  margin-top: 16rpx;
 }
+

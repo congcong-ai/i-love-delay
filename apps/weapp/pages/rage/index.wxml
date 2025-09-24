@@ -42,7 +42,15 @@
     </view>
 
     <view class="section">
-      <t-button theme="primary" size="large" class="full" shape="round" bind:tap="startRage" style="width:100%;background:#2563eb;color:#fff" custom-style="width:100%;background:#2563eb;color:#fff">⚡ {{i18n.startRage}}</t-button>
+      <t-button 
+        theme="primary" 
+        size="large" 
+        class="full" 
+        shape="round" 
+        bind:tap="startRage"
+        style="width:100%;background: {{count>0 ? '#fb923c' : '#2563eb'}}; color:#fff"
+        custom-style="width:100%;background: {{count>0 ? '#fb923c' : '#2563eb'}}; color:#fff"
+      >⚡ {{ count>0 ? (i18n.startRage + ' (' + count + ' tasks)') : i18n.startRage }}</t-button>
     </view>
   </view>
 
@@ -94,3 +102,4 @@
     </view>
   </view>
 </view>
+

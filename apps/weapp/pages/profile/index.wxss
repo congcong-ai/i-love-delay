@@ -8,10 +8,15 @@
 .avatar{width:80rpx;height:80rpx;border-radius:50%}
 .meta .name{font-weight:600}
 .meta .uid{color:#6b7280;font-size:24rpx}
-.tabs{display:flex;gap:16rpx;flex-wrap:wrap;margin:8rpx 0 12rpx}
+.tabs{display:flex;gap:16rpx;flex-wrap:wrap;margin:12rpx 0 24rpx}
 .tab{padding:8rpx 16rpx;border-radius:9999rpx;background:#f3f4f6;color:#374151}
 .tab.active{background:#111827;color:#fff}
 .hint{color:#6b7280;margin:16rpx 0}
 .activity{display:flex;flex-direction:column;gap:6rpx;padding:16rpx 0;border-bottom:1px solid #f3f4f6}
 .a-title{color:#111827}
 .a-time{color:#6b7280;font-size:24rpx}
+
+/* 未登录时的登录卡片：增加整体高度与留白 */
+.login-card{padding:48rpx 36rpx 64rpx;margin-top:24rpx}
+.login-actions{margin-top:20rpx}
+

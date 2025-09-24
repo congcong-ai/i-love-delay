@@ -13,9 +13,9 @@
 
   <!-- 账户 -->
   <block wx:if="{{section==='account'}}">
-    <view wx:if="{{!user}}" class="card">
+    <view wx:if="{{!user}}" class="card login-card">
       <text class="section-title">{{i18n.accountDescription}}</text>
-      <view class="row">
+      <view class="row login-actions">
         <t-button theme="primary" shape="round" bind:tap="goLogin">{{i18n.wechatLogin}}</t-button>
       </view>
     </view>
@@ -69,3 +69,4 @@
     </view>
   </block>
 </view>
+
