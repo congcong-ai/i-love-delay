@@ -22,8 +22,8 @@
 .task-meta{font-size:24rpx;color:#6b7280;margin-top:6rpx}
 .textarea-wrap{margin:24rpx 0 16rpx}
 .actions.two{display:flex;gap:12rpx;margin:12rpx 0 24rpx;justify-content:flex-end;flex-wrap:nowrap}
-.actions.two .action{flex:0 0 44%;max-width:44%;min-width:0}
-.actions.two t-button{flex:0 0 auto;width:100%;font-size:26rpx}
+.actions.two .action{flex:1 1 0;min-width:0}
+.actions.two t-button{flex:0 0 auto;width:100%;font-size:24rpx;min-width:140rpx}
 /* 统一顶部两个按钮高度 */
 .actions.two t-button{height:72rpx}
 .empty-card{margin:20rpx 0}

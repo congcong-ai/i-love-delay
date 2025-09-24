@@ -26,3 +26,32 @@
 /* 列表单元格 */
 .cell-title{font-weight:600}
 .cell-actions{display:flex;align-items:center;gap:12rpx}
+
+/* 暴走完成卡片 */
+.completion-card{
+  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1rpx solid #bbf7d0;
+  text-align: center;
+  padding: 48rpx 32rpx;
+}
+.completion-icon{
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+}
+.completion-title{
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #16a34a;
+  margin-bottom: 8rpx;
+}
+.completion-subtitle{
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #15803d;
+  margin-bottom: 12rpx;
+}
+.completion-desc{
+  font-size: 26rpx;
+  color: #166534;
+  line-height: 1.5;
+}

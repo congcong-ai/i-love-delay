@@ -65,8 +65,8 @@
 .cell-actions .van-button + .van-button{margin-left:12rpx}
 /* 两列模式下，去掉相邻按钮的额外左间距，避免总宽度不一致 */
 .cell-actions.two-col .van-button + .van-button{margin-left:0}
-/* 两列模式下，确保每个按钮等分一行 */
-.cell-actions.two-col .van-button{flex:1 1 0}
+/* 两列模式下，确保每个按钮等分一行，并设置最小宽度 */
+.cell-actions.two-col .van-button{flex:1 1 0; min-width: 120rpx; font-size: 26rpx;}
 .link{background:transparent;color:#2563eb}
 
 /* 已完成列表标题与徽记样式 */

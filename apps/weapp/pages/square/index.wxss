@@ -19,9 +19,24 @@
 .actions{display:flex;gap:16rpx;margin-top:8rpx}
 .link{background:transparent;color:#374151}
 .link.active{color:#2563eb}
-/* 心形点赞：未点赞灰，已点赞红 */
-.heart{color:#9ca3af}
-.heart.liked{color:#ef4444}
+
+/* 操作按钮样式 */
+.action-btn{display:flex;align-items:center;gap:6rpx;padding:8rpx 12rpx;border-radius:20rpx;background:transparent}
+.action-btn .action-icon{font-size:32rpx}
+.action-btn .action-count{font-size:24rpx;font-weight:600}
+
+/* 点赞按钮：未点赞灰色，已点赞红色 */
+.action-btn.heart .action-icon{color:#9ca3af}
+.action-btn.heart.liked .action-icon{color:#ef4444}
+.action-btn.heart .action-count{color:#6b7280}
+.action-btn.heart.liked .action-count{color:#ef4444}
+
+/* 收藏按钮：未收藏灰色，已收藏金色 */
+.action-btn.star .action-icon{color:#9ca3af}
+.action-btn.star.favorited .action-icon{color:#f59e0b}
+
+/* 评论按钮：始终灰色 */
+.action-btn.comment .action-icon{color:#9ca3af}
 .comment-box{display:flex;gap:12rpx;margin-top:16rpx}
 .comment-box t-input{flex:1}
 .comments{margin-top:16rpx;display:flex;flex-direction:column;gap:16rpx}

@@ -34,9 +34,16 @@
         <text class="excuse">{{item.excuse}}</text>
       </view>
       <view class="actions">
-        <view class="count">👍 {{item.likesCount||0}}</view>
-        <t-button size="small" variant="text" class="heart {{item.isLiked?'liked':''}}" data-id="{{item.id}}" bind:tap="toggleLike">❤</t-button>
-        <t-button size="small" variant="text" class="link" data-id="{{item.id}}" bind:tap="toggleCommentBox">💬</t-button>
+        <t-button size="small" variant="text" class="action-btn heart {{item.isLiked?'liked':''}}" data-id="{{item.id}}" bind:tap="toggleLike">
+          <text class="action-icon">❤</text>
+          <text class="action-count">{{item.likesCount||0}}</text>
+        </t-button>
+        <t-button size="small" variant="text" class="action-btn star {{item.isFavorited?'favorited':''}}" data-id="{{item.id}}" bind:tap="toggleFavorite">
+          <text class="action-icon">⭐</text>
+        </t-button>
+        <t-button size="small" variant="text" class="action-btn comment" data-id="{{item.id}}" bind:tap="toggleCommentBox">
+          <text class="action-icon">💬</text>
+        </t-button>
       </view>
 
       <view wx:if="{{activeCommentFor===item.id}}" class="comment-box">

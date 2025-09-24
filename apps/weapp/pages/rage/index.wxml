@@ -66,10 +66,10 @@
       <view class="progress"><view class="bar" style="width: {{progressPercent}}%"></view></view>
     </view>
 
-    <view class="section">
+    <view class="section" wx:if="{{progressList.length > 0}}">
       <text class="section-title">{{i18n.delayedTasks}}</text>
       <block wx:for="{{progressList}}" wx:key="id">
-        <view class="rage-item">
+        <view class="rage-item" wx:if="{{!item.completed}}">
           <view class="cell-title">{{item.name}}</view>
           <view class="cell-actions">
             <text class="badge">{{item.status==='delayed' ? i18n.delayed : i18n.todo}}</text>
@@ -77,6 +77,16 @@
           </view>
         </view>
       </block>
+    </view>
+
+    <!-- 暴走完成状态 -->
+    <view class="section" wx:if="{{progressCompleted === selectedIds.length && selectedIds.length > 0}}">
+      <view class="card completion-card">
+        <view class="completion-icon">⚡</view>
+        <view class="completion-title">暴走完成！</view>
+        <view class="completion-subtitle">恭喜你完成了 {{selectedIds.length}} 个任务！</view>
+        <view class="completion-desc">今天的暴走模式表现完美，可以安心拖延明天的任务了～</view>
+      </view>
     </view>
 
     <view class="section">
