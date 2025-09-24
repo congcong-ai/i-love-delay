@@ -106,7 +106,18 @@
     "huaweiLogin": "Huawei Login",
     "loggingIn": "Logging in...",
     "logoutConfirm": "Logout",
-    "loginTimeout": "Login timed out"
+    "loginTimeout": "Login timed out",
+    "wechatH5OpenInWeChatTitle": "Open in WeChat to login",
+    "wechatH5OpenInWeChatDesc": "You're browsing in a mobile browser. To continue with WeChat login, please open this page inside WeChat: copy the link below, open WeChat, paste it to a chat with yourself or 'File Transfer', then tap the link to continue.",
+    "copyLink": "Copy Link",
+    "copied": "Copied",
+    "openWeChatGuideTitle": "Steps",
+    "openWeChatGuideSteps": "1. Tap 'Copy Link'\n2. Open WeChat and search for 'File Transfer' (or chat with yourself)\n3. Paste and send the link\n4. Tap the link in the message to return to this page\n5. Tap 'WeChat Login' to authorize",
+    "gotIt": "Got it",
+    "wechatAuthProcessing": "Opening WeChat authorization, please wait...",
+    "wechatAuthFailed": "Authorization failed. Please try again later",
+    "backToApp": "Back to App",
+    "openWeChatTips": "If you cannot open the link, you can bookmark it or send it to a friend and open from there. For security, do not share the link with others."
   },
   "tasks": {
     "title": "Tasks",

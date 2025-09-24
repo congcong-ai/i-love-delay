@@ -106,7 +106,18 @@
     "huaweiLogin": "华为登录",
     "loggingIn": "登录中...",
     "logoutConfirm": "退出登录",
-    "loginTimeout": "登录超时"
+    "loginTimeout": "登录超时",
+    "wechatH5OpenInWeChatTitle": "用微信打开完成登录",
+    "wechatH5OpenInWeChatDesc": "你正在手机浏览器中访问。微信登录需要在微信内打开本页：复制下方链接，打开微信，粘贴到聊天框发送给自己或“文件传输助手”，再点击链接即可继续登录。",
+    "copyLink": "复制链接",
+    "copied": "已复制",
+    "openWeChatGuideTitle": "操作步骤",
+    "openWeChatGuideSteps": "1. 点击“复制链接”\n2. 打开微信，搜索“文件传输助手”（或发给自己）\n3. 粘贴并发送该链接\n4. 点击消息中的链接，回到本页\n5. 点击“微信登录”完成授权",
+    "gotIt": "我知道了",
+    "wechatAuthProcessing": "正在拉起微信授权，请稍候…",
+    "wechatAuthFailed": "授权失败，请重试或稍后再试",
+    "backToApp": "返回应用",
+    "openWeChatTips": "若无法打开链接，可将链接收藏或发给好友再点开。为保证安全，请勿泄露链接给他人。"
   },
   "tasks": {
     "title": "任务",

@@ -1,4 +1,0 @@
-.tabbar{ position: fixed; left: 0; right: 0; bottom: 0; height: 112rpx; padding-bottom: env(safe-area-inset-bottom); display:flex; align-items:center; justify-content: space-around; background:#fff; box-shadow: 0 -8rpx 24rpx rgba(16,24,40,0.08); z-index:999; }
-.item{ flex:1; display:flex; align-items:center; justify-content:center; height:100%; }
-.label{ font-size:32rpx; color:#6b7280; }
-.active .label{ color:#111827; font-weight:700; }

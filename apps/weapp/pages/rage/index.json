@@ -1,9 +1,0 @@
-{
-  "navigationBarTitleText": "暴走",
-  "usingComponents": {
-    "t-checkbox": "/miniprogram_npm/tdesign-miniprogram/checkbox/checkbox",
-    "t-checkbox-group": "/miniprogram_npm/tdesign-miniprogram/checkbox-group/checkbox-group",
-    "t-button": "/miniprogram_npm/tdesign-miniprogram/button/button",
-    "t-empty": "/miniprogram_npm/tdesign-miniprogram/empty/empty"
-  }
-}

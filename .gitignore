@@ -47,3 +47,5 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+
+apps/taro/app/node_modules

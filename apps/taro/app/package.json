@@ -1,0 +1,36 @@
+{
+  "name": "i-love-delay-taro",
+  "private": true,
+  "version": "0.1.0",
+  "description": "i love delay - Taro unified frontend (H5/WeApp/App)",
+  "scripts": {
+    "dev:h5": "taro build --type h5 --watch",
+    "dev:weapp": "taro build --type weapp --watch",
+    "build:h5": "taro build --type h5",
+    "build:weapp": "taro build --type weapp"
+  },
+  "dependencies": {
+    "@tarojs/components": "^3.6.38",
+    "@tarojs/plugin-framework-react": "^3.6.38",
+    "@tarojs/plugin-platform-h5": "^3.6.38",
+    "@tarojs/plugin-platform-weapp": "^3.6.38",
+    "@tarojs/runtime": "^3.6.38",
+    "@tarojs/taro": "^3.6.38",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@tarojs/cli": "^3.6.38",
+    "@tarojs/webpack5-runner": "^3.6.38",
+    "@types/react": "^18.2.38",
+    "@types/react-dom": "^18.2.17",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "taro-plugin-tailwind": "^1.0.6",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "react-refresh": "^0.14.0",
+    "babel-preset-taro": "^3.6.38",
+    "typescript": "^5.4.5"
+  }
+}

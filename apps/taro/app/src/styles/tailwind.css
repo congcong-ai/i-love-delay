@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义组件层 */
+@layer components {
+  .card {
+    @apply bg-white rounded-lg border border-gray-100 shadow-sm p-4;
+  }
+  .section-title {
+    @apply text-base font-semibold text-gray-900 mb-3;
+  }
+  .muted {
+    @apply text-xs text-gray-500;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium bg-brand text-white active:opacity-90;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 active:opacity-90;
+  }
+}

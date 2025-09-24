@@ -6,13 +6,25 @@ export async function POST(req: Request) {
     if ((process.env.ENABLE_WECHAT_LOGIN || 'true') !== 'true') {
       return NextResponse.json({ success: false, message: 'wechat login disabled' }, { status: 404 })
     }
-    const { code } = (await req.json()) as { code?: string }
+    const { code, from } = (await req.json()) as { code?: string; from?: string }
     if (!code) {
       return NextResponse.json({ success: false, message: 'code is required' }, { status: 400 })
     }
 
-    const appid = process.env.NEXT_PUBLIC_WECHAT_APP_ID
-    const secret = process.env.WECHAT_APP_SECRET
+    // 根据来源选择不同的 AppID/Secret
+    const f = (from || '').toLowerCase()
+    let appid: string | undefined
+    let secret: string | undefined
+    if (f === 'web') {
+      appid = process.env.NEXT_PUBLIC_WECHAT_WEB_APP_ID || process.env.NEXT_PUBLIC_WECHAT_APP_ID
+      secret = process.env.WECHAT_WEB_APP_SECRET || process.env.WECHAT_APP_SECRET
+    } else if (f === 'h5') {
+      appid = process.env.NEXT_PUBLIC_WECHAT_H5_APP_ID || process.env.NEXT_PUBLIC_WECHAT_APP_ID
+      secret = process.env.WECHAT_H5_APP_SECRET || process.env.WECHAT_APP_SECRET
+    } else {
+      appid = process.env.NEXT_PUBLIC_WECHAT_APP_ID
+      secret = process.env.WECHAT_APP_SECRET
+    }
     if (!appid || !secret) {
       return NextResponse.json({ success: false, message: 'WeChat credentials missing' }, { status: 500 })
     }

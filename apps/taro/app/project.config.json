@@ -1,0 +1,17 @@
+{
+  "miniprogramRoot": "dist/weapp",
+  "projectname": "i-love-delay-taro",
+  "description": "i love delay - Taro unified frontend",
+  "appid": "",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "compileType": "miniprogram",
+  "packOptions": {
+    "ignore": []
+  }
+}
