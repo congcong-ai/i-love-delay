@@ -16,7 +16,14 @@ const config = {
     '@': path.resolve(__dirname, '..', 'src')
   },
   framework: 'react',
-  compiler: 'webpack5',
+  compiler: {
+    type: 'webpack5',
+    // 关闭 H5 开发时的预编译（通过 external script 的模块联邦 remote），
+    // 避免在不支持 async/await 的环境下导致运行时错误和白屏
+    prebundle: {
+      enable: false
+    }
+  },
   cache: {
     enable: true
   },
@@ -41,11 +48,17 @@ const config = {
     publicPath: '/',
     staticDirectory: 'static',
     esnextModules: [],
+    template: path.resolve(__dirname, '..', 'src', 'index.html'),
     router: {
-      mode: 'browser'
+      mode: 'hash',
+      customRoutes: {
+        '/pages/index/index': '/'
+      }
     },
     devServer: {
-      port: 10086
+      host: '0.0.0.0',
+      port: 10086,
+      historyApiFallback: true
     },
     postcss: {
       autoprefixer: {

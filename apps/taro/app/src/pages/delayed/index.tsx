@@ -1,36 +1,60 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { View, Text } from '@tarojs/components'
-
-interface DelayItem {
-  id: string
-  reason: string
-  minutes: number
-  createdAt: string
-}
+import { getAllTasks, getDelayedTasks, initAndSyncFromLegacy } from '@/lib/data'
+import { StatsCard } from '@/components/delayed/StatsCard'
+import DelayedTaskItem from '@/components/delayed/DelayedTaskItem'
 
 export default function DelayedPage() {
-  const [items, setItems] = useState<DelayItem[]>([
-    { id: 'd1', reason: '刷短视频', minutes: 18, createdAt: '今天 09:20' },
-    { id: 'd2', reason: '摸鱼聊天', minutes: 12, createdAt: '今天 11:02' },
-    { id: 'd3', reason: '走神放空', minutes: 7, createdAt: '昨天 21:43' }
-  ])
+  const [delayed, setDelayed] = useState(() => getDelayedTasks())
+
+  useEffect(() => {
+    // 初始化并做一次旧数据迁移
+    initAndSyncFromLegacy()
+    // 首次加载
+    setDelayed(getDelayedTasks())
+  }, [])
+
+  const reload = () => {
+    // 触发组件内部更新后，刷新列表
+    getAllTasks() // 读取一次，保证写入顺序
+    setDelayed(getDelayedTasks())
+  }
 
   return (
-    <View className="p-4 space-y-3">
-      <View className="section-title">拖延记录</View>
-      {items.map(i => (
-        <View key={i.id} className="card flex items-center justify-between">
-          <View>
-            <View className="text-sm font-medium text-gray-900">{i.reason}</View>
-            <View className="muted mt-1">{i.createdAt}</View>
-          </View>
-          <View className="text-brand-600 text-sm font-semibold">+{i.minutes} 分钟</View>
+    <View className="min-h-screen bg-gray-50 pb-20">
+      <View className="mx-auto max-w-2xl px-4 py-6">
+        <View className="mb-8">
+          <Text className="text-3xl font-bold text-gray-900 block mb-2">拖延</Text>
+          <Text className="text-gray-600 block">为你的拖延找个完美的借口吧！</Text>
         </View>
-      ))}
 
-      <View className="card">
-        <View className="muted mb-2">统计</View>
-        <View className="text-2xl font-semibold text-gray-900">本周累计 37 分钟</View>
+        <StatsCard />
+
+        <View className="mb-6">
+          <View className="flex items-center justify-between mb-4">
+            <Text className="text-lg font-semibold">拖延中的任务（{delayed.length}）</Text>
+          </View>
+
+          {delayed.length > 0 && (
+            <Text className="text-sm text-gray-600 block mb-4">您有 {delayed.length} 个任务正在享受拖延的时光</Text>
+          )}
+
+          {delayed.length === 0 ? (
+            <View className="card p-8 text-center bg-gradient-to-r from-orange-50 to-red-50">
+              <View className="text-gray-700">
+                <Text className="text-xl font-semibold block mb-2">太棒了！</Text>
+                <Text className="block mb-2">您还没有正在拖延的任务</Text>
+                <Text className="text-sm text-gray-500 block">拖延的艺术在于掌握节奏，而非停滞不前</Text>
+              </View>
+            </View>
+          ) : (
+            <View className="space-y-4">
+              {delayed.map(task => (
+                <DelayedTaskItem key={task.id} task={task} onUpdate={reload} />
+              ))}
+            </View>
+          )}
+        </View>
       </View>
     </View>
   )

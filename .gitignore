@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+apps/taro/app/node_modules
 
 # testing
 /coverage
@@ -48,4 +49,3 @@ next-env.d.ts
 # OS
 Thumbs.db
 
-apps/taro/app/node_modules
